@@ -1,8 +1,8 @@
 """Predefined pages from the Standardy (FR-09): applicant data, contact and consents, FINISH.
 
-Sections come from templates.json, taken from references 5 and 1 with decisions K-05 (validation),
-K-06 (TERYT_4G_DOWODOWY) and K-11 (MLPZ) applied. Code only picks the sections the applicant
-kinds need, sets their visibility and gives every element a fresh id.
+Sections come from templates.json, taken from references 5 and 1 with decision K-05 (validation)
+applied. Dictionaries and initial data (K-06, K-10, K-11) come from domain.dictionaries. Code picks
+the sections the applicant kinds need, sets their visibility and gives every element a fresh id.
 """
 
 import html
@@ -11,6 +11,7 @@ import uuid
 from collections.abc import Collection, Sequence
 from importlib.resources import files
 
+from forms2json.domain import dictionaries
 from forms2json.domain.form_definition import JsonObject, JsonValue, Question, State, Tab
 from forms2json.domain.form_draft import ApplicantKind, Consent
 
@@ -117,6 +118,7 @@ def _section(name: str, visible_when: str | None = None) -> Question:
     section.field.id = str(uuid.uuid4())
     for child in section.field.repeating_section_grid:
         child.field.id = str(uuid.uuid4())
+        dictionaries.apply(child.field)
     if visible_when:
         section.field.states = [State("SHOW", visible_when)]
     return section
