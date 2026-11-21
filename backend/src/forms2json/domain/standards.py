@@ -11,6 +11,7 @@ from pathlib import Path
 
 from forms2json.domain.form_definition import FormDefinition, JsonObject, JsonValue, Tab
 from forms2json.domain.rules import Issue, Severity, _is_section, _walk
+from forms2json.domain.validators import expected_validators
 
 TITLE_PREFIXES = ("Wniosek", "Zgłoszenie", "Deklaracja", "Oświadczenie")
 # techNames of the predefined blocks, as in the references (analiza §3).
@@ -39,16 +40,6 @@ EXPECTED_TYPES = [
         "TEXTAREA",
     ),
 ]
-# (pattern on title or techName, validator the Standards require)
-EXPECTED_VALIDATORS = [
-    (re.compile(r"e-?mail|e_mail", re.IGNORECASE), "EMAIL"),
-    (re.compile(r"pesel", re.IGNORECASE), "PESEL"),
-    (re.compile(r"\bnip\b|(^|_)nip(_|$)", re.IGNORECASE), "NIP"),
-    (re.compile(r"regon", re.IGNORECASE), "REGON"),
-    (re.compile(r"kod pocztowy|kod_pocztowy", re.IGNORECASE), "ZIP_CODE"),
-]
-# Standards: a postal code outside Poland has no validation.
-FOREIGN = re.compile(r"zagranica")
 INFO_TYPES = {"TEXT_BLOCK", "INFO_SECTION", "CONSENT_SECTION"}
 
 
@@ -150,12 +141,8 @@ def _check_field_types(form: FormDefinition) -> Iterator[Issue]:
                     f"Pole „{name}” ma typ {field.type}, a jego etykieta wskazuje na {expected}.",
                     p.path,
                 )
-        for pattern, validator in EXPECTED_VALIDATORS:
-            if (
-                validator not in field.validation
-                and any(pattern.search(label) for label in labels)
-                and not FOREIGN.search(name)
-            ):
+        for validator in expected_validators(field.title, name):
+            if validator not in field.validation:
                 yield _warn(
                     "S-VALIDATOR",
                     f"Pole „{name}” nie ma walidatora {validator}.",
