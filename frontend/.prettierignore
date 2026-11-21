@@ -1,2 +1,4 @@
 dist
 package-lock.json
+# dokumenty projektowe pisane ręcznie, Prettier pilnuje tylko kodu
+*.md
