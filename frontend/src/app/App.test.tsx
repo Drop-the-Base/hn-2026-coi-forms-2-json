@@ -58,7 +58,7 @@ test("401 z API wraca do logowania z komunikatem", async () => {
     ),
   );
   renderApp();
-  expect(await screen.findByRole("alert")).toBeDefined();
+  await screen.findByRole("heading", { name: "Zaloguj się" });
   expect(screen.getByRole("alert").textContent).toContain(
     "Serwer nie przyjął tokenu",
   );

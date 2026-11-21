@@ -38,6 +38,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/jobs/{job_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Job Events
+         * @description Live progress (FR-T5, ADR-0014); FastAPI adds a keep-alive ping every 15 s.
+         */
+        get: operations["job_events_api_v1_jobs__job_id__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/config": {
         parameters: {
             query?: never;
@@ -52,6 +72,26 @@ export interface paths {
         get: operations["get_config_api_v1_config_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/forms:convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Convert Form
+         * @description Synchronous mode (FR-01, FR-06): the eUsługi form JSON, or 202 when it takes too long.
+         */
+        post: operations["convert_form_api_v1_forms_convert_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -83,6 +123,11 @@ export interface components {
         ApiConfig: {
             /** Max Upload Bytes */
             max_upload_bytes: number;
+        };
+        /** Body_convert_form_api_v1_forms_convert_post */
+        Body_convert_form_api_v1_forms_convert_post: {
+            /** File */
+            file: string;
         };
         /** Body_submit_job_api_v1_jobs_post */
         Body_submit_job_api_v1_jobs_post: {
@@ -200,6 +245,37 @@ export interface operations {
             };
         };
     };
+    job_events_api_v1_jobs__job_id__events_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_config_api_v1_config_get: {
         parameters: {
             query?: never;
@@ -217,6 +293,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiConfig"];
                 };
+            };
+        };
+    };
+    convert_form_api_v1_forms_convert_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_convert_form_api_v1_forms_convert_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobAccepted"];
+                };
+            };
+            /** @description Konwersja nie powiodła się */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

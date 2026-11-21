@@ -10,5 +10,10 @@ export default defineConfig({
       "/health": "http://localhost:8000",
     },
   },
-  test: { environment: "jsdom", setupFiles: ["src/test/setup.ts"] },
+  // testTimeout: the polling test waits one real 2 s interval.
+  test: {
+    environment: "jsdom",
+    setupFiles: ["src/test/setup.ts"],
+    testTimeout: 10_000,
+  },
 });

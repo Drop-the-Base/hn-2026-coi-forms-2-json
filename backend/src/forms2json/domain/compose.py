@@ -9,6 +9,7 @@ import html
 from collections.abc import Iterator, Sequence
 from itertools import pairwise
 
+from forms2json.domain import rules
 from forms2json.domain.blocks.pages import applicant_page, contact_page, finish_page
 from forms2json.domain.form_definition import Field, FlowLink, FormDefinition, Option, Question, Tab
 from forms2json.domain.form_draft import DraftField, FieldType, FormDraft
@@ -27,7 +28,10 @@ type Confidence = dict[str, float]
 
 
 def compose(draft: FormDraft) -> tuple[FormDefinition, Confidence]:
-    """The form plus the confidence of every element built from the draft, keyed by techName."""
+    """The form plus the confidence of every page and field, keyed by JSON path like Issue.path.
+
+    Elements of predefined blocks get 1.0 (FR-T1); the rest carry the draft's confidence.
+    """
     applicant = applicant_page(draft.addressee.value, [a.kind for a in draft.applicants])
     contact = contact_page(draft.consents)
     finish = finish_page()
@@ -38,7 +42,10 @@ def compose(draft: FormDraft) -> tuple[FormDefinition, Confidence]:
     if draft.consents:
         consent = next(f for f in _walk(contact) if f.type == "CONSENT_SECTION")
         confidence[consent.tech_name] = min(c.confidence for c in draft.consents)
-    return FormDefinition(draft.title.value, tabs, links), confidence
+    form = FormDefinition(draft.title.value, tabs, links)
+    by_path = {f"tabs[{t}]": 1.0 for t in range(len(tabs))}
+    by_path |= {p.path: confidence.get(p.field.tech_name, 1.0) for p in rules._walk(form)}
+    return form, by_path
 
 
 def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confidence]:
