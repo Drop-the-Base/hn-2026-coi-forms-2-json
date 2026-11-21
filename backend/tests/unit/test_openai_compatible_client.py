@@ -9,7 +9,11 @@ from forms2json.adapters.outbound.llm.openai_compatible_client import (
     MAX_ATTEMPTS,
     OpenAiCompatibleLlmClient,
 )
-from forms2json.application.ports.llm_client import LlmCallFailed
+from forms2json.application.ports.llm_client import (
+    LlmCallFailed,
+    LlmRateLimited,
+    LlmRequestTooLarge,
+)
 
 SCHEMA = {"type": "object", "properties": {"title": {"type": "string"}}}
 
@@ -108,6 +112,19 @@ def test_rejected_request_is_not_retried() -> None:
     client, requests = client_with(lambda _: httpx2.Response(404, json={"error": "no model"}))
 
     with pytest.raises(LlmCallFailed):
+        client.generate_json("system", "user", SCHEMA)
+    assert len(requests) == 1
+
+
+@pytest.mark.parametrize(
+    ("status", "error_type"), [(413, LlmRequestTooLarge), (429, LlmRateLimited)]
+)
+def test_provider_limits_get_their_own_error_type(
+    status: int, error_type: type[LlmCallFailed]
+) -> None:
+    client, requests = client_with(lambda _: httpx2.Response(status, json={"error": "limit"}))
+
+    with pytest.raises(error_type):
         client.generate_json("system", "user", SCHEMA)
     assert len(requests) == 1
 

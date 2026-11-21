@@ -246,6 +246,20 @@ cd frontend && npm ci && npm run dev
 | ewaluacje jakości (ADR-0010) | `EVAL_PREDICTED_DIR=<wyniki> EVAL_GOLDEN_DIR=tests/evals/dataset/golden uv run pytest -m evals` (`backend/`); pliki parowane po nazwie (`3.json` …) |
 | frontend | `npm run lint && npx prettier --check . && npx vitest run && npm run build` (`frontend/`) |
 
+### Ewaluacja przez działającą aplikację
+
+Skrypt wysyła formularze 1–9 (plik DOCX, potem PDF, potem ODS/XLSX z `data/N. …`) do API, czeka na wynik i liczy metryki względem wzorców (1 i 5: JSON-y COI z `data/`, reszta: `tests/evals/dataset/golden/`). W `backend/`, z działającym `docker compose`:
+
+```bash
+uv run python -m tests.evals.run_eval --forms 1,3 --name groq-1 --token-file <plik z JWT>
+uv run python -m tests.evals.run_eval --forms 1,3 --name groq-2 --token-file <plik z JWT> --baseline groq-1
+```
+
+- adres API: `--api-url` albo `EVAL_API_URL` (domyślnie http://localhost:8080); token: `--token-file` albo `EVAL_TOKEN`
+- `--forms` domyślnie 1–9, sekwencyjnie z `--delay` sekund przerwy (limity dostawcy LLM), `--timeout` na zadanie
+- przebieg trafia do `backend/tests/evals/runs/<nazwa>/` (`N.json` wynik zadania, `scores.json` metryki), katalog jest w `.gitignore`
+- tabela Markdown: per formularz i średnia; `--baseline <nazwa>` dopisuje deltę w nawiasie. Zadanie `failed` liczy się jako pusty formularz (recall 0), w kolumnie status widać typ błędu (np. `LlmRequestTooLarge`)
+
 Złote JSON-y formularzy 2, 3, 4, 6, 7, 8, 9 i decyzje przy ich tworzeniu: [backend/tests/evals/dataset/](backend/tests/evals/dataset/README.md). CI (GitHub Actions) uruchamia testy backendu i frontendu.
 
 ## Struktura repo

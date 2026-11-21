@@ -9,9 +9,22 @@ from openai import OpenAI
 from openai.types.chat.completion_create_params import ResponseFormat
 from opentelemetry import metrics, trace
 
-from forms2json.application.ports.llm_client import LlmCallFailed, LlmClient, LlmResult, LlmUsage
+from forms2json.application.ports.llm_client import (
+    LlmCallFailed,
+    LlmClient,
+    LlmRateLimited,
+    LlmRequestTooLarge,
+    LlmResult,
+    LlmUsage,
+)
 
 MAX_ATTEMPTS = 3
+# shortcut: 429 is not retried, a per-minute limit outlasts our attempts; add a backoff
+# honouring Retry-After if paid tiers hit short bursts.
+_REJECTION_ERRORS: dict[int | None, type[LlmCallFailed]] = {
+    413: LlmRequestTooLarge,
+    429: LlmRateLimited,
+}
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +127,9 @@ class OpenAiCompatibleLlmClient(LlmClient):
             except openai.APIError as error:
                 status = getattr(error, "status_code", None)  # 429 = rate limit
                 logger.warning("LLM %s attempt %d rejected: HTTP %s", self._model, attempt, status)
-                raise LlmCallFailed(f"LLM runtime rejected the request: {error}") from error
+                # The job error is only the type name, so the user sees which limit was hit.
+                error_type = _REJECTION_ERRORS.get(status, LlmCallFailed)
+                raise error_type(f"LLM runtime rejected the request: {error}") from error
             if response.usage:
                 prompt_tokens += response.usage.prompt_tokens
                 completion_tokens += response.usage.completion_tokens
