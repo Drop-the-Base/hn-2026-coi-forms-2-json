@@ -47,6 +47,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0021](0021-kolejka-aio-pika.md) | Kolejka zadań: `aio-pika` za portem `JobQueue` | Proponowana |
 | [0022](0022-serwer-uvicorn-python-multipart.md) | Serwer ASGI `uvicorn` i `python-multipart` dla uploadu | Proponowana |
 | [0023](0023-odczyt-pdf-pdfplumber.md) | Odczyt PDF: pdfplumber | Proponowana |
+| [0024](0024-tracing-otel-pakiety.md) | Tracing OTel w `api` i `worker`: pakiety i propagacja przez RabbitMQ | Proponowana |
 
 ## Szablon
 

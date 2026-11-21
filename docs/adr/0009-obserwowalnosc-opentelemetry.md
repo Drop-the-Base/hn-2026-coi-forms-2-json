@@ -19,6 +19,8 @@ Chcemy widzieć każde żądanie od uploadu do wyniku: latencję per krok, wywo�
 | Widoki | Jaeger, zakładka Monitor (SPM): latencja, liczba żądań i błędy per endpoint z metryk Prometheusa; UI Prometheusa dla tokenów i kosztu | Apache-2.0 |
 | Dashboardy (opcjonalnie) | **Perses**, tylko jeśli na demo potrzebny dashboard kosztów; dashboardy jako kod w repo | Apache-2.0 |
 
+Pakiety Pythona i propagacja kontekstu: [ADR-0024](0024-tracing-otel-pakiety.md).
+
 Aplikacja zależy tylko od OTLP. Backend obserwowalności to wymienny element infrastruktury.
 
 Grafany nie używamy: AGPL jest wprost wymieniona w zakazie (NFR-02), a SPM w Jaegerze pokrywa podstawowe metryki bez dodatkowej usługi.
