@@ -74,7 +74,7 @@ def run_job(step: PipelineStep[SourceFile, str]) -> tuple[FakeFileStore, FakeJob
     files, queue = FakeFileStore(), FakeJobQueue()
     job = Job(uuid.uuid4(), "application/pdf")
     files.save(str(job.job_id), b"form")
-    use_case = ProcessJob(files, Pipeline([step], NullObserver()), queue)
+    use_case = ProcessJob(files, lambda: Pipeline([step], NullObserver()), queue)
 
     asyncio.run(use_case.execute(job))
     return files, queue, job
@@ -100,6 +100,8 @@ def test_missing_file_publishes_error() -> None:
     files, queue = FakeFileStore(), FakeJobQueue()
     job = Job(uuid.uuid4(), "application/pdf")
 
-    asyncio.run(ProcessJob(files, Pipeline([Describe()], NullObserver()), queue).execute(job))
+    asyncio.run(
+        ProcessJob(files, lambda: Pipeline([Describe()], NullObserver()), queue).execute(job)
+    )
 
     assert queue.results == [JobResult(job.job_id, error="KeyError")]

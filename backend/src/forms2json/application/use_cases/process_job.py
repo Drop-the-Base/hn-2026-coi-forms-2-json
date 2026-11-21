@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections.abc import Callable
 
 from forms2json.application.pipeline.pipeline import Pipeline
 from forms2json.application.ports.file_store import FileStore
@@ -12,9 +13,11 @@ logger = logging.getLogger(__name__)
 class ProcessJob:
     """Worker side of a job: file → pipeline → result, and the file never outlives it (NFR-06)."""
 
-    def __init__(self, files: FileStore, pipeline: Pipeline, queue: JobQueue) -> None:
+    def __init__(
+        self, files: FileStore, pipelines: Callable[[], Pipeline], queue: JobQueue
+    ) -> None:
         self._files = files
-        self._pipeline = pipeline
+        self._pipelines = pipelines  # a fresh pipeline per job: steps keep per-run state
         self._queue = queue
 
     async def execute(self, job: Job) -> None:
@@ -22,7 +25,7 @@ class ProcessJob:
         try:
             source = SourceFile(self._files.read(job_id), job.mime_type)
             # The pipeline blocks (LLM calls take minutes); a thread keeps AMQP heartbeats alive.
-            output = await asyncio.to_thread(self._pipeline.run, source)
+            output = await asyncio.to_thread(self._pipelines().run, source)
             result = JobResult(job.job_id, result=output)
         except Exception as error:
             logger.exception("Job %s failed", job_id)
