@@ -1,6 +1,7 @@
 import asyncio
 import uuid
 
+import httpx2
 import pytest
 from fastapi.testclient import TestClient
 
@@ -22,7 +23,7 @@ class Api:
         settings = Settings(max_upload_bytes=MAX_BYTES)
         self.files, self.queue = FakeFileStore(), FakeJobQueue()
         self.results = InMemoryResultStore(ttl_seconds=60)
-        app = create_app()
+        self.app = app = create_app()
         app.state.submit_job = SubmitJob(self.files, self.queue, self.results, MAX_BYTES)
         app.state.get_job_result = GetJobResult(self.results)
         app.dependency_overrides[get_settings] = lambda: settings
@@ -119,3 +120,71 @@ def test_file_is_deleted_when_the_job_cannot_be_queued() -> None:
     with pytest.raises(ConnectionError):
         asyncio.run(submit.execute("wniosek.pdf", PDF))
     assert files.files == {}
+
+
+class InstantWorker(FakeJobQueue):
+    """Completes every job as soon as it is queued, like a very fast worker."""
+
+    def __init__(self, results: InMemoryResultStore, outcome: JobResult) -> None:
+        super().__init__()
+        self._results, self._outcome = results, outcome
+
+    async def publish_job(self, job: Job) -> None:
+        await super().publish_job(job)
+        self._results.complete(JobResult(job.job_id, self._outcome.result, self._outcome.error))
+
+
+def convert(api: Api, outcome: JobResult | None, timeout: float = 5.0) -> httpx2.Response:
+    settings = Settings(max_upload_bytes=MAX_BYTES, sync_timeout_seconds=timeout)
+    api.app.dependency_overrides[get_settings] = lambda: settings
+    queue = InstantWorker(api.results, outcome) if outcome else api.queue
+    api.app.state.submit_job = SubmitJob(api.files, queue, api.results, MAX_BYTES)
+    return api.client.post("/api/v1/forms:convert", files={"file": ("wniosek.pdf", PDF)})
+
+
+def test_convert_returns_the_form_json(api: Api) -> None:
+    form = {"title": "Wniosek", "pages": []}
+    response = convert(api, JobResult(uuid.uuid4(), result={"form": form, "confidence": 0.9}))
+
+    assert response.status_code == 200
+    assert response.json() == form
+
+
+def test_convert_failed_job_is_422(api: Api) -> None:
+    response = convert(api, JobResult(uuid.uuid4(), error="ValueError"))
+
+    assert response.status_code == 422
+    assert response.json()["error"] == "ValueError"
+
+
+def test_convert_timeout_is_202_with_job_location(api: Api) -> None:
+    response = convert(api, None, timeout=0.05)
+
+    assert response.status_code == 202
+    job_id = response.json()["job_id"]
+    assert response.headers["Location"] == f"/api/v1/jobs/{job_id}"
+    assert api.client.get(response.headers["Location"]).json() == {"status": "pending"}
+
+
+def test_wait_returns_a_result_that_arrives_later() -> None:
+    results, job_id = InMemoryResultStore(ttl_seconds=60), uuid.uuid4()
+    results.add_pending(job_id)
+
+    async def scenario() -> JobResult | None:
+        asyncio.get_running_loop().call_later(0.05, results.complete, JobResult(job_id, result=1))
+        return await GetJobResult(results).wait(job_id, timeout_seconds=5)
+
+    assert asyncio.run(scenario()) == JobResult(job_id, result=1)
+
+
+def test_convert_without_token_is_401(api: Api) -> None:
+    del api.client.headers["Authorization"]
+    response = api.client.post("/api/v1/forms:convert", files={"file": ("a.pdf", PDF)})
+    assert response.status_code == 401
+    assert api.queue.jobs == []
+
+
+def test_convert_rejects_a_bad_file(api: Api) -> None:
+    response = api.client.post("/api/v1/forms:convert", files={"file": ("wniosek.exe", PDF)})
+    assert response.status_code == 415
+    assert api.queue.jobs == []

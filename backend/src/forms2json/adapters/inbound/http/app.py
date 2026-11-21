@@ -89,6 +89,34 @@ async def get_config(settings: Annotated[Settings, Depends(get_settings)]) -> Ap
     return ApiConfig(max_upload_bytes=settings.max_upload_bytes)
 
 
+@router.post(
+    "/forms:convert",
+    responses={202: {"model": JobAccepted}, 422: {"description": "Konwersja nie powiodła się"}},
+)
+async def convert_form(
+    file: UploadFile,
+    submit: Annotated[SubmitJob, Depends(_submit_job)],
+    get_result: Annotated[GetJobResult, Depends(_get_job_result)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> Any:
+    """Synchronous mode (FR-01, FR-06): the eUsługi form JSON, or 202 when it takes too long."""
+    content = await file.read(settings.max_upload_bytes + 1)
+    job_id = await submit.execute(file.filename or "", content)
+    result = await get_result.wait(job_id, settings.sync_timeout_seconds)
+    if result is None:
+        return JSONResponse(
+            {"job_id": str(job_id)},
+            status_code=status.HTTP_202_ACCEPTED,
+            headers={"Location": f"/api/v1/jobs/{job_id}"},
+        )
+    if result.error is not None:
+        return JSONResponse(
+            {"detail": "Nie udało się przekonwertować formularza.", "error": result.error},
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        )
+    return result.result["form"]
+
+
 def create_app(lifespan: Lifespan[FastAPI] | None = None) -> FastAPI:
     app = FastAPI(title="forms2json", lifespan=lifespan)
     app.include_router(router)
