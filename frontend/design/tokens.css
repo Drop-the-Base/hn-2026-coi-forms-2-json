@@ -2,37 +2,37 @@
  * Po zmianie dowolnego koloru: python3 frontend/design/kontrast.py */
 :root {
   /* papier i arkusze */
-  --color-paper: #F4F3EF;
-  --color-paper-2: #EBEAE4;
-  --color-sheet: #FFFFFF;
-  --color-ink: #1A1D24;
-  --color-muted: #565B66;
-  --color-rule: #D9D7CF;
-  --color-field-border: #767A84;
+  --color-paper: #f4f3ef;
+  --color-paper-2: #ebeae4;
+  --color-sheet: #ffffff;
+  --color-ink: #1a1d24;
+  --color-muted: #565b66;
+  --color-rule: #d9d7cf;
+  --color-field-border: #767a84;
 
   /* grzbiet teczki: pasek aplikacji */
-  --color-shell: #15213D;
-  --color-on-shell: #FFFFFF;
-  --color-on-shell-muted: #BCC5D8;
+  --color-shell: #15213d;
+  --color-on-shell: #ffffff;
+  --color-on-shell-muted: #bcc5d8;
   --color-backdrop: rgb(21 33 61 / 0.4);
 
   /* atrament: jedyny akcent */
-  --color-accent: #22408C;
-  --color-accent-hover: #1A3170;
-  --color-accent-subtle: #E6EBF6;
-  --color-on-accent: #FFFFFF;
-  --color-focus: #22408C;
-  --color-focus-on-shell: #FFFFFF;
+  --color-accent: #22408c;
+  --color-accent-hover: #1a3170;
+  --color-accent-subtle: #e6ebf6;
+  --color-on-accent: #ffffff;
+  --color-focus: #22408c;
+  --color-focus-on-shell: #ffffff;
 
   /* stany */
-  --color-error: #B42318;
-  --color-error-bg: #FDEDEB;
-  --color-warning: #8A4B00;
-  --color-warning-bg: #FFF3DC;
-  --color-warning-mark: #B26A00;
-  --color-success: #1E6B3A;
-  --color-success-bg: #E7F3EB;
-  --color-success-mark: #2F7D4A;
+  --color-error: #b42318;
+  --color-error-bg: #fdedeb;
+  --color-warning: #8a4b00;
+  --color-warning-bg: #fff3dc;
+  --color-warning-mark: #b26a00;
+  --color-success: #1e6b3a;
+  --color-success-bg: #e7f3eb;
+  --color-success-mark: #2f7d4a;
 
   /* confidence = aliasy stanów */
   --color-conf-low: var(--color-error);
@@ -45,33 +45,37 @@
   --color-conf-high-mark: var(--color-success-mark);
 
   /* edytor JSON */
-  --color-code-bg: #FFFFFF;
-  --color-code-gutter: #F7F6F2;
-  --color-code-line-no: #6A6F79;
-  --color-code-key: #22408C;
-  --color-code-string: #17663A;
-  --color-code-number: #9A4100;
-  --color-code-punct: #565B66;
-  --color-code-current: #EEF1F8;
+  --color-code-bg: #ffffff;
+  --color-code-gutter: #f7f6f2;
+  --color-code-line-no: #6a6f79;
+  --color-code-key: #22408c;
+  --color-code-string: #17663a;
+  --color-code-number: #9a4100;
+  --color-code-punct: #565b66;
+  --color-code-current: #eef1f8;
 
   /* podgląd eUsługi: odwzorowanie wizualizacji COI, tylko wewnątrz ramki podglądu */
-  --color-eu-ground: #EEF2F7;
-  --color-eu-card: #FFFFFF;
-  --color-eu-ink: #1B1B1F;
-  --color-eu-label: #33363D;
-  --color-eu-readonly: #F3F5F8;
-  --color-eu-border: #51596A;
-  --color-eu-primary: #1A3E7A;
+  --color-eu-ground: #eef2f7;
+  --color-eu-card: #ffffff;
+  --color-eu-ink: #1b1b1f;
+  --color-eu-label: #33363d;
+  --color-eu-readonly: #f3f5f8;
+  --color-eu-border: #51596a;
+  --color-eu-primary: #1a3e7a;
 
   /* typografia: Atkinson Hyperlegible (OFL 1.1); w kodzie dopiero po ADR, do tego czasu działa fallback systemowy */
-  --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
-  --text-xs: 0.8125rem;  /* 13px: badge, metadane */
-  --text-sm: 0.875rem;   /* 14px: tabela, etykiety, edytor */
-  --text-md: 1rem;       /* 16px: tekst, pola */
-  --text-lg: 1.125rem;   /* 18px: nagłówek arkusza */
-  --text-xl: 1.3125rem;  /* 21px: tytuł formularza w podglądzie */
-  --text-2xl: 1.5rem;    /* 24px: tytuł strony */
+  --font-body:
+    "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono:
+    "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Consolas,
+    "Liberation Mono", monospace;
+  --text-xs: 0.8125rem; /* 13px: badge, metadane */
+  --text-sm: 0.875rem; /* 14px: tabela, etykiety, edytor */
+  --text-md: 1rem; /* 16px: tekst, pola */
+  --text-lg: 1.125rem; /* 18px: nagłówek arkusza */
+  --text-xl: 1.3125rem; /* 21px: tytuł formularza w podglądzie */
+  --text-2xl: 1.5rem; /* 24px: tytuł strony */
   --leading-tight: 1.3;
   --leading-body: 1.5;
   --weight-regular: 400;
@@ -88,18 +92,20 @@
   --space-12: 3rem;
 
   /* kształt */
-  --radius-mark: 2px;    /* badge, znacznik marginesu */
+  --radius-mark: 2px; /* badge, znacznik marginesu */
   --radius-control: 4px; /* przycisk, pole */
-  --radius-sheet: 6px;   /* arkusz */
-  --radius-eu: 8px;      /* karta w podglądzie eUsługi */
-  --control-h: 2.5rem;   /* 40px; obszar kliknięcia 44px przez ::before */
+  --radius-sheet: 6px; /* arkusz */
+  --radius-eu: 8px; /* karta w podglądzie eUsługi */
+  --control-h: 2.5rem; /* 40px; obszar kliknięcia 44px przez ::before */
   --shell-h: 3.5rem;
   --container: 90rem;
   --gutter: 2rem;
 
   /* głębia: tylko elementy nad treścią */
-  --shadow-raised: 0 1px 2px rgb(21 33 61 / 0.08), 0 8px 24px -8px rgb(21 33 61 / 0.22);
-  --shadow-band: 0 1px 0 var(--color-rule), 0 4px 12px -6px rgb(21 33 61 / 0.18);
+  --shadow-raised:
+    0 1px 2px rgb(21 33 61 / 0.08), 0 8px 24px -8px rgb(21 33 61 / 0.22);
+  --shadow-band:
+    0 1px 0 var(--color-rule), 0 4px 12px -6px rgb(21 33 61 / 0.18);
 
   /* ruch: tylko stan */
   --dur-micro: 120ms;
@@ -108,5 +114,9 @@
 
   /* wzory poziomów pewności: kształt niezależny od koloru */
   --pattern-low: var(--color-conf-low);
-  --pattern-medium: repeating-linear-gradient(135deg, var(--color-conf-medium-mark) 0 2px, transparent 2px 5px);
+  --pattern-medium: repeating-linear-gradient(
+    135deg,
+    var(--color-conf-medium-mark) 0 2px,
+    transparent 2px 5px
+  );
 }

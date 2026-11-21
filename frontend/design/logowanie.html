@@ -1,62 +1,136 @@
 <!doctype html>
 <html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Logowanie: forms2json</title>
-<meta name="description" content="Makieta ekranu logowania tokenem dostępu do panelu przeglądu formularzy.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap">
-<link rel="stylesheet" href="ui.css">
-<style>
-  .login { min-height: 100dvh; display: grid; grid-template-rows: var(--shell-h) 1fr; }
-  .login__main { display: grid; place-items: start center; padding: var(--space-12) var(--gutter); }
-  .login__sheet { width: min(100%, 26rem); }
-  .login__sheet form { display: grid; gap: var(--space-4); }
-  .login__lede { color: var(--color-muted); margin-top: var(--space-2); }
-  .login__note { font-size: var(--text-sm); color: var(--color-muted); border-top: 1px solid var(--color-rule); padding-top: var(--space-4); }
-  /* stany makiety: element bez swojego stanu znika, reszta zachowuje własny display */
-  body:not(:has(#s-blad:target)) .only-error, body:has(#s-blad:target) .not-error { display: none; }
-</style>
-</head>
-<body>
-<span class="anchor" id="s-blad"></span>
-<div class="login">
-  <header class="shell"><div class="shell__in"><a class="wordmark" href="#" aria-label="forms2json, strona główna">forms2json <span>blankiet do eUsługi</span></a></div></header>
-  <main class="login__main">
-    <div class="sheet login__sheet">
-      <div class="sheet__body stack">
-        <div>
-          <h1>Zaloguj się</h1>
-          <p class="login__lede">Wklej token dostępu, który dostałeś od administratora.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Logowanie: forms2json</title>
+    <meta
+      name="description"
+      content="Makieta ekranu logowania tokenem dostępu do panelu przeglądu formularzy."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="ui.css" />
+    <style>
+      .login {
+        min-height: 100dvh;
+        display: grid;
+        grid-template-rows: var(--shell-h) 1fr;
+      }
+      .login__main {
+        display: grid;
+        place-items: start center;
+        padding: var(--space-12) var(--gutter);
+      }
+      .login__sheet {
+        width: min(100%, 26rem);
+      }
+      .login__sheet form {
+        display: grid;
+        gap: var(--space-4);
+      }
+      .login__lede {
+        color: var(--color-muted);
+        margin-top: var(--space-2);
+      }
+      .login__note {
+        font-size: var(--text-sm);
+        color: var(--color-muted);
+        border-top: 1px solid var(--color-rule);
+        padding-top: var(--space-4);
+      }
+      /* stany makiety: element bez swojego stanu znika, reszta zachowuje własny display */
+      body:not(:has(#s-blad:target)) .only-error,
+      body:has(#s-blad:target) .not-error {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <span class="anchor" id="s-blad"></span>
+    <div class="login">
+      <header class="shell">
+        <div class="shell__in">
+          <a class="wordmark" href="#" aria-label="forms2json, strona główna"
+            >forms2json <span>blankiet do eUsługi</span></a
+          >
         </div>
-
-        <div class="alert alert--error only-error" role="alert">
-          <span class="i i-x-circle" aria-hidden="true"></span>
-          <p class="alert__title">Token wygasł 21.11.2026 o 9:12</p>
-          <p>Poproś administratora o nowy token i wklej go poniżej.</p>
-        </div>
-
-        <form action="#" novalidate>
-          <div class="field">
-            <label class="field__label" for="token">Token dostępu</label>
-            <div class="input-row">
-              <input class="input input--mono not-error" id="token" name="token" type="password" autocomplete="off" spellcheck="false" aria-describedby="token-hint" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9">
-              <input class="input input--mono only-error" id="token-bad" name="token" type="password" autocomplete="off" spellcheck="false" aria-invalid="true" aria-describedby="token-msg" value="eyJhbGciOiJIUzI1NiJ9.wygasly">
-              <button class="btn btn--secondary" type="button" aria-pressed="false"><span class="i i-eye" aria-hidden="true"></span>Pokaż</button>
+      </header>
+      <main class="login__main">
+        <div class="sheet login__sheet">
+          <div class="sheet__body stack">
+            <div>
+              <h1>Zaloguj się</h1>
+              <p class="login__lede">
+                Wklej token dostępu, który dostałeś od administratora.
+              </p>
             </div>
-            <p class="field__hint not-error" id="token-hint">Token zaczyna się od „eyJ”. Nie zapisujemy go po zamknięciu karty.</p>
-            <p class="field__msg only-error" id="token-msg"><span class="i i-x" aria-hidden="true"></span>Ten token już nie działa. Wklej nowy.</p>
-          </div>
-          <button class="btn btn--primary" type="submit">Zaloguj</button>
-        </form>
 
-        <p class="login__note">Pliki, które wgrasz, są przetwarzane tylko tymczasowo i usuwane z serwera po zakończeniu zadania.</p>
-      </div>
+            <div class="alert alert--error only-error" role="alert">
+              <span class="i i-x-circle" aria-hidden="true"></span>
+              <p class="alert__title">Token wygasł 21.11.2026 o 9:12</p>
+              <p>Poproś administratora o nowy token i wklej go poniżej.</p>
+            </div>
+
+            <form action="#" novalidate>
+              <div class="field">
+                <label class="field__label" for="token">Token dostępu</label>
+                <div class="input-row">
+                  <input
+                    class="input input--mono not-error"
+                    id="token"
+                    name="token"
+                    type="password"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-describedby="token-hint"
+                    value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+                  />
+                  <input
+                    class="input input--mono only-error"
+                    id="token-bad"
+                    name="token"
+                    type="password"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-invalid="true"
+                    aria-describedby="token-msg"
+                    value="eyJhbGciOiJIUzI1NiJ9.wygasly"
+                  />
+                  <button
+                    class="btn btn--secondary"
+                    type="button"
+                    aria-pressed="false"
+                  >
+                    <span class="i i-eye" aria-hidden="true"></span>Pokaż
+                  </button>
+                </div>
+                <p class="field__hint not-error" id="token-hint">
+                  Token zaczyna się od „eyJ”. Nie zapisujemy go po zamknięciu
+                  karty.
+                </p>
+                <p class="field__msg only-error" id="token-msg">
+                  <span class="i i-x" aria-hidden="true"></span>Ten token już
+                  nie działa. Wklej nowy.
+                </p>
+              </div>
+              <button class="btn btn--primary" type="submit">Zaloguj</button>
+            </form>
+
+            <p class="login__note">
+              Pliki, które wgrasz, są przetwarzane tylko tymczasowo i usuwane z
+              serwera po zakończeniu zadania.
+            </p>
+          </div>
+        </div>
+      </main>
     </div>
-  </main>
-</div>
-<nav class="proto-bar" aria-label="Stany makiety">Makieta, stan: <a href="#">domyślny</a> <a href="#s-blad">token wygasł</a></nav>
-</body>
+    <nav class="proto-bar" aria-label="Stany makiety">
+      Makieta, stan: <a href="#">domyślny</a> <a href="#s-blad">token wygasł</a>
+    </nav>
+  </body>
 </html>
