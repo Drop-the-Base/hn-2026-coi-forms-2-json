@@ -32,8 +32,6 @@ class TmpfsFileStore(FileStore):
         self._path(job_id).unlink(missing_ok=True)
 
     def delete_expired(self) -> None:
-        # shortcut: nothing calls this periodically yet; schedule it in the api lifespan
-        # once the FastAPI app exists (ADR-0005).
         cutoff = time.time() - self._ttl_seconds
         for path in self._directory.iterdir():
             try:

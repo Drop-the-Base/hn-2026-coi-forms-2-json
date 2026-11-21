@@ -31,17 +31,21 @@ class FakeFileStore(FileStore):
 
 class FakeJobQueue(JobQueue):
     def __init__(self) -> None:
+        self.jobs: list[Job] = []
         self.results: list[JobResult] = []
         self.events: list[ProgressEvent] = []
 
     async def publish_job(self, job: Job) -> None:
-        raise NotImplementedError
+        self.jobs.append(job)
 
     async def consume_jobs(self, handler: Callable[[Job], Awaitable[None]]) -> None:
         raise NotImplementedError
 
     async def publish_result(self, result: JobResult) -> None:
         self.results.append(result)
+
+    async def consume_results(self, handler: Callable[[JobResult], Awaitable[None]]) -> None:
+        raise NotImplementedError
 
     async def publish_progress(self, event: ProgressEvent) -> None:
         self.events.append(event)

@@ -46,4 +46,8 @@ class JobQueue(ABC):
     async def publish_result(self, result: JobResult) -> None: ...
 
     @abstractmethod
+    async def consume_results(self, handler: Callable[[JobResult], Awaitable[None]]) -> None:
+        """Registers the handler and returns; results then arrive one at a time."""
+
+    @abstractmethod
     async def publish_progress(self, event: ProgressEvent) -> None: ...
