@@ -18,7 +18,7 @@ FR-02 wymaga czytania JPG/PNG i skanów PDF. W `data/` każdy formularz ma wersj
 - Ochrona: limit 50 Mpx dla obrazu (sprawdzany przed dekodowaniem) i dla renderowanej strony PDF (sprawdzany przed renderowaniem), limit 100 stron PDF z [ADR-0023](0023-odczyt-pdf-pdfplumber.md), timeout 120 s na stronę.
 - Pewność: średnia pewność OCR dokumentu ogranicza z góry confidence każdego elementu. Poniżej progu przeglądu (`CONFIDENCE_REVIEW_THRESHOLD`) wynik dostaje ostrzeżenie `OCR-LOW-CONFIDENCE`.
 
-Pomiar (formularz 3, JPG, kontener workera): OCR 0,6 s (lokalnie na M-series), 94% słów z wersji DOCX odczytanych, średnia pewność 0,87.
+Pomiar (formularz 3, JPG, Tesseract z Homebrew na macOS, dane `pol`): OCR 0,6 s, 94% słów z wersji DOCX odczytanych (precyzja 90%), średnia pewność 0,87.
 
 ## Rozważone alternatywy
 
@@ -32,7 +32,7 @@ Pomiar (formularz 3, JPG, kontener workera): OCR 0,6 s (lokalnie na M-series), 9
 
 ## Konsekwencje
 
-- Obraz workera rośnie o Tesseracta z danymi `pol` i `eng` (pomiar w PR).
+- Obraz workera rośnie o Tesseracta z danymi `pol` i `eng`; rozmiar do zmierzenia po buildzie (sieć do Docker Hub padała przy pracy nad #25).
 - Tesseract nie rozpoznaje pól wyboru ani tabel: kratki stają się śmieciowymi znakami (np. `m».`), a tabele liniami tekstu. Understand dostaje surowy tekst.
 - Cięcia wysokich obrazów na strony A4 ([architecture.md §4](../architecture.md)) nie robimy: wszystkie obrazy w `data/` to pojedyncze strony A4.
 - Pewność OCR jest jedna dla dokumentu, nie per pole: nie wiemy, z której linii LLM wziął pole.
