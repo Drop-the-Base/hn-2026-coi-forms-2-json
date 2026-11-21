@@ -2,7 +2,7 @@
 
 from forms2json.domain.blocks.pages import contact_page
 from forms2json.domain.form_definition import JsonObject
-from tests.evals.dataset.drafts._common import build, field, fields, html_text, save
+from tests.evals.dataset.golden._common import build, field, fields, html_text, save
 
 BOOKING = "Rezerwacja świetlicy"
 EVENT = "Informacje o wydarzeniu"

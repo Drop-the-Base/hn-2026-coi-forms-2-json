@@ -13,8 +13,9 @@ from forms2json.domain.upload import DOCX
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 # Text boxes are stored twice: as DrawingML and as a VML fallback; read only the first.
 MC_FALLBACK = "{http://schemas.openxmlformats.org/markup-compatibility/2006}Fallback"
-# Word content-control checkboxes render as these glyphs too, so one rule covers both.
-BOX_STATES = {"☐": False, "□": False, "☒": True, "☑": True}
+# Word content-control checkboxes render as these glyphs too, so one rule covers both;
+# the PDF reader shares it (❑ is the Word-exported box in form 7).
+BOX_STATES = {"☐": False, "□": False, "❑": False, "☒": True, "☑": True}
 BOX_SPLIT = re.compile(f"([{''.join(BOX_STATES)}])")
 
 

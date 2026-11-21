@@ -1,7 +1,7 @@
-"""Shared steps of the golden JSON drafts: FormDraft -> compose -> hand fixes -> golden/<n>.json.
+"""Shared steps of build_golden_2/3/4: FormDraft -> compose -> hand fixes -> <n>.json.
 
-Run a draft from backend/: `uv run python -m tests.evals.dataset.drafts.form_2`. Ids are fresh
-uuids on every run, so regenerating a golden file changes its ids, not its content.
+Run from backend/: `uv run python -m tests.evals.dataset.golden.build_golden_2` (-m, because the
+scripts import this module). Ids are fresh uuids on every run, so a rebuild rewrites all ids.
 """
 
 import html
@@ -14,7 +14,7 @@ from forms2json.domain.form_draft import FormDraft
 from forms2json.domain.rules import Severity, check_rules
 from forms2json.domain.standards import check_schema
 
-GOLDEN = Path(__file__).parents[1] / "golden"
+GOLDEN = Path(__file__).parent
 
 
 def sure(data: JsonValue) -> JsonValue:

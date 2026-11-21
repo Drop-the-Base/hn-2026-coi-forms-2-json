@@ -2,7 +2,7 @@
 
 from forms2json.domain.blocks.pages import CONTACT_TAB
 from forms2json.domain.layout import layout_page
-from tests.evals.dataset.drafts._common import build, field, html_text, rename_tab, save, tab
+from tests.evals.dataset.golden._common import build, field, html_text, rename_tab, save, tab
 
 KIND = "Rodzaj zaświadczenia"
 PURPOSE = "Cel wydania zaświadczenia"

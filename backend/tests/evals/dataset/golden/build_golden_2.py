@@ -1,6 +1,6 @@
 """Golden JSON 2: Wniosek o zwrot opłaty skarbowej (Urząd Gminy Stawiguda). See ../README.md."""
 
-from tests.evals.dataset.drafts._common import build, field, html_text, save
+from tests.evals.dataset.golden._common import build, field, html_text, save
 
 CASE = "Informacje o opłacie skarbowej"
 REASON = "Uzasadnienie wniosku"
