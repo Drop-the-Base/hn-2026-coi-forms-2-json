@@ -55,24 +55,36 @@ class RabbitMqJobQueue(JobQueue):
         await self._publish(self._channel.default_exchange, JOBS, _job.dump_json(job))
 
     async def consume_jobs(self, handler: Callable[[Job], Awaitable[None]]) -> None:
-        async def on_message(message: AbstractIncomingMessage) -> None:
-            # Acked after the handler, so a worker killed mid-job leaves the job for another one.
-            async with message.process():
-                try:
-                    job = _job.validate_json(message.body)
-                except ValidationError:
-                    logger.warning("Dropping malformed job message %s", message.message_id)
-                    return
-                await handler(job)
-
-        queue = await self._channel.get_queue(JOBS)
-        await queue.consume(on_message)
+        await self._consume(JOBS, _job, handler)
 
     async def publish_result(self, result: JobResult) -> None:
         await self._publish(self._channel.default_exchange, RESULTS, _result.dump_json(result))
 
+    async def consume_results(self, handler: Callable[[JobResult], Awaitable[None]]) -> None:
+        # shortcut: one api replica consumes all results; replicas would split them between
+        # themselves, so switch to a fanout exchange or a shared store when scaling the api.
+        await self._consume(RESULTS, _result, handler)
+
     async def publish_progress(self, event: ProgressEvent) -> None:
         await self._publish(self._progress, str(event.job_id), _progress.dump_json(event))
+
+    async def _consume[T](
+        self, queue_name: str, schema: TypeAdapter[T], handler: Callable[[T], Awaitable[None]]
+    ) -> None:
+        async def on_message(message: AbstractIncomingMessage) -> None:
+            # Acked after the handler, so a consumer killed mid-message leaves it for another one.
+            async with message.process():
+                try:
+                    item = schema.validate_json(message.body)
+                except ValidationError:
+                    logger.warning(
+                        "Dropping malformed %s message %s", queue_name, message.message_id
+                    )
+                    return
+                await handler(item)
+
+        queue = await self._channel.get_queue(queue_name)
+        await queue.consume(on_message)
 
     async def _publish(self, exchange: AbstractExchange, routing_key: str, body: bytes) -> None:
         message = Message(
