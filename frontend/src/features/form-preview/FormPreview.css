@@ -1,0 +1,287 @@
+/* Podgląd eUsługi: chłodna paleta eu-* z wizualizacji COI (DESIGN.md §2), tylko wewnątrz .eu.
+ * Wzorzec: frontend/design/przeglad.html, kolumna „Podgląd formularza”. */
+.eu {
+  background: var(--color-eu-ground);
+  color: var(--color-eu-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  padding: var(--space-5) var(--space-5) var(--space-8);
+}
+.eu :is(h2, h3, h4, p) {
+  margin: 0;
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-strong);
+}
+.eu-form-title {
+  font-size: var(--text-xl);
+  margin-bottom: var(--space-4);
+  text-wrap: balance;
+}
+.eu-page-title {
+  font-size: var(--text-lg);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.eu-page-title:focus {
+  outline: none;
+}
+.eu-page-title:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.eu-alert {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+/* kroki stron */
+.eu-steps {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+}
+.eu-steps button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--color-eu-label);
+  cursor: pointer;
+}
+.eu-step-n {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-eu-border);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-strong);
+  color: var(--color-eu-ink);
+}
+.eu-steps [aria-current="step"] {
+  color: var(--color-eu-ink);
+  font-weight: var(--weight-strong);
+}
+.eu-steps [aria-current="step"] .eu-step-n {
+  background: var(--color-eu-primary);
+  border-color: var(--color-eu-primary);
+  color: var(--color-sheet);
+}
+
+/* siatka 3 kolumn z x/y/cols */
+.eu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-4);
+}
+.eu > .eu-grid {
+  gap: var(--space-3);
+}
+.eu-card {
+  background: var(--color-eu-card);
+  border-radius: var(--radius-eu);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+}
+.eu-card > h4 {
+  font-size: var(--text-lg);
+}
+.eu-card .eu-card {
+  padding: 0;
+}
+
+/* pola */
+.eu-q {
+  display: grid;
+  gap: var(--space-1);
+}
+.eu-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.eu-label {
+  padding: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-eu-label);
+}
+.eu .eu-hint {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-eu-label);
+}
+.eu .eu-text {
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  max-width: 70ch;
+}
+.eu-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--control-h);
+  border: 1px solid var(--color-eu-border);
+  border-radius: var(--radius-control);
+  background: var(--color-eu-card);
+  padding: var(--space-2) var(--space-3);
+  font: inherit;
+  color: var(--color-eu-ink);
+}
+.eu-input::placeholder {
+  color: var(--color-muted);
+}
+.eu-textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+.eu-input:read-only:not(select),
+select.eu-input:disabled {
+  background: var(--color-eu-readonly);
+  border-color: var(--color-eu-readonly);
+}
+.eu :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -3px;
+}
+.eu-choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  font-size: var(--text-sm);
+}
+.eu-choice input {
+  accent-color: var(--color-eu-primary);
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0.0625rem 0 0;
+  flex: none;
+}
+.eu-choice input:focus-visible {
+  outline-offset: 2px;
+}
+.eu-file {
+  border: 1px solid var(--color-eu-border);
+  border-radius: var(--radius-control);
+  padding: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--color-eu-label);
+}
+.eu-file input::file-selector-button {
+  margin-right: var(--space-3);
+  min-height: var(--control-h);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-eu-primary);
+  border-radius: var(--radius-control);
+  background: var(--color-eu-card);
+  color: var(--color-eu-primary);
+  font: inherit;
+  font-weight: var(--weight-strong);
+  cursor: pointer;
+}
+.eu-info {
+  background: var(--color-accent-subtle);
+  border-radius: var(--radius-control);
+  padding: var(--space-3) var(--space-4);
+}
+.eu .eu-warning,
+.eu .eu-unknown {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-regular);
+  color: var(--color-warning);
+  overflow-wrap: anywhere;
+}
+.eu-unknown {
+  border: 1px dashed var(--color-rule);
+  border-radius: var(--radius-control);
+  padding: var(--space-3);
+}
+
+/* stopka */
+.eu-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-6);
+}
+.eu-back,
+.eu-next {
+  min-height: var(--control-h);
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-strong);
+  cursor: pointer;
+}
+.eu-back {
+  background: none;
+  border: 0;
+  padding-left: 0;
+  color: var(--color-eu-primary);
+}
+.eu-next {
+  margin-left: auto;
+  background: var(--color-eu-primary);
+  color: var(--color-sheet);
+  border: 0;
+}
+.eu :is(button):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .eu-back:hover {
+    text-decoration: underline;
+  }
+  .eu-next:hover {
+    background: var(--color-accent-hover);
+  }
+  .eu-steps button:hover {
+    color: var(--color-eu-ink);
+  }
+}
+
+/* tymczasowa trasa /podglad-demo (#54 ją zastąpi) */
+.eu-demo {
+  font-family: var(--font-body);
+  max-width: 44rem;
+  display: grid;
+  gap: var(--space-3);
+}
+.eu-demo [role="group"] {
+  display: flex;
+  gap: var(--space-2);
+}
+.eu-demo [role="group"] button {
+  min-height: var(--control-h);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius-control);
+  background: var(--color-sheet);
+  color: var(--color-accent);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-strong);
+  cursor: pointer;
+}
+.eu-demo [aria-pressed="true"] {
+  background: var(--color-accent-subtle);
+}
