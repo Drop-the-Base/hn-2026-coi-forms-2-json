@@ -1,6 +1,7 @@
 """Runs forms 1-9 through the running app and scores them (ADR-0010, FR-T4).
 
 uv run python -m tests.evals.run_eval --forms 3 --name groq-1 [--baseline groq-0]   (in backend/)
+Hold-out forms 10-12 (data/walidacja, NFR-11): --forms 10,11,12; measure only, never tune to them.
 """
 
 import argparse
@@ -19,6 +20,7 @@ from tests.evals.metrics import score
 
 DATA = Path(__file__).parents[3] / "data"
 GOLDEN = Path(__file__).parent / "dataset" / "golden"
+HOLDOUT = Path(__file__).parent / "dataset" / "walidacja"
 RUNS = Path(__file__).parent / "runs"
 SOURCE_SUFFIXES = (".docx", ".pdf", ".ods", ".xlsx")
 POLL_SECONDS = 2.0
@@ -43,7 +45,7 @@ type Row = dict[str, Any]
 
 
 def form_dir(n: int) -> Path:
-    return next(DATA.glob(f"{n}. *"))
+    return next(p for d in (DATA, DATA / "walidacja") for p in d.glob(f"{n}. *"))
 
 
 def source_file(directory: Path) -> Path:
@@ -60,7 +62,7 @@ def golden_file(n: int) -> Path:
     # Forms 1 and 5 come with COI's reference JSON; the rest have our goldens.
     if n in (1, 5):
         return next(form_dir(n).glob("konfiguracja_form_*.json"))
-    return GOLDEN / f"{n}.json"
+    return next(p for p in (GOLDEN / f"{n}.json", HOLDOUT / f"{n}.json") if p.exists())
 
 
 def run_job(client: httpx2.Client, path: Path, timeout: float) -> dict[str, Any]:

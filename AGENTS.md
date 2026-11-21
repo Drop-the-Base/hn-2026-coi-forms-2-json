@@ -46,6 +46,13 @@ Zasady:
 - Przed merge'em: zielone testy. Konflikt z PR-em drugiego agenta rozwiązuje ten, kto merguje później.
 - Merge'uje człowiek, w imieniu którego działa agent (albo agent, jeśli jego człowiek wprost na to pozwolił).
 
+## Zbiór walidacyjny: nie ruszaj
+`data/walidacja/` i `backend/tests/evals/dataset/walidacja/` to hold-out (formularze 10+, NFR-11): udają nieznane pliki z obrony.
+- Nie otwieraj tych plików i nie wklejaj ich treści do promptów, reguł, testów ani issue. Nie poprawiaj niczego pod nie.
+- Wolno tylko uruchomić `run_eval --forms 10,11,12` i podać liczby w PR.
+- Spadek na walidacji szukasz i naprawiasz na formularzach 1–9.
+- Zmiany w samym zbiorze (nowe formularze, poprawki złotych JSON-ów) robi człowiek albo agent na jego wyraźne polecenie, w osobnym PR.
+
 ## Pisanie kodu
 - Zasady: [docs/coding-rules.md](docs/coding-rules.md) (KISS, YAGNI, SOLID, architektura heksagonalna z portami na ABC, czytelny pipeline).
 - Przy każdym zadaniu z kodem stosuj skill **ponytail** na poziomie `full` ([.claude/skills/ponytail/SKILL.md](.claude/skills/ponytail/SKILL.md)). Przegląd zmian: `ponytail-review`, audyt repo: `ponytail-audit`.

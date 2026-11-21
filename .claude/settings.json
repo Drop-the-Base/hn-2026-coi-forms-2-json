@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./data/walidacja/**)",
+      "Edit(./data/walidacja/**)",
+      "Read(./backend/tests/evals/dataset/walidacja/**)",
+      "Edit(./backend/tests/evals/dataset/walidacja/**)"
+    ]
+  }
+}
