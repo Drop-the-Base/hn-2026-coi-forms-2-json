@@ -38,6 +38,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0012](0012-obraz-bazowy-slim.md) | Obraz workera: `python:3.14-slim` zamiast Alpine | Proponowana |
 | [0013](0013-polityka-licencji.md) | Polityka licencji i lista zakazanych zależności | Zaakceptowana |
 | [0014](0014-sse-postep-pipeline.md) | Postęp pipeline'u na żywo przez SSE | Proponowana |
+| [0015](0015-router-react-router.md) | Routing we frontendzie: React Router | Proponowana |
 
 ## Szablon
 
