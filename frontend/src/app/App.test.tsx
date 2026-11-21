@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
 import { expect, test } from "vitest";
-import { fakeToken, server } from "../test/server";
+import { fakeToken, server, sseStream } from "../test/server";
 import { setToken } from "../shared/api/token";
 import { App } from "./App";
 import { routes } from "./routes";
@@ -96,19 +96,36 @@ test("walidacja pliku: wysyła tylko poprawne, pokazuje przyczyny", async () => 
   expect(screen.getByText(/zostaną pominięte: 3/)).toBeDefined();
 });
 
-test("upload tworzy zadanie, status przechodzi z pending na done", async () => {
+/** GET /jobs/{id} answers pending until `finish()`, then done (or failed). */
+function mockJob(stream?: ReturnType<typeof sseStream>) {
+  let final: object | null = null;
+  server.use(
+    http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
+      HttpResponse.json(final ?? { status: "pending" }),
+    ),
+    http.get(`*/api/v1/jobs/${JOB_ID}/events`, () =>
+      stream ? stream.response() : HttpResponse.error(),
+    ),
+  );
+  return (result: object = { status: "done", result: { title: "Wniosek" } }) =>
+    void (final = result);
+}
+
+const event = (step: string, status: string, ts = 1763700000) => ({
+  job_id: JOB_ID,
+  step,
+  status,
+  message: "",
+  ts,
+});
+
+test("upload tworzy zadanie, lista pokazuje krok z SSE, potem gotowe", async () => {
   setToken(fakeToken());
-  let polls = 0;
+  const stream = sseStream();
+  const finish = mockJob(stream);
   server.use(
     http.post("*/api/v1/jobs", () =>
       HttpResponse.json({ job_id: JOB_ID }, { status: 202 }),
-    ),
-    http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
-      HttpResponse.json(
-        ++polls < 2
-          ? { status: "pending" }
-          : { status: "done", result: { title: "Wniosek" } },
-      ),
     ),
   );
   renderApp();
@@ -122,7 +139,13 @@ test("upload tworzy zadanie, status przechodzi z pending na done", async () => {
   );
   expect(list.getByRole("link", { name: "Wniosek.pdf" })).toBeDefined();
   expect(await list.findByText("W toku")).toBeDefined();
-  expect(await list.findByText("Gotowe", {}, { timeout: 4000 })).toBeDefined();
+  stream.send(event("job", "progress"));
+  stream.send(event("ingest", "started"));
+  expect(await list.findByText("W toku: Odczyt pliku")).toBeDefined();
+  finish();
+  stream.send(event("job", "done"));
+  stream.close();
+  expect(await list.findByText("Gotowe")).toBeDefined();
   fireEvent.click(
     list.getByRole("link", { name: "Zobacz wynik: Wniosek.pdf" }),
   );
@@ -153,4 +176,92 @@ test("błąd serwera przy uploadzie pokazuje detail", async () => {
     ),
   ).toBeDefined();
   expect(screen.getByText("Nie masz jeszcze zadań")).toBeDefined();
+});
+
+test("postęp na żywo: kolejne zdarzenia aktualizują kroki, koniec pokazuje wynik", async () => {
+  setToken(fakeToken());
+  const stream = sseStream();
+  const finish = mockJob(stream);
+  renderApp(`/zadania/${JOB_ID}`);
+  const steps = within(await screen.findByRole("list"));
+  expect(await screen.findByText("Na żywo")).toBeDefined();
+
+  stream.send(event("job", "progress"));
+  stream.send(event("ingest", "started", 1763700000));
+  stream.send(event("ingest", "done", 1763700018));
+  stream.send(event("understand", "started", 1763700018));
+  expect(
+    await screen.findByText("Analiza treści przez model: w toku."),
+  ).toBeDefined();
+  expect(steps.getByText("Zakończono w 18 s.")).toBeDefined();
+  expect(steps.getByText("(zakończony)")).toBeDefined();
+  expect(steps.getAllByText("(oczekuje)")).toHaveLength(3);
+
+  finish();
+  stream.send(event("understand", "done", 1763700100));
+  stream.send(event("job", "done"));
+  stream.close();
+  expect((await screen.findByLabelText("Wynik JSON")).textContent).toContain(
+    '"title": "Wniosek"',
+  );
+});
+
+test("błąd przetwarzania: krok z błędem i komunikat z przyczyną", async () => {
+  setToken(fakeToken());
+  const stream = sseStream();
+  const finish = mockJob(stream);
+  renderApp(`/zadania/${JOB_ID}`);
+  await screen.findByText("Na żywo");
+
+  stream.send(event("ingest", "started"));
+  stream.send(event("ingest", "failed", 1763700001));
+  finish({ status: "failed", error: "ValueError" });
+  stream.send(event("job", "failed"));
+  stream.close();
+
+  expect((await screen.findByRole("alert")).textContent).toContain(
+    "Serwer przerwał pracę (ValueError).",
+  );
+  expect(screen.getByText("(błąd)")).toBeDefined();
+  expect(screen.getByText("Przerwano po 1 s.")).toBeDefined();
+  expect(screen.getByRole("link", { name: "Wgraj inny plik" })).toBeDefined();
+});
+
+test("zerwanie SSE: komunikat o utracie połączenia i polling do wyniku", async () => {
+  setToken(fakeToken());
+  const stream = sseStream();
+  const finish = mockJob(stream);
+  renderApp(`/zadania/${JOB_ID}`);
+  await screen.findByText("Na żywo");
+
+  stream.send(event("ingest", "started"));
+  stream.close(); // no final event
+  expect(await screen.findByText("Utracono połączenie na żywo")).toBeDefined();
+  expect(screen.getByText("Odczyt pliku: w toku.")).toBeDefined();
+
+  finish(); // the next poll (2 s) sees the result
+  expect(
+    (await screen.findByLabelText("Wynik JSON", {}, { timeout: 4000 }))
+      .textContent,
+  ).toContain('"title": "Wniosek"');
+});
+
+test("401 ze strumienia SSE wraca do logowania", async () => {
+  setToken(fakeToken());
+  let unauthorized = false;
+  server.use(
+    http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
+      unauthorized
+        ? HttpResponse.json({ detail: "x" }, { status: 401 })
+        : HttpResponse.json({ status: "pending" }),
+    ),
+    http.get(`*/api/v1/jobs/${JOB_ID}/events`, () => {
+      unauthorized = true; // token expired between the two requests
+      return HttpResponse.json({ detail: "x" }, { status: 401 });
+    }),
+  );
+  renderApp(`/zadania/${JOB_ID}`);
+  expect(
+    await screen.findByRole("heading", { name: "Zaloguj się" }),
+  ).toBeDefined();
 });
