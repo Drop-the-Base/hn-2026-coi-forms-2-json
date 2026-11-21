@@ -51,3 +51,7 @@ class JobQueue(ABC):
 
     @abstractmethod
     async def publish_progress(self, event: ProgressEvent) -> None: ...
+
+    @abstractmethod
+    async def consume_progress(self, handler: Callable[[ProgressEvent], Awaitable[None]]) -> None:
+        """Registers the handler for progress of all jobs and returns."""

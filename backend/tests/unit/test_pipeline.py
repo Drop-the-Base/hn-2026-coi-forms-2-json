@@ -54,3 +54,12 @@ def test_failing_step_stops_pipeline_and_is_reported() -> None:
         Pipeline([Append("a"), Boom(), Append("c")], observer).run("")
 
     assert observer.events == ["started a", "done a", "started boom", "failed boom"]
+
+
+def test_every_observer_sees_the_failure() -> None:
+    first, second = FakeObserver(), FakeObserver()
+
+    with pytest.raises(ValueError):
+        Pipeline([Boom()], first, second).run("")
+
+    assert first.events == second.events == ["started boom", "failed boom"]

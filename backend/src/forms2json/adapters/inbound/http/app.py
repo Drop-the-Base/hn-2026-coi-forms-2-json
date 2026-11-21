@@ -1,14 +1,19 @@
 """HTTP api (FR-T3). The use cases live in app.state, set by the lifespan from bootstrap.py."""
 
+import asyncio
+from collections.abc import AsyncIterable, AsyncIterator
 from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, FastAPI, Request, UploadFile, status
 from fastapi.responses import JSONResponse
+from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel
 from starlette.types import Lifespan
 
 from forms2json.adapters.inbound.http.auth import require_jwt
+from forms2json.adapters.inbound.http.progress_hub import ProgressHub, job_finished
+from forms2json.application.ports.job_queue import JobResult, ProgressEvent
 from forms2json.application.ports.result_store import UnknownJob
 from forms2json.application.use_cases.get_job_result import GetJobResult
 from forms2json.application.use_cases.submit_job import SubmitJob
@@ -81,6 +86,34 @@ async def get_job(
     if result.error is not None:
         return JobStatus(status="failed", error=result.error)
     return JobStatus(status="done", result=result.result)
+
+
+type _Listener = tuple[JobResult | None, asyncio.Queue[ProgressEvent]]
+
+
+async def _listen(job_id: UUID, request: Request) -> AsyncIterator[_Listener]:
+    hub = cast(ProgressHub, request.app.state.progress_hub)
+    # Listen before reading the state, so an event arriving in between is not lost.
+    with hub.listen(job_id) as events:
+        # Raises UnknownJob before the stream starts, so the client gets a plain 404.
+        yield _get_job_result(request).execute(job_id), events
+
+
+@router.get("/jobs/{job_id}/events", response_class=EventSourceResponse)
+async def job_events(
+    job_id: UUID, listener: Annotated[_Listener, Depends(_listen)]
+) -> AsyncIterable[ServerSentEvent]:
+    """Live progress (FR-T5, ADR-0014); FastAPI adds a keep-alive ping every 15 s."""
+    result, events = listener
+    if result is not None:
+        yield ServerSentEvent(event="progress", data=job_finished(result))
+        return
+    yield ServerSentEvent(event="progress", data=ProgressEvent(job_id, "job", "progress"))
+    while True:
+        event = await events.get()
+        yield ServerSentEvent(event="progress", data=event)
+        if event.step == "job":
+            return
 
 
 @router.get("/config")
