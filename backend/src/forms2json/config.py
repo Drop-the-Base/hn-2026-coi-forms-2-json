@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://llm-runtime:11434/v1"  # Ollama in compose (ADR-0007)
     llm_model: str = "qwen3:1.7b"  # placeholder until the eval-based model ADR
     llm_timeout_seconds: float = Field(default=120.0, gt=0)
+    # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
+    llm_max_input_chars: int = Field(default=30_000, gt=0)
 
     # FR-10. No default secret: the API must not start with a guessable key (NFR-07).
     # 32 bytes is the HS256 minimum from RFC 7518 §3.2.
