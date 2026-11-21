@@ -82,7 +82,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_RESPONSE_FORMAT` | `json_schema` | `json_schema` | `json_schema` (strict) albo `json_object` (schemat w prompcie) dla dostawców bez strict structured output |
 | `LLM_TIMEOUT_SECONDS` | `120` | `120` | timeout jednego wywołania LLM |
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
-| `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
+| `LLM_MAX_OUTPUT_TOKENS` | `32768` | `32768` | maks. długość odpowiedzi modelu, u modeli rozumujących razem z tokenami myślenia; ucięta odpowiedź = błąd bez ponawiania (#103). Lokalna Ollama z oknem 16384: ustaw `4096` |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
 | `OCR_LANG` | `pol` | `pol` | język Tesseracta dla obrazów i skanów PDF ([ADR-0029](docs/adr/0029-ocr-tesseract.md)) |
 | `COST_PER_1M_INPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wejścia ([Koszt](#koszt)) |
