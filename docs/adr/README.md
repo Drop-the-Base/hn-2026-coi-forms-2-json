@@ -42,6 +42,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0016](0016-router-react-router.md) | Routing we frontendzie: React Router | Zaakceptowana |
 | [0017](0017-odczyt-arkuszy-openpyxl.md) | Odczyt arkuszy: openpyxl dla XLSX, biblioteka standardowa dla ODS | Proponowana |
 | [0018](0018-klient-llm-openai-sdk.md) | Klient LLM: SDK `openai` z własną pętlą ponowień | Proponowana |
+| [0020](0020-pydantic-w-domenie.md) | Pydantic w domenie: tylko dla modeli-kontraktów z LLM (`FormDraft`) | Zaakceptowana |
 
 ## Szablon
 

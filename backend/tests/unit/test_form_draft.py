@@ -48,63 +48,26 @@ DRAFT: JsonObject = {
 }
 
 
-def _validate(schema: JsonValue, value: JsonValue) -> None:
-    """Checks the JSON Schema subset FORM_DRAFT_SCHEMA uses; there is no jsonschema dependency."""
-    assert isinstance(schema, dict)
-    types = schema["type"] if isinstance(schema["type"], list) else [schema["type"]]
-    python_types = {
-        "object": dict,
-        "array": list,
-        "string": str,
-        "boolean": bool,
-        "number": int | float,
-        "null": type(None),
-    }
-    assert any(isinstance(value, python_types[str(t)]) for t in types), (schema, value)
-    if "enum" in schema:
-        assert isinstance(schema["enum"], list) and value in schema["enum"]
-    if isinstance(value, int | float) and "minimum" in schema:
-        assert schema["minimum"] <= value <= schema["maximum"]  # type: ignore[operator]
-    if isinstance(value, list):
-        for item in value:
-            _validate(schema["items"], item)
-    if isinstance(value, dict):
-        properties = schema["properties"]
-        assert isinstance(properties, dict)
-        assert set(value) == set(properties)
-        for key, item in value.items():
-            _validate(properties[key], item)
-
-
 def _object_schemas(schema: JsonObject) -> list[JsonObject]:
-    if schema["type"] == "array":
-        return _object_schemas(cast(JsonObject, schema["items"]))
-    if schema["type"] != "object":
-        return []
-    properties = cast(JsonObject, schema["properties"])
-    return [schema] + [o for p in properties.values() for o in _object_schemas(cast(JsonObject, p))]
+    defs = cast(JsonObject, schema["$defs"])
+    objects = [schema, *(cast(JsonObject, d) for d in defs.values())]
+    return [o for o in objects if o["type"] == "object"]
 
 
 def test_schema_is_strict_json_schema() -> None:
     objects = _object_schemas(FORM_DRAFT_SCHEMA)
 
     json.dumps(FORM_DRAFT_SCHEMA)
-    assert FORM_DRAFT_SCHEMA["$schema"] == "https://json-schema.org/draft/2020-12/schema"
-    assert len(objects) == 9
+    assert len(objects) == 8  # FormDraft + 7 nested models (title and addressee share Text)
     for obj in objects:
         assert obj["additionalProperties"] is False
-        assert obj["required"] == list(obj["properties"])  # type: ignore[arg-type]
+        properties = cast(dict[str, JsonObject], obj["properties"])
+        assert obj["required"] == list(properties)
+        assert all("default" not in p for p in properties.values())
 
 
-def test_schema_accepts_sample_draft() -> None:
-    _validate(FORM_DRAFT_SCHEMA, DRAFT)
-
-
-def test_draft_round_trips_and_matches_schema() -> None:
-    result = FormDraft.from_dict(DRAFT).to_dict()
-
-    assert result == DRAFT
-    _validate(FORM_DRAFT_SCHEMA, json.loads(json.dumps(result)))
+def test_draft_round_trips() -> None:
+    assert FormDraft.from_dict(DRAFT).model_dump(mode="json") == DRAFT
 
 
 def _broken(path: list[str | int], value: JsonValue) -> JsonObject:
@@ -119,13 +82,14 @@ def _broken(path: list[str | int], value: JsonValue) -> JsonObject:
 @pytest.mark.parametrize(
     ("path", "value", "message"),
     [
-        (["title"], "Wniosek", "object"),
-        (["fields", 0, "confidence"], 1.5, "between 0 and 1"),
-        (["fields", 0, "confidence"], True, "number"),
-        (["fields", 0, "type"], "WYSIWYG", "unknown value"),
-        (["applicants", 0, "kind"], "ALIEN", "unknown value"),
-        (["fields", 0, "options"], "gotówka", "list"),
-        (["fees", 0, "amount"], "17 zł", "number"),
+        (["title"], "Wniosek", "dictionary"),
+        (["title", "extra"], "x", "Extra inputs"),
+        (["fields", 0, "confidence"], 1.5, "less than or equal to 1"),
+        (["fields", 0, "confidence"], True, "valid number"),
+        (["fields", 0, "type"], "WYSIWYG", "Input should be 'TEXT_FIELD'"),
+        (["applicants", 0, "kind"], "ALIEN", "Input should be 'SELF'"),
+        (["fields", 0, "options"], "gotówka", "valid list"),
+        (["fees", 0, "amount"], "17", "valid number"),
         (["fields", 1, "key"], "sposob_zwrotu", "unique"),
         (["conditions", 0, "source"], "brak_pola", "unknown field"),
     ],
