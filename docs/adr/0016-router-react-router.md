@@ -1,4 +1,4 @@
-# ADR-0015: Routing we frontendzie: React Router
+# ADR-0016: Routing we frontendzie: React Router
 
 - Status: Proponowana
 - Data: 2026-11-21

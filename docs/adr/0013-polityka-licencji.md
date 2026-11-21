@@ -36,6 +36,7 @@ Przed dodaniem zależności sprawdzamy licencję na PyPI/npm **i** w repozytoriu
 |---|---|---|
 | RabbitMQ | MPL-2.0 | niezmodyfikowany oficjalny obraz |
 | LibreOffice (konwersja `.doc`) | MPL-2.0 | niezmodyfikowany program wywoływany jako proces |
+| pathspec (zależność mypy) | MPL-2.0 | niezmodyfikowana biblioteka, tylko narzędzia dev ([ADR-0015](0015-narzedzia-backendu.md)) |
 
 ## Konsekwencje
 
