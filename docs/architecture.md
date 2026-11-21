@@ -195,5 +195,5 @@ Poprawki urzędnika z panelu (FR-T2) eksportujemy jako pliki JSON. Można je dod
 | # | Kwestia | Status |
 |---|---|---|
 | 1 | Wybór modelu (Bielik vs Qwen, rozmiar) i OCR | do ADR po pierwszych evalach |
-| 2 | Formularz 9 (3 w 1): SHOW czy strony alternatywne w `flow` | pytanie do mentorów (P-5) |
-| 3 | Niespójności danych COI (K-05, K-06, K-07, K-09) | pytania P-1..P-4 w [requirements.md §3.1](requirements.md#31-pytania-do-mentorów-coi) |
+| 2 | Formularz 9 (3 w 1): SHOW czy strony alternatywne w `flow` | zamknięte: K-13, jeden JSON z `SHOW` |
+| 3 | Niespójności danych COI (K-05, K-06, K-07, K-09) | zamknięte, decyzje w [requirements.md §3](requirements.md#3-konflikty-i-niejasności-w-wymaganiach) |

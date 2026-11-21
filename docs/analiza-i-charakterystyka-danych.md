@@ -7,7 +7,7 @@ Stan na 2026-11-21. Źródła: `data/`, `docs/COI - Pełna treść zadania konku
 1. **To nie jest OCR „pole po polu".** Wzorcowe JSON-y to papierowy formularz *przeprojektowany* według dokumentu „Standardy i dobre praktyki". 85–93% elementów każdego wzorca (wzorzec 5: 63 z 73, wzorzec 1: 64 z 69) to te same gotowe sekcje (urząd, podmiot wniosku, Twoje dane, adres, pełnomocnictwo, opłata skarbowa, kontakt, zgoda, strona końcowa).
 2. **Unikalna część to tylko „przedmiot wniosku"** (zwykle strona 2): 4 pola we wzorcu nr 1, 7 pól we wzorcu nr 5. To jest właściwa robota dla AI.
 3. **Większość JSON-a da się wygenerować deterministycznie**: layout (`x/y/rows/cols`), UUID-y, `flow`, zapytania JSONata i dane inicjalne mają stały, powtarzalny wzór.
-4. **Wzorce są niespójne z dokumentacją** (walidacje zawsze puste, inne nazwy słowników, nieudokumentowane klucze). Przed generowaniem trzeba ustalić, co jest źródłem prawdy (lista pytań do mentorów na końcu).
+4. **Wzorce są niespójne z dokumentacją** (walidacje zawsze puste, inne nazwy słowników, nieudokumentowane klucze). Zespół ustalił, co jest źródłem prawdy (decyzje na końcu).
 5. **Ograniczenie techniczne**: brak zewnętrznych API LLM, więc model musi działać lokalnie w Dockerze. To wpływa na koszt, czas i jakość ekstrakcji.
 
 ## 1. Inwentarz danych
@@ -146,7 +146,7 @@ Elementy papieru, które **usuwamy lub zamieniamy** (wynika ze Standardów i wzo
 | 4 | Klucze spoza schematu: `multiLevelTree`, `searchEnabled` (opisany w regułach, brak w schemacie), `defaultValue` jako tablica (`["Polska"]`, `[]`), choć schemat mówi string | wzorce vs schemat | schemat **tego nie wykryje**: przez literówkę `repetingSectionGrid` nie sprawdza żadnego pola, więc wzorce przechodzą walidację z 0 błędów (sprawdzone `jsonschema`). Własny walidator musi schodzić w pola sam (K-09) |
 | 5 | Pola adresu z `EXTERNAL_SYSTEM` mają `readOnly: false`. „Dane inicjalne": specyfikacja pola z rejestru „powinna zawierać wskazanie, że pole jest readOnly" | wzorce | decyzja: K-10 |
 | 6 | Twoje dane: wzorzec 1 bierze `MLPZ.name`, wzorzec 5 `PESEL.name`. Standardy mówią MLPZ | wzorce | decyzja: K-11, bierzemy MLPZ |
-| 7 | FINISH: reguły mówią „wyłącznie INFO_SECTION", a wzorce mają SECTION + TEXT_BLOCK. Na najwyższym poziomie stron są tylko SECTION (nawet CONSENT_SECTION leży w sekcji), więc różnica to tylko TEXT_BLOCK zamiast INFO_SECTION | reguły vs wzorce | co przejdzie import? (K-07, P-3) |
+| 7 | FINISH: reguły mówią „wyłącznie INFO_SECTION", a wzorce mają SECTION + TEXT_BLOCK. Na najwyższym poziomie stron są tylko SECTION (nawet CONSENT_SECTION leży w sekcji), więc różnica to tylko TEXT_BLOCK zamiast INFO_SECTION | reguły vs wzorce | decyzja: K-07, `TEXT_BLOCK` jak we wzorcach |
 | 8 | Wzorce pomijają pola ze Standardów: PESEL w Dane innej osoby, REGON/KRS w Dane podmiotu (nr 5), checkbox „Brak kodu pocztowego" | wzorce | brak klucza JSON na checkbox „Brak …" |
 | 9 | Standardy każą podać limity plików (rozmiar, formaty, liczba), ale w JSON-ie nie ma na nie klucza | Standardy vs schemat | pominąć albo dać do `description` |
 | 10 | Standardy: Ulica ma walidację „Kod pocztowy" | Standardy | błąd kopiuj-wklej, ignorujemy |
@@ -187,12 +187,16 @@ REST API przyjmuje 1 plik (PDF/DOC/DOCX/ODS/XLSX/JPG/PNG) i zwraca JSON konfigur
 | V. Wizualizacja JSON | wizualizacje DOCX ze screenami jako referencja wyglądu |
 | VI. Walidacje | lista 9 walidatorów, ale brak przykładu formatu (patrz problem nr 1) |
 
-## 7. Pytania do mentorów COI (blokujące)
+## 7. Decyzje zespołu
 
-1. Jaki jest format wpisu w `validation`? Stringi `["REQUIRED","PESEL"]`? Wzorce mają `[]` albo `{}`.
-2. `dictionaryName`: używać `TERYT_4G_DOWODOWY` / `Kraje` ze wzorców czy nazw z dokumentu Słowniki?
-3. Czy strona FINISH może mieć SECTION + TEXT_BLOCK (jak we wzorcach), czy tylko INFO_SECTION (jak w regułach)?
-4. Czy pola z `EXTERNAL_SYSTEM` mają być `readOnly: true` zawsze, także adres?
-5. Formularz 7: idziemy za tytułem (psy agresywne) czy za treścią (charty)?
-6. Formularz 9: jeden JSON z wyborem rodzaju wniosku, czy strony alternatywne w `flow`?
-7. Jak będzie oceniany wynikowy JSON: porównanie z ukrytym wzorcem (wtedy liczą się nazwy techName i kolejność) czy ocena ekspercka?
+Nie pytamy mentorów COI. Każdą niejasność rozstrzyga zespół, pełna treść decyzji jest w [requirements.md §3](requirements.md#3-konflikty-i-niejasności-w-wymaganiach).
+
+| Niejasność | Decyzja |
+|---|---|
+| Format wpisu w `validation` | K-05: `["REQUIRED", "PESEL"]`, pole opcjonalne `[]` |
+| `dictionaryName` | K-06: `TERYT_4G_DOWODOWY` i `Kraje`, jak we wzorcach |
+| Strona FINISH | K-07: `SECTION` z `TEXT_BLOCK`, jak we wzorcach |
+| `readOnly` dla pól z `EXTERNAL_SYSTEM` | K-10: tylko imię, nazwisko, PESEL |
+| Formularz 7: tytuł kontra treść | K-12: pola z treści, tytuł bez zmian |
+| Formularz 9: SHOW kontra strony alternatywne | K-13: jeden JSON, `SHOW`, liniowy `flow` |
+| Sposób oceny wyniku | K-14: zakładamy ocenę ekspercką, `techName` ze Standardów |
