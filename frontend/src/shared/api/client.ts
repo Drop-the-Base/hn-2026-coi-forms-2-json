@@ -16,21 +16,25 @@ export class ApiError extends Error {
   }
 }
 
+/** fetch to the API with the session token. Rejects only when there is no response. */
+function authFetch(path: string, init: RequestInit = {}) {
+  const headers = new Headers(init.headers);
+  const token = getToken();
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  // Absolute URL because fetch in Node (tests) rejects relative ones; in the browser it is the same origin.
+  return fetch(new URL(`/api/v1${path}`, location.origin), {
+    ...init,
+    headers,
+  });
+}
+
 export async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  const headers = new Headers(init.headers);
-  const token = getToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
   let response: Response;
   try {
-    // Absolute URL because fetch in Node (tests) rejects relative ones; in the browser it is the same origin.
-    response = await fetch(new URL(`/api/v1${path}`, location.origin), {
-      ...init,
-      headers,
-    });
+    response = await authFetch(path, init);
   } catch {
     throw new ApiError(0, "Brak połączenia z serwerem. Spróbuj ponownie.");
   }
@@ -51,6 +55,10 @@ export const getConfig = () => apiFetch<ApiConfig>("/config");
 
 export const getJob = (jobId: string) =>
   apiFetch<JobStatus>(`/jobs/${encodeURIComponent(jobId)}`);
+
+/** Raw SSE response (ADR-0014): EventSource cannot send the Authorization header. */
+export const getJobEvents = (jobId: string, signal: AbortSignal) =>
+  authFetch(`/jobs/${encodeURIComponent(jobId)}/events`, { signal });
 
 export function submitJob(file: File) {
   const body = new FormData();

@@ -1,12 +1,15 @@
 import { Link } from "react-router";
 import { formatTime } from "../../shared/api/token";
-import { useJobStatus } from "./api";
+import { currentStep, useJobEvents } from "./api";
 import { JobStatusText } from "./JobStatusText";
 import type { SessionJob } from "./useSessionJobs";
 import "./JobList.css";
 
-function JobRow({ job }: { job: SessionJob }) {
-  const status = useJobStatus(job.id);
+// shortcut: SSE only for the newest rows, because HTTP/1.1 allows ~6 connections per origin and the rest poll; lift when nginx serves HTTP/2.
+const LIVE_ROWS = 4;
+
+function JobRow({ job, live }: { job: SessionJob; live: boolean }) {
+  const { status, steps } = useJobEvents(job.id, live);
   return (
     <tr>
       <td>
@@ -21,7 +24,7 @@ function JobRow({ job }: { job: SessionJob }) {
       {/* aria-live announces only state changes, with the file name for context */}
       <td aria-live="polite" aria-atomic="true">
         <span className="visually-hidden">{job.fileName}: </span>
-        <JobStatusText status={status} />
+        <JobStatusText status={status} step={currentStep(steps)?.label} />
       </td>
       <td className="row-actions">
         {status.data?.status === "done" && (
@@ -69,8 +72,8 @@ export function JobList({ jobs }: { jobs: SessionJob[] }) {
               </tr>
             </thead>
             <tbody>
-              {jobs.map((job) => (
-                <JobRow key={job.id} job={job} />
+              {jobs.map((job, index) => (
+                <JobRow key={job.id} job={job} live={index < LIVE_ROWS} />
               ))}
             </tbody>
           </table>
