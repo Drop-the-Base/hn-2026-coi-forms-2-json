@@ -91,7 +91,7 @@ def test_process_job_reports_finished_job_to_its_observer() -> None:
     files, queue = FakeFileStore(), FakeJobQueue()
     job = Job(uuid.uuid4(), "application/pdf")  # no file saved, so the job fails
     use_case = ProcessJob(
-        files, lambda progress: Pipeline([Describe()], progress), queue, JobMetrics("m", 0, 0)
+        files, lambda progress: Pipeline([Describe()], progress), queue, [JobMetrics("m", 0, 0)]
     )
 
     asyncio.run(use_case.execute(job))

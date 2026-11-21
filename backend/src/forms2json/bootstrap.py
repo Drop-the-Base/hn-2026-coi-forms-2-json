@@ -24,7 +24,11 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from forms2json.adapters.inbound.http.app import create_app
 from forms2json.adapters.inbound.http.progress_hub import ProgressHub, job_finished
 from forms2json.adapters.outbound.llm.openai_compatible_client import OpenAiCompatibleLlmClient
-from forms2json.adapters.outbound.observability.log_observer import LogObserver
+from forms2json.adapters.outbound.observability.log_observer import (
+    JobLog,
+    LogObserver,
+    configure_logging,
+)
 from forms2json.adapters.outbound.observability.metrics import JobMetrics, MetricsObserver
 from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
@@ -34,6 +38,7 @@ from forms2json.adapters.outbound.readers.pdf_reader import PdfReader
 from forms2json.adapters.outbound.readers.xlsx_reader import XlsxReader
 from forms2json.adapters.outbound.storage.in_memory_result_store import InMemoryResultStore
 from forms2json.adapters.outbound.storage.tmpfs_file_store import TmpfsFileStore
+from forms2json.application.log_context import job_id_var
 from forms2json.application.pipeline.compose_step import ComposeStep
 from forms2json.application.pipeline.ingest_step import IngestStep
 from forms2json.application.pipeline.pipeline import Pipeline
@@ -71,6 +76,7 @@ def configure_telemetry(service_name: str) -> None:
 
 
 def create_api() -> FastAPI:
+    configure_logging("api")
     configure_telemetry("api")
     app = create_app(lifespan=_api_lifespan)
     FastAPIInstrumentor.instrument_app(app)
@@ -87,6 +93,8 @@ async def _api_lifespan(app: FastAPI) -> AsyncIterator[None]:
     hub = ProgressHub()
 
     async def store_result(result: JobResult) -> None:
+        job_id_var.set(str(result.job_id))
+        logger.info("Result received: %s", "failed" if result.error else "done")
         results.complete(result)
         hub.publish(job_finished(result))  # closes SSE streams only once the result is readable
 
@@ -150,6 +158,7 @@ def new_llm_client(settings: Settings) -> LlmClient:
 
 
 async def build_worker(settings: Settings) -> tuple[RabbitMqJobQueue, ProcessJob]:
+    configure_logging("worker")
     configure_telemetry("worker")
     queue = await RabbitMqJobQueue.connect(settings.rabbitmq_url)
     files = TmpfsFileStore(settings.file_store_dir, settings.file_ttl_seconds)
@@ -157,4 +166,4 @@ async def build_worker(settings: Settings) -> tuple[RabbitMqJobQueue, ProcessJob
     job_metrics = JobMetrics(
         settings.llm_model, settings.cost_per_1k_tokens, settings.cost_per_gpu_second
     )
-    return queue, ProcessJob(files, pipelines, queue, job_metrics)
+    return queue, ProcessJob(files, pipelines, queue, [job_metrics, JobLog()])
