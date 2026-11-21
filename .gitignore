@@ -1,3 +1,5 @@
 .DS_Store
 .env
 .claude/worktrees/
+# Lokalne zmienne Vite (np. VITE_DEV_TOKEN)
+*.local
