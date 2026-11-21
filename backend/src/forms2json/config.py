@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     llm_response_format: Literal["json_schema", "json_object"] = "json_schema"
     # soffice can hang on a broken .doc; the worker kills it after this (#24).
     doc_conversion_timeout_seconds: float = Field(default=60.0, gt=0)
+    ocr_lang: str = "pol"  # Tesseract language pack installed in the worker image (ADR-0029)
     rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
     # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
     llm_max_input_chars: int = Field(default=30_000, gt=0)

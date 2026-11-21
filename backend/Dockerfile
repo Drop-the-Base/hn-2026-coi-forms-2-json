@@ -23,10 +23,11 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"]
 CMD ["uvicorn", "forms2json.bootstrap:create_api", "--factory", "--host", "0.0.0.0", "--port", "8000"]
 
-# Worker on Debian slim: LibreOffice converts .doc to .docx (ADR-0012, ADR-0013).
+# Worker on Debian slim: LibreOffice converts .doc to .docx, Tesseract reads scans and images
+# (ADR-0012, ADR-0013, ADR-0029).
 FROM python:3.14.10-slim-trixie@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f AS worker
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libreoffice-writer-nogui \
+    && apt-get install -y --no-install-recommends libreoffice-writer-nogui tesseract-ocr tesseract-ocr-pol \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --create-home --uid 10001 app
 COPY --from=build /app/.venv /app/.venv
