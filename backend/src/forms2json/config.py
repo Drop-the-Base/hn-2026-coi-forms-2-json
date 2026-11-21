@@ -21,8 +21,14 @@ class Settings(BaseSettings):
     rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
     # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
     llm_max_input_chars: int = Field(default=30_000, gt=0)
+    # A looping model stops here instead of running until the timeout. Input + prompt + this
+    # must fit the runtime context (Ollama: OLLAMA_CONTEXT_LENGTH, default 4096 is too small).
+    llm_max_output_tokens: int = Field(default=4096, gt=0)
     # FR-T1: below this an element is not "high" in frontend/DESIGN.md and needs a human look.
     confidence_review_threshold: float = Field(default=0.85, ge=0, le=1)
+    # NFR-13: job cost in made-up units to compare models; 0 = not counted.
+    cost_per_1k_tokens: float = Field(default=0.0, ge=0)
+    cost_per_gpu_second: float = Field(default=0.0, ge=0)
 
     # FR-10. No default secret: the API must not start with a guessable key (NFR-07).
     # 32 bytes is the HS256 minimum from RFC 7518 §3.2.

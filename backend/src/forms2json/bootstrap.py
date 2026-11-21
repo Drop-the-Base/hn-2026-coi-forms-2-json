@@ -11,9 +11,12 @@ from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from opentelemetry import trace
+from opentelemetry import metrics, trace
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -22,6 +25,7 @@ from forms2json.adapters.inbound.http.app import create_app
 from forms2json.adapters.inbound.http.progress_hub import ProgressHub, job_finished
 from forms2json.adapters.outbound.llm.openai_compatible_client import OpenAiCompatibleLlmClient
 from forms2json.adapters.outbound.observability.log_observer import LogObserver
+from forms2json.adapters.outbound.observability.metrics import JobMetrics, MetricsObserver
 from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
 from forms2json.adapters.outbound.readers.docx_reader import DocxReader
@@ -50,21 +54,24 @@ FILE_CLEANUP_INTERVAL_SECONDS = 60
 logger = logging.getLogger(__name__)
 
 
-def configure_tracing(service_name: str) -> None:
-    """Exports spans over OTLP only when OTEL_EXPORTER_OTLP_ENDPOINT is set (ADR-0009).
+def configure_telemetry(service_name: str) -> None:
+    """Exports spans and metrics over OTLP only when OTEL_EXPORTER_OTLP_ENDPOINT is set (ADR-0009).
 
     Without it the OTel API stays a no-op and the app runs as before.
-    The exporter reads the standard OTEL_EXPORTER_OTLP_* variables itself.
+    The exporters read the standard OTEL_EXPORTER_OTLP_* variables themselves.
     """
     if not os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
         return
-    provider = TracerProvider(resource=Resource.create({SERVICE_NAME: service_name}))
-    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
-    trace.set_tracer_provider(provider)
+    resource = Resource.create({SERVICE_NAME: service_name})
+    tracer_provider = TracerProvider(resource=resource)
+    tracer_provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+    trace.set_tracer_provider(tracer_provider)
+    reader = PeriodicExportingMetricReader(OTLPMetricExporter())
+    metrics.set_meter_provider(MeterProvider(resource=resource, metric_readers=[reader]))
 
 
 def create_api() -> FastAPI:
-    configure_tracing("api")
+    configure_telemetry("api")
     app = create_app(lifespan=_api_lifespan)
     FastAPIInstrumentor.instrument_app(app)
     return app
@@ -114,7 +121,7 @@ async def _delete_expired_files_forever(files: FileStore) -> None:
 def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineObserver], Pipeline]:
     """Adapters are created once; steps per job, because Understand and Compose keep run state."""
     readers = [DocxReader(), XlsxReader(), OdsReader(), PdfReader()]
-    tracing, logs = TracingObserver(), LogObserver()
+    tracing, logs, step_metrics = TracingObserver(), LogObserver(), MetricsObserver()
 
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
         understand = UnderstandStep(llm, settings.llm_max_input_chars)
@@ -124,6 +131,7 @@ def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineOb
             [IngestStep(readers), understand, compose, ValidateStep(), report],
             tracing,
             logs,
+            step_metrics,
             progress,
         )
 
@@ -132,13 +140,19 @@ def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineOb
 
 def new_llm_client(settings: Settings) -> LlmClient:
     return OpenAiCompatibleLlmClient(
-        settings.llm_base_url, settings.llm_model, settings.llm_timeout_seconds
+        settings.llm_base_url,
+        settings.llm_model,
+        settings.llm_timeout_seconds,
+        settings.llm_max_output_tokens,
     )
 
 
 async def build_worker(settings: Settings) -> tuple[RabbitMqJobQueue, ProcessJob]:
-    configure_tracing("worker")
+    configure_telemetry("worker")
     queue = await RabbitMqJobQueue.connect(settings.rabbitmq_url)
     files = TmpfsFileStore(settings.file_store_dir, settings.file_ttl_seconds)
     pipelines = pipeline_factory(settings, new_llm_client(settings))
-    return queue, ProcessJob(files, pipelines, queue)
+    job_metrics = JobMetrics(
+        settings.llm_model, settings.cost_per_1k_tokens, settings.cost_per_gpu_second
+    )
+    return queue, ProcessJob(files, pipelines, queue, job_metrics)
