@@ -26,6 +26,14 @@ class Scores:
     type_accuracy: float
     condition_accuracy: float
 
+    @property
+    def section_f1(self) -> float:
+        return _f1(self.section_precision, self.section_recall)
+
+    @property
+    def field_f1(self) -> float:
+        return _f1(self.field_precision, self.field_recall)
+
 
 def score(predicted: FormDefinition, golden: FormDefinition) -> Scores:
     pred, gold = _elements(predicted), _elements(golden)
@@ -81,6 +89,11 @@ def _elements(form: FormDefinition) -> dict[str, Field]:
 def _states(field: Field) -> set[tuple[str, str]]:
     # Whitespace in JSONata carries no meaning; the references mix \r\n and spaces.
     return {(s.type, " ".join(s.query.split())) for s in field.states or []}
+
+
+def _f1(precision: float, recall: float) -> float:
+    total = precision + recall
+    return 2 * precision * recall / total if total else 0.0
 
 
 def _ratio(hits: int, total: int) -> float:

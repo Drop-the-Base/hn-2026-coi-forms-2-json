@@ -66,3 +66,9 @@ def test_rule_errors_count_violations_of_the_prediction() -> None:
 def test_markdown_table_has_a_row_per_case() -> None:
     table = to_markdown({"a": score(GOLDEN, GOLDEN)})
     assert table.splitlines()[-1] == "| a | 0 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |"
+
+
+def test_f1_is_the_harmonic_mean_and_zero_without_hits() -> None:
+    s = Scores(0, 1.0, 0.5, 0.0, 0.0, 1.0, 1.0)
+    assert s.section_f1 == 2 / 3
+    assert s.field_f1 == 0.0

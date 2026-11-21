@@ -8,6 +8,10 @@ const MESSAGES: Record<string, string> = {
     "Blankiet jest za długi do przetworzenia w całości. Podziel go na mniejsze pliki.",
   LlmCallFailed:
     "Model językowy nie odpowiedział poprawnie. Wgraj plik ponownie za kilka minut.",
+  LlmRequestTooLarge:
+    "Formularz jest za duży dla limitu dostawcy modelu językowego (np. darmowego planu). Podziel blankiet na mniejsze pliki albo użyj modelu z wyższym limitem.",
+  LlmRateLimited:
+    "Wyczerpano limit zapytań do modelu językowego. Odczekaj minutę i wgraj plik ponownie.",
   InvalidFormDraft:
     "Model zwrócił formularz, którego nie da się odczytać. Wgraj plik ponownie.",
   InvalidFormDefinition:

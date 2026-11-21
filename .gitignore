@@ -3,3 +3,5 @@
 .claude/worktrees/
 # Lokalne zmienne Vite (np. VITE_DEV_TOKEN)
 *.local
+# Przebiegi ewaluacji (run_eval.py)
+backend/tests/evals/runs/
