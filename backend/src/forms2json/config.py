@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://llm-runtime:11434/v1"  # Ollama in compose (ADR-0007)
     llm_model: str = "qwen3:1.7b"  # placeholder until the eval-based model ADR
     llm_timeout_seconds: float = Field(default=120.0, gt=0)
+    rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
     # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
     llm_max_input_chars: int = Field(default=30_000, gt=0)
 
