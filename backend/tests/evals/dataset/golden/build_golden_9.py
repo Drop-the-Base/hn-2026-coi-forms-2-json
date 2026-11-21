@@ -215,6 +215,13 @@ def build() -> str:
     def kind_is(value: str) -> str:
         return answer_is(value, SUBJECT_TAB, kind_section.field.tech_name, kind)
 
+    # compose names them imie_2 / nazwisko_2 (imie is taken by "Twoje dane"). Fails while
+    # clean_draft drops a bare "Imię"/"Nazwisko" in "Dane kandydata" (#121), so 9.json is not
+    # regenerated silently without the candidate's name.
+    candidate = _by_title(subject, "Dane kandydata")
+    _child(candidate, "Imię").tech_name = "imie_kandydata"
+    _child(candidate, "Nazwisko").tech_name = "nazwisko_kandydata"
+
     disciplines = _by_title(subject, "Dyscypliny sportowe")
     disciplines.field.states = [show(kind_is(SCHOLARSHIP))]
     pick = _child(disciplines, "Wybierz dyscypliny z listy")

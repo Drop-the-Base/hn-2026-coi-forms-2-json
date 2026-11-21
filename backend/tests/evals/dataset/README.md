@@ -50,7 +50,7 @@ Pliki generuje `golden/build_golden_6_7_8.py`. Uruchom z `backend/`: `uv run pyt
 Decyzje wspólne dla trzech formularzy:
 
 - **Kilka stron z przedmiotem wniosku** w formularzach 6 i 8, tematycznie (Standardy: grupuj pola w sekcjach, strony nazywaj według treści). Pola idą w kolejności dokumentu (K-14).
-- **Adres inny niż wnioskodawcy** (osoba odpowiedzialna, miejsce utrzymywania psów, współmałżonek, adres do korespondencji) to blok adresu ze Standardów (szablon `adres_zamieszkania`) z sufiksem w techName (`kraj_korespondencja`, `ulica_korespondencja_zagranica` …) i warunkami przepisanymi na nową sekcję i stronę.
+- **Adres inny niż wnioskodawcy** (osoba odpowiedzialna, miejsce utrzymywania psów, współmałżonek, adres do korespondencji) to blok adresu ze Standardów (szablon `adres_zamieszkania`) z sufiksem w techName (`kraj_korespondencja`, `ulica_korespondencja_zagranica` …) i warunkami przepisanymi na nową sekcję i stronę. Bez danych inicjalnych z MLPZ: rejestr zna tylko adres wnioskodawcy (tak jak adres innej osoby we wzorcach).
 - **Sekcja powtarzająca się** (`REPEATING_SECTION`) tam, gdzie papier zbiera te same dane wiele razy. Warunek pola w tym samym wierszu sekcji ma szablon z reguł technicznych: `...field.__userAnswer[$repeatingSectionIndex]['pole' in fieldTechName].answers`.
 - **Pola wyliczane** (m², sumy opłat): JSON nie ma typu „formuła”, więc są to pola NUMBER wypełniane przez użytkownika. Wzór jest w opisie pola, stawki też (stawka to stała, nie pole).
 - **Zgody.** Pierwsza pozycja to zawsze zgoda z linkiem do klauzuli informacyjnej z szablonu. Oświadczenia z papieru są kolejnymi pozycjami, a sekcja ma wtedy tytuł „Zgody i oświadczenia”. Pełna klauzula RODO, podpis, data i „wypełnia organ” są pominięte.
