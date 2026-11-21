@@ -1,7 +1,6 @@
 import { jsonLanguage } from "@codemirror/lang-json";
 import { elementPath, type FormJson } from "../form-preview";
 import { REVIEW_THRESHOLD } from "../../shared/confidence";
-import rawSchema from "./form-schema.json";
 
 type Tree = ReturnType<typeof jsonLanguage.parser.parse>;
 type SyntaxNode = Tree["topNode"];
@@ -77,6 +76,42 @@ export const isUncertain = (
 
 export const pathSegments = (path: string) => path.match(/[^.[\]]+/g) ?? [];
 
+/** The value at a JSON path ("tabs[0].questions[1].field"); undefined when it is gone. */
+export function getAt(data: unknown, path: string): unknown {
+  let node = data;
+  for (const segment of pathSegments(path))
+    node = (node as Record<string, unknown> | null | undefined)?.[segment];
+  return node;
+}
+
+/** A copy of `data` with `value` at an existing JSON path. */
+export function setAt<T>(data: T, path: string, value: unknown): T {
+  const copy = structuredClone(data);
+  const segments = pathSegments(path);
+  const last = segments.pop();
+  const parent = getAt(copy, segments.join(".")) as Record<string, unknown>;
+  if (last !== undefined) parent[last] = value;
+  return copy;
+}
+
+/** Field types seen in the reference forms (data/, wzorce 1–9), with the words a clerk uses. */
+export const FIELD_TYPES: Record<string, string> = {
+  TEXT_FIELD: "Pole tekstowe",
+  TEXTAREA: "Pole tekstowe wielowierszowe",
+  NUMBER: "Liczba",
+  DATEPICKER: "Data",
+  SELECT: "Lista rozwijana",
+  RADIO: "Jednokrotny wybór",
+  CHECKBOX: "Pola wyboru",
+  FILE_UPLOADER: "Załącznik",
+  SECTION: "Sekcja",
+  REPEATING_SECTION: "Sekcja powtarzalna",
+  TEXT_BLOCK: "Tekst informacyjny",
+  CONSENT_SECTION: "Zgody",
+};
+
+export const fieldTypeLabel = (type: string) => FIELD_TYPES[type] ?? type;
+
 /** "Informacje o budynku, Lokalizacja budynku, Miejscowość": titles of the page and fields on the path. */
 export function describePath(form: unknown, path: string): string {
   const titles: string[] = [];
@@ -121,19 +156,20 @@ export function locate(
 }
 
 // The official schema uses only type/properties/items, like the backend's check (standards.py), so no library.
-interface Schema {
+export interface FormSchema {
   type?: string;
-  properties?: Record<string, Schema>;
-  items?: Schema;
+  properties?: Record<string, FormSchema>;
+  items?: FormSchema;
 }
 
-// K-09: the schema says "repetingSectionGrid"; we generate "repeatingSectionGrid", as the backend does.
-const SCHEMA: Schema = JSON.parse(
-  JSON.stringify(rawSchema).replace(
-    '"repetingSectionGrid"',
-    '"repeatingSectionGrid"',
-  ),
-);
+/** K-09: the schema says "repetingSectionGrid"; we generate "repeatingSectionGrid", as the backend does. */
+export const fixSchemaTypo = (schema: unknown): FormSchema =>
+  JSON.parse(
+    JSON.stringify(schema).replace(
+      '"repetingSectionGrid"',
+      '"repeatingSectionGrid"',
+    ),
+  );
 
 const TYPE_NAMES: Record<string, string> = {
   object: "obiekt",
@@ -152,7 +188,7 @@ const hasType = (value: unknown, type: string) =>
 
 export function schemaIssues(
   value: unknown,
-  schema: Schema = SCHEMA,
+  schema: FormSchema,
   path = "",
 ): { path: string; message: string }[] {
   if (schema.type && !hasType(value, schema.type))
@@ -171,9 +207,10 @@ export function schemaIssues(
           ...schemaIssues(record[key], sub, path ? `${path}.${key}` : key),
         );
     }
-  if (schema.items && Array.isArray(value))
+  const { items } = schema;
+  if (items && Array.isArray(value))
     value.forEach((item, i) =>
-      issues.push(...schemaIssues(item, schema.items, `${path}[${i}]`)),
+      issues.push(...schemaIssues(item, items, `${path}[${i}]`)),
     );
   return issues;
 }
@@ -185,7 +222,7 @@ export interface JsonCheck {
 }
 
 /** Syntax and schema check of the editor text, with line numbers for the messages. */
-export function checkJson(text: string): JsonCheck {
+export function checkJson(text: string, schema: FormSchema): JsonCheck {
   const tree = jsonLanguage.parser.parse(text);
   const lineAt = (pos: number) => text.slice(0, pos).split("\n").length;
   let data: unknown;
@@ -202,7 +239,7 @@ export function checkJson(text: string): JsonCheck {
     return { syntaxError: { line: lineAt(from), from }, schemaErrors: [] };
   }
   const read = (from: number, to: number) => text.slice(from, to);
-  const schemaErrors = schemaIssues(data).map((issue) => {
+  const schemaErrors = schemaIssues(data, schema).map((issue) => {
     const from = locate(tree, read, issue.path)?.from ?? 0;
     return { ...issue, from, line: lineAt(from) };
   });

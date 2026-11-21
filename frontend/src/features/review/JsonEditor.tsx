@@ -22,6 +22,8 @@ import { locate } from "./review";
 
 export interface JsonEditorHandle {
   text: () => string;
+  /** Replaces the whole text as one undoable change (edits from the field inspector). */
+  replace: (text: string) => void;
   format: () => void;
   /** Moves the cursor to the element at the JSON path, highlights its lines and focuses the editor. */
   reveal: (path: string) => boolean;
@@ -215,6 +217,10 @@ export function JsonEditor({
     };
     return {
       text: () => view().state.doc.toString(),
+      replace(insert) {
+        const v = view();
+        v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert } });
+      },
       format() {
         const v = view();
         try {

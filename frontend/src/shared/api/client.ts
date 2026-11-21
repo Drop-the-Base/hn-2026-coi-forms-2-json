@@ -28,18 +28,16 @@ function authFetch(path: string, init: RequestInit = {}) {
   });
 }
 
-export async function apiFetch<T>(
-  path: string,
-  init: RequestInit = {},
-): Promise<T> {
+/** The successful response; anything else becomes an ApiError with the server's detail. */
+async function okResponse(path: string, init: RequestInit) {
   let response: Response;
   try {
     response = await authFetch(path, init);
   } catch {
     throw new ApiError(0, "Brak połączenia z serwerem. Spróbuj ponownie.");
   }
-  const body: unknown = await response.json().catch(() => null);
   if (!response.ok) {
+    const body: unknown = await response.json().catch(() => null);
     const detail = (body as { detail?: unknown } | null)?.detail;
     throw new ApiError(
       response.status,
@@ -48,10 +46,22 @@ export async function apiFetch<T>(
         : `Serwer zwrócił błąd ${response.status}.`,
     );
   }
-  return body as T;
+  return response;
+}
+
+export async function apiFetch<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const response = await okResponse(path, init);
+  return (await response.json().catch(() => null)) as T;
 }
 
 export const getConfig = () => apiFetch<ApiConfig>("/config");
+
+/** The official eUsługi FormDefinition JSON Schema, as published by the backend. */
+export const getFormSchema = () =>
+  apiFetch<Record<string, unknown>>("/form-schema");
 
 export const getJob = (jobId: string) =>
   apiFetch<JobStatus>(`/jobs/${encodeURIComponent(jobId)}`);
@@ -64,4 +74,12 @@ export function submitJob(file: File) {
   const body = new FormData();
   body.append("file", file);
   return apiFetch<JobAccepted>("/jobs", { method: "POST", body });
+}
+
+/** The office file rendered as PDF by the API, for the review screen's "Oryginał" (ADR-0031). */
+export async function getPreviewPdf(file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  const response = await okResponse("/preview", { method: "POST", body });
+  return response.blob();
 }
