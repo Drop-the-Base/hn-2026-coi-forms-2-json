@@ -1,7 +1,6 @@
-import io
 import xml.etree.ElementTree as ET
-import zipfile
 
+from forms2json.adapters.outbound.readers.zip_archive import open_archive
 from forms2json.application.ports.document_reader import DocumentReader
 from forms2json.domain.document import NormalizedDocument, Page, Table
 from forms2json.domain.upload import ODS
@@ -24,12 +23,13 @@ class OdsReader(DocumentReader):
         return mime_type == ODS
 
     def read(self, content: bytes) -> NormalizedDocument:
-        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+        with open_archive(content) as archive:
             root = ET.fromstring(archive.read("content.xml"))
-        pages = []
-        for number, sheet in enumerate(root.iter(f"{_TABLE}table"), start=1):
-            rows = tuple(_rows(sheet))
-            pages.append(Page(number=number, blocks=(Table(rows=rows),) if rows else ()))
+            pages = []
+            # Inside the guard: a crafted repeat attribute fails in int() with ValueError.
+            for number, sheet in enumerate(root.iter(f"{_TABLE}table"), start=1):
+                rows = tuple(_rows(sheet))
+                pages.append(Page(number=number, blocks=(Table(rows=rows),) if rows else ()))
         return NormalizedDocument(pages=tuple(pages))
 
 

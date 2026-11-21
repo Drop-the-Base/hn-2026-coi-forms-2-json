@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     file_store_dir: Path = Path("/tmp/forms2json")  # tmpfs volume in compose (ADR-0005)
     file_ttl_seconds: int = Field(default=15 * 60, gt=0)  # NFR-06
     result_ttl_seconds: int = Field(default=30 * 60, gt=0)  # NFR-06, results live in api memory
+    # FR-06: how long POST /forms:convert waits before answering 202 with the job id.
+    sync_timeout_seconds: float = Field(default=120.0, gt=0)
     llm_base_url: str = "http://llm-runtime:11434/v1"  # Ollama in compose (ADR-0007)
     llm_model: str = "qwen3:1.7b"  # placeholder until the eval-based model ADR
     llm_timeout_seconds: float = Field(default=120.0, gt=0)

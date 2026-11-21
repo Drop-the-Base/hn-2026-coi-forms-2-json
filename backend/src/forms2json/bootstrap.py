@@ -6,18 +6,27 @@ Run the worker: uv run python -m forms2json.adapters.inbound.worker
 
 import asyncio
 import logging
+import os
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from forms2json.adapters.inbound.http.app import create_app
 from forms2json.adapters.inbound.http.progress_hub import ProgressHub, job_finished
 from forms2json.adapters.outbound.llm.openai_compatible_client import OpenAiCompatibleLlmClient
 from forms2json.adapters.outbound.observability.log_observer import LogObserver
+from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
 from forms2json.adapters.outbound.readers.docx_reader import DocxReader
 from forms2json.adapters.outbound.readers.ods_reader import OdsReader
+from forms2json.adapters.outbound.readers.pdf_reader import PdfReader
 from forms2json.adapters.outbound.readers.xlsx_reader import XlsxReader
 from forms2json.adapters.outbound.storage.in_memory_result_store import InMemoryResultStore
 from forms2json.adapters.outbound.storage.tmpfs_file_store import TmpfsFileStore
@@ -41,8 +50,24 @@ FILE_CLEANUP_INTERVAL_SECONDS = 60
 logger = logging.getLogger(__name__)
 
 
+def configure_tracing(service_name: str) -> None:
+    """Exports spans over OTLP only when OTEL_EXPORTER_OTLP_ENDPOINT is set (ADR-0009).
+
+    Without it the OTel API stays a no-op and the app runs as before.
+    The exporter reads the standard OTEL_EXPORTER_OTLP_* variables itself.
+    """
+    if not os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
+        return
+    provider = TracerProvider(resource=Resource.create({SERVICE_NAME: service_name}))
+    provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
+    trace.set_tracer_provider(provider)
+
+
 def create_api() -> FastAPI:
-    return create_app(lifespan=_api_lifespan)
+    configure_tracing("api")
+    app = create_app(lifespan=_api_lifespan)
+    FastAPIInstrumentor.instrument_app(app)
+    return app
 
 
 @asynccontextmanager
@@ -88,15 +113,18 @@ async def _delete_expired_files_forever(files: FileStore) -> None:
 
 def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineObserver], Pipeline]:
     """Adapters are created once; steps per job, because Understand and Compose keep run state."""
-    readers = [DocxReader(), XlsxReader(), OdsReader()]
-    observer = LogObserver()
+    readers = [DocxReader(), XlsxReader(), OdsReader(), PdfReader()]
+    tracing, logs = TracingObserver(), LogObserver()
 
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
         understand = UnderstandStep(llm, settings.llm_max_input_chars)
         compose = ComposeStep()
         report = ReportStep(understand, compose, settings.confidence_review_threshold)
         return Pipeline(
-            [IngestStep(readers), understand, compose, ValidateStep(), report], observer, progress
+            [IngestStep(readers), understand, compose, ValidateStep(), report],
+            tracing,
+            logs,
+            progress,
         )
 
     return new_pipeline
@@ -112,6 +140,7 @@ def new_llm_client(settings: Settings) -> LlmClient:
 
 
 async def build_worker(settings: Settings) -> tuple[RabbitMqJobQueue, ProcessJob]:
+    configure_tracing("worker")
     queue = await RabbitMqJobQueue.connect(settings.rabbitmq_url)
     files = TmpfsFileStore(settings.file_store_dir, settings.file_ttl_seconds)
     pipelines = pipeline_factory(settings, new_llm_client(settings))

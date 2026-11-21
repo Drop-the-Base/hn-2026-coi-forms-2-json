@@ -2,3 +2,8 @@ dist
 package-lock.json
 # dokumenty projektowe pisane ręcznie, Prettier pilnuje tylko kodu
 *.md
+# wygenerowane: npm run api:openapi && npm run api:types
+openapi.json
+src/shared/api/schema.d.ts
+# kopie wzorców COI 1:1 z data/
+src/features/form-preview/fixtures

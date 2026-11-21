@@ -6,7 +6,7 @@ from forms2json.domain.document import NormalizedDocument, SourceFile
 
 
 class UnsupportedFormat(ValueError):
-    """No reader for this MIME type yet (PDF, DOC and images: #22, #24, #25)."""
+    """No reader for this MIME type yet (DOC and images: #24, #25)."""
 
 
 class IngestStep(PipelineStep[SourceFile, NormalizedDocument]):

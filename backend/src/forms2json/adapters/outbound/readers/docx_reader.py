@@ -1,12 +1,11 @@
 """DOCX reader on the standard library: WordprocessingML is plain XML in a ZIP."""
 
-import io
 import re
-import zipfile
 from collections.abc import Iterator
 from itertools import batched
 from xml.etree import ElementTree
 
+from forms2json.adapters.outbound.readers.zip_archive import open_archive
 from forms2json.application.ports.document_reader import DocumentReader
 from forms2json.domain.document import Block, Checkbox, NormalizedDocument, Page, Table, TextBlock
 from forms2json.domain.upload import DOCX
@@ -14,11 +13,10 @@ from forms2json.domain.upload import DOCX
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 # Text boxes are stored twice: as DrawingML and as a VML fallback; read only the first.
 MC_FALLBACK = "{http://schemas.openxmlformats.org/markup-compatibility/2006}Fallback"
-# Word content-control checkboxes render as these glyphs too, so one rule covers both.
-BOX_STATES = {"☐": False, "□": False, "☒": True, "☑": True}
+# Word content-control checkboxes render as these glyphs too, so one rule covers both;
+# the PDF reader shares it (❑ is the Word-exported box in form 7).
+BOX_STATES = {"☐": False, "□": False, "❑": False, "☒": True, "☑": True}
 BOX_SPLIT = re.compile(f"([{''.join(BOX_STATES)}])")
-# Guards against ZIP bombs; document.xml of a real form is a few MB at most.
-MAX_XML_BYTES = 50 * 1024 * 1024
 
 
 class DocxReader(DocumentReader):
@@ -26,9 +24,7 @@ class DocxReader(DocumentReader):
         return mime_type == DOCX
 
     def read(self, content: bytes) -> NormalizedDocument:
-        with zipfile.ZipFile(io.BytesIO(content)) as archive:
-            if archive.getinfo("word/document.xml").file_size > MAX_XML_BYTES:
-                raise ValueError("word/document.xml is too large")
+        with open_archive(content) as archive:
             root = ElementTree.fromstring(archive.read("word/document.xml"))
         # shortcut: DOCX has no fixed pages (the layout engine decides), so everything is page 1;
         # split on explicit page breaks when a later step needs pages.
