@@ -113,7 +113,7 @@ Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/
 | `observability` | `jaeger` (http://127.0.0.1:16686), `prometheus` (http://127.0.0.1:9090), `perses` (http://127.0.0.1:8081) | `docker compose --profile observability up -d` |
 | `llm` | `llm-runtime` (Ollama w kontenerze) | w `.env`: `LLM_BASE_URL=http://llm-runtime:11434/v1`, potem `docker compose --profile llm up -d` i `docker compose exec llm-runtime ollama pull qwen2.5:7b-instruct` |
 
-Na zewnątrz wystawiony jest tylko port 8080 (nginx: SPA + proxy `/api/` i `/health` do api). UI obserwowalności tylko na 127.0.0.1.
+Na zewnątrz wystawiony jest tylko port 8080 (nginx: SPA + proxy `/api/` i `/health` do api). UI obserwowalności domyślnie tylko na 127.0.0.1; na serwerze `OBSERVABILITY_BIND=0.0.0.0` w `.env` wystawia je na zewnątrz (16686, 9090, 8081, bez logowania), a `COMPOSE_PROFILES=observability` sprawia, że `deploy.sh` je uruchamia.
 
 ### Wdrożenie na VPS
 
