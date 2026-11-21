@@ -4,6 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.165.0",
+    "openpyxl>=3.1.5",
     "pydantic-settings>=2.16.3",
     "pyjwt>=2.15.1",
 ]
@@ -38,4 +39,5 @@ dev = [
     "mypy>=2.4.1",
     "pytest>=9.2.0",
     "ruff>=0.17.6",
+    "types-openpyxl>=3.1.5.20261017",
 ]
