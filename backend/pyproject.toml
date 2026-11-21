@@ -3,6 +3,7 @@ name = "forms2json"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "openai>=3.57.0",
     "openpyxl>=3.1.5",
     "pydantic-settings>=2.16.3",
 ]
