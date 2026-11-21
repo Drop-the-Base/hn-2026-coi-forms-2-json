@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr = SecretStr("local")
     # Not every OpenAI-compatible provider supports strict json_schema; json_object is the fallback.
     llm_response_format: Literal["json_schema", "json_object"] = "json_schema"
+    # soffice can hang on a broken .doc; the worker kills it after this (#24).
+    doc_conversion_timeout_seconds: float = Field(default=60.0, gt=0)
     rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
     # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
     llm_max_input_chars: int = Field(default=30_000, gt=0)
