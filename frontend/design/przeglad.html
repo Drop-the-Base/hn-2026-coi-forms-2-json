@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Przegląd wyniku: forms2json</title>
+    <meta
+      name="description"
+      content="Makieta ekranu przeglądu wyniku: lista problemów, edytor JSON, podgląd formularza eUsługi i margines pewności."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="ui.css" />
+    <style>
+      body {
+        --band-h: 3.5rem;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        height: calc(100dvh - var(--shell-h));
+        min-height: 40rem;
+      }
+      .rhead {
+        max-width: none;
+        padding: var(--space-4) var(--gutter) var(--space-3);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3) var(--space-6);
+        align-items: end;
+      }
+      .rhead h1 {
+        font-size: var(--text-xl);
+      }
+      .rhead .back {
+        margin-bottom: var(--space-1);
+      }
+      .rhead__summary {
+        margin-left: auto;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2) var(--space-4);
+        font-size: var(--text-sm);
+      }
+      .rhead__dl {
+        display: grid;
+        justify-items: end;
+        gap: var(--space-1);
+      }
+
+      /* pasek nawigacji po problemach: zawsze widoczny, pokazuje tylko następną decyzję */
+      .band {
+        position: sticky;
+        top: var(--shell-h);
+        z-index: 4;
+        background: var(--color-sheet);
+        border-block: 1px solid var(--color-rule);
+        box-shadow: var(--shadow-band);
+      }
+      .band__in {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3) var(--space-4);
+        min-height: var(--band-h);
+        padding: var(--space-2) var(--gutter);
+        flex-wrap: wrap;
+      }
+      .band__pos {
+        font-weight: var(--weight-strong);
+        font-size: var(--text-sm);
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+      .band__kind {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        font-size: var(--text-sm);
+        font-weight: var(--weight-strong);
+        color: var(--color-warning);
+        white-space: nowrap;
+      }
+      .band__msg {
+        font-size: var(--text-sm);
+        min-width: 0;
+        flex: 1 1 18rem;
+      }
+      .band__msg .path {
+        color: var(--color-muted);
+      }
+      .band__nav {
+        display: flex;
+        gap: var(--space-2);
+      }
+      kbd {
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        border: 1px solid var(--color-rule);
+        border-radius: var(--radius-mark);
+        padding: 0 var(--space-1);
+        color: var(--color-muted);
+      }
+
+      /* trzy obszary pracy */
+      .ws {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 19rem minmax(0, 1fr) minmax(0, 1.1fr);
+      }
+      .pane {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        min-width: 0;
+        border-right: 1px solid var(--color-rule);
+        background: var(--color-sheet);
+      }
+      .pane:last-child {
+        border-right: 0;
+      }
+      .pane__head {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        min-height: 3rem;
+        padding: var(--space-2) var(--space-4);
+        border-bottom: 1px solid var(--color-rule);
+      }
+      .pane__head h2 {
+        font-size: var(--text-md);
+      }
+      .pane__head .end {
+        margin-left: auto;
+        display: flex;
+        gap: var(--space-2);
+        align-items: center;
+      }
+      .pane__body {
+        flex: 1;
+        overflow: auto;
+        min-height: 0;
+      }
+      .pane__foot {
+        border-top: 1px solid var(--color-rule);
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--text-sm);
+      }
+
+      /* lista problemów */
+      .issues {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .issue {
+        display: grid;
+        gap: var(--space-1);
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: 0;
+        border-bottom: 1px solid var(--color-rule);
+        padding: var(--space-3) var(--space-4);
+        cursor: pointer;
+        font-size: var(--text-sm);
+        outline-offset: -2px;
+      }
+      @media (hover: hover) {
+        .issue:hover {
+          background: var(--color-paper);
+        }
+      }
+      .issue[aria-current="true"] {
+        background: var(--color-accent-subtle);
+        box-shadow: inset 3px 0 0 var(--color-accent);
+      }
+      .issue__kind {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-1);
+        font-weight: var(--weight-strong);
+      }
+      .issue__kind--error {
+        color: var(--color-error);
+      }
+      .issue__kind--check {
+        color: var(--color-warning);
+      }
+      .issue__path {
+        color: var(--color-muted);
+        font-size: var(--text-xs);
+      }
+      .issue__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .select {
+        min-height: 2rem;
+        padding: 0 var(--space-6) 0 var(--space-2);
+        border: 1px solid var(--color-field-border);
+        border-radius: var(--radius-control);
+        background: var(--color-sheet);
+        font-size: var(--text-sm);
+      }
+
+      /* edytor */
+      .code {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        line-height: 1.6;
+        background: var(--color-code-bg);
+        padding: var(--space-2) 0;
+        min-width: max-content;
+      }
+      .ln {
+        display: grid;
+        grid-template-columns: 3.25rem 0.5rem 1.25rem auto;
+      }
+      .ln__no {
+        background: var(--color-code-gutter);
+        color: var(--color-code-line-no);
+        text-align: right;
+        padding-right: var(--space-2);
+        user-select: none;
+        font-variant-numeric: tabular-nums;
+      }
+      .ln__mark {
+        background: var(--color-code-gutter);
+      }
+      .ln[data-mark="low"] .ln__mark {
+        background: var(--pattern-low);
+      }
+      .ln[data-mark="medium"] .ln__mark {
+        background: var(--pattern-medium);
+      }
+      .ln__icon {
+        display: grid;
+        place-items: center;
+        color: var(--color-error);
+      }
+      .ln code {
+        white-space: pre;
+        padding-right: var(--space-4);
+        font-size: inherit;
+        color: var(--color-ink);
+      }
+      .ln.is-current code {
+        background: var(--color-code-current);
+      }
+      .ln.is-error code {
+        text-decoration: underline wavy var(--color-error);
+        text-underline-offset: 0.25em;
+        text-decoration-skip-ink: none;
+      }
+      .k {
+        color: var(--color-code-key);
+      }
+      .s {
+        color: var(--color-code-string);
+      }
+      .n {
+        color: var(--color-code-number);
+      }
+      .p {
+        color: var(--color-code-punct);
+      }
+      .fold {
+        font-family: var(--font-body);
+        font-size: var(--text-xs);
+        color: var(--color-muted);
+        border: 1px solid var(--color-rule);
+        border-radius: var(--radius-mark);
+        padding: 0 var(--space-1);
+      }
+      .schema {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .schema--ok {
+        color: var(--color-success);
+      }
+      .schema-errors {
+        list-style: none;
+        margin: var(--space-2) 0 0;
+        padding: 0;
+        display: grid;
+        gap: var(--space-1);
+        color: var(--color-ink);
+      }
+
+      /* podgląd eUsługi: odwzorowanie wizualizacji COI w ramce */
+      .eu {
+        background: var(--color-eu-ground);
+        color: var(--color-eu-ink);
+        padding: var(--space-5) var(--space-5) var(--space-8);
+        min-height: 100%;
+      }
+      .eu-steps {
+        list-style: none;
+        margin: 0 0 var(--space-4);
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-1) var(--space-4);
+        font-size: var(--text-sm);
+      }
+      .eu-steps button {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        background: none;
+        border: 0;
+        padding: var(--space-1) 0;
+        cursor: pointer;
+        color: var(--color-eu-label);
+      }
+      .eu-steps .n-step {
+        display: grid;
+        place-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: 1.5px solid var(--color-eu-border);
+        font-size: var(--text-xs);
+        font-weight: var(--weight-strong);
+        color: var(--color-eu-ink);
+      }
+      .eu-steps [aria-current="step"] {
+        color: var(--color-eu-ink);
+        font-weight: var(--weight-strong);
+      }
+      .eu-steps [aria-current="step"] .n-step {
+        background: var(--color-eu-primary);
+        border-color: var(--color-eu-primary);
+        color: var(--color-sheet);
+      }
+      .eu-steps .flag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.125rem;
+        color: var(--color-error);
+        font-size: var(--text-xs);
+        font-weight: var(--weight-strong);
+      }
+      .eu-steps .flag--check {
+        color: var(--color-warning);
+      }
+      .eu h3.eu-title {
+        font-size: var(--text-xl);
+        margin-bottom: var(--space-4);
+      }
+      .eu-card {
+        background: var(--color-eu-card);
+        border-radius: var(--radius-eu);
+        padding: var(--space-5) var(--space-5) var(--space-5) 0;
+        margin-bottom: var(--space-3);
+        display: grid;
+        grid-template-columns: 1.75rem minmax(0, 1fr);
+        row-gap: var(--space-4);
+      }
+      .eu-card > h4 {
+        grid-column: 2;
+        margin: 0;
+        font-size: var(--text-lg);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .eu-q {
+        display: contents;
+      }
+      .eu-q > .mark {
+        justify-self: center;
+        align-self: stretch;
+      }
+      .eu-q__body {
+        display: grid;
+        gap: var(--space-1);
+        border-radius: var(--radius-control);
+        cursor: pointer;
+      }
+      .eu-q.is-current .eu-q__body {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 4px;
+        background: var(--color-accent-subtle);
+        box-shadow: 0 0 0 4px var(--color-accent-subtle);
+      }
+      .eu-q__label {
+        font-size: var(--text-sm);
+        color: var(--color-eu-label);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .eu-input {
+        min-height: 2.5rem;
+        border: 1px solid var(--color-eu-border);
+        border-radius: var(--radius-control);
+        background: var(--color-eu-card);
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-sm);
+        color: var(--color-eu-label);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .eu-radio {
+        display: grid;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+      }
+      .eu-radio label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+      .eu-radio input {
+        accent-color: var(--color-eu-primary);
+        width: 1.125rem;
+        height: 1.125rem;
+        margin: 0;
+      }
+      .eu-foot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: var(--space-4);
+        font-size: var(--text-sm);
+      }
+      .eu-foot a {
+        color: var(--color-eu-primary);
+        font-weight: var(--weight-strong);
+      }
+      .eu-next {
+        background: var(--color-eu-primary);
+        color: var(--color-sheet);
+        border: 0;
+        border-radius: var(--radius-control);
+        min-height: 2.5rem;
+        padding: 0 var(--space-5);
+        font-weight: var(--weight-strong);
+        cursor: pointer;
+      }
+      .why {
+        font-size: var(--text-xs);
+        font-weight: var(--weight-regular);
+      }
+
+      /* wąski ekran: obszary jako zakładki */
+      .ws-tabs {
+        display: none;
+      }
+      @media (max-width: 64rem) {
+        main {
+          display: block;
+          height: auto;
+          min-height: 0;
+        }
+        .rhead__summary {
+          margin-left: 0;
+          width: 100%;
+          justify-content: space-between;
+        }
+        .rhead__dl {
+          justify-items: start;
+          width: 100%;
+        }
+        .rhead__dl .btn {
+          width: 100%;
+        }
+        .band__msg {
+          flex-basis: 100%;
+          order: 3;
+        }
+        .pane__head .note {
+          display: none;
+        }
+        .band__nav {
+          margin-left: auto;
+        }
+        .ws-tabs {
+          display: flex;
+          position: sticky;
+          top: calc(var(--shell-h) + var(--band-h));
+          z-index: 3;
+          background: var(--color-sheet);
+          padding-inline: var(--gutter);
+        }
+        .ws {
+          display: block;
+        }
+        .pane {
+          border-right: 0;
+        }
+        .pane__body {
+          overflow: visible;
+        }
+        .js .pane[data-hidden] {
+          display: none;
+        }
+      }
+
+      /* stany makiety; „bez problemów” gasi znaczniki obszarów pracy samym CSS */
+      body:has(#s-czysto:target) :is(.ws .mark, .ws .badge, .eu-steps .flag) {
+        visibility: hidden;
+      }
+      body:has(#s-czysto:target) .ln.is-current code {
+        background: none;
+      }
+      body:has(#s-czysto:target) .ln .ln__mark {
+        background: var(--color-code-gutter);
+      }
+      body:has(#s-czysto:target) .eu-q.is-current .eu-q__body {
+        outline: 0;
+        background: none;
+        box-shadow: none;
+      }
+      /* stany makiety: element bez swojego stanu znika, reszta zachowuje własny display */
+      body:not(:has(#s-schemat:target)) .only-schemat,
+      body:has(#s-schemat:target) .not-schemat,
+      body:not(:has(#s-czysto:target)) .only-czysto,
+      body:has(#s-czysto:target) .not-czysto,
+      body:not(:has(#s-wyjscie:target)) .only-wyjscie,
+      body:has(#s-wyjscie:target) .not-wyjscie {
+        display: none;
+      }
+      .overlay {
+        display: grid;
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        place-items: center;
+        background: var(--color-backdrop);
+        padding: var(--gutter);
+      }
+    </style>
+  </head>
+  <body>
+    <span class="anchor" id="s-schemat"></span
+    ><span class="anchor" id="s-czysto"></span
+    ><span class="anchor" id="s-wyjscie"></span>
+    <a class="skip" href="#edytor">Przejdź do edytora</a>
+    <header class="shell">
+      <div class="shell__in">
+        <a class="wordmark" href="#" aria-label="forms2json, strona główna"
+          >forms2json <span>blankiet do eUsługi</span></a
+        >
+        <nav aria-label="Główna">
+          <a href="zadania.html" aria-current="page">Zadania</a>
+        </nav>
+        <div class="shell__end">
+          <span class="who">Sesja do 17:40</span
+          ><button type="button">
+            <span class="i i-log-out" aria-hidden="true"></span>Wyloguj
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="rhead">
+        <div>
+          <a class="back" href="#s-wyjscie"
+            ><span class="i i-arrow-left" aria-hidden="true"></span>Zadania</a
+          >
+          <h1>Wniosek o ustalenie numeru porządkowego nieruchomości</h1>
+          <p class="page-head__meta">
+            Wniosek o ustalenie numeru porządkowego.pdf,
+            <span class="mono">e52b8a07</span>, wynik dostępny do 11:34
+          </p>
+        </div>
+        <div class="rhead__summary">
+          <span
+            >Ocena ogólna
+            <span class="badge badge--medium not-czysto"
+              ><span class="visually-hidden">Pewność: </span>Średnia
+              <span class="num">0,78</span></span
+            ><span class="badge badge--high only-czysto"
+              ><span class="visually-hidden">Pewność: </span>Wysoka
+              <span class="num">0,94</span></span
+            ></span
+          >
+          <span class="not-czysto">2 błędy, 5 do sprawdzenia</span>
+          <span class="only-czysto">Brak problemów</span>
+          <div class="rhead__dl">
+            <button class="btn btn--primary not-schemat" type="button">
+              <span class="i i-download" aria-hidden="true"></span>Pobierz JSON
+            </button>
+            <button
+              class="btn btn--primary only-schemat"
+              type="button"
+              disabled
+              aria-describedby="dl-why"
+            >
+              <span class="i i-download" aria-hidden="true"></span>Pobierz JSON
+            </button>
+            <span class="btn-note only-schemat" id="dl-why"
+              >Popraw 1 błąd schematu, aby pobrać.</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="band" role="region" aria-label="Bieżący problem">
+        <div class="band__in not-czysto">
+          <span class="band__pos">Problem 3 z 7</span>
+          <span class="band__kind"
+            ><span class="i i-alert" aria-hidden="true"></span>Do
+            sprawdzenia</span
+          >
+          <p class="band__msg">
+            Niepewny typ pola: zwykły tekst czy lista miejscowości ze słownika
+            TERYT.
+            <span class="path"
+              >Informacje o budynku, Lokalizacja budynku, Miejscowość</span
+            >
+          </p>
+          <span class="badge badge--low"
+            ><span class="visually-hidden">Pewność: </span>Niska
+            <span class="num">0,41</span></span
+          >
+          <div class="band__nav">
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              aria-keyshortcuts="Shift+F8"
+            >
+              <span class="i i-chevron-left" aria-hidden="true"></span>Poprzedni
+            </button>
+            <button
+              class="btn btn--secondary btn--sm"
+              type="button"
+              aria-keyshortcuts="F8"
+            >
+              Następny<span class="i i-chevron-right" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+        <div class="band__in only-czysto">
+          <span class="band__kind" style="color: var(--color-success)"
+            ><span class="i i-check-circle" aria-hidden="true"></span>Brak
+            problemów do sprawdzenia</span
+          >
+          <p class="band__msg">
+            Wszystkie elementy mają wysoką pewność i spełniają reguły. Przejrzyj
+            podgląd i pobierz JSON.
+          </p>
+        </div>
+      </div>
+
+      <div class="tabs ws-tabs" role="tablist" aria-label="Obszary pracy">
+        <button
+          class="tab"
+          role="tab"
+          type="button"
+          aria-selected="true"
+          aria-controls="podglad"
+          id="t-podglad"
+        >
+          <span class="i i-eye" aria-hidden="true"></span>Podgląd
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          type="button"
+          aria-selected="false"
+          aria-controls="edytor"
+          id="t-edytor"
+        >
+          <span class="i i-braces" aria-hidden="true"></span>JSON
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          type="button"
+          aria-selected="false"
+          aria-controls="problemy"
+          id="t-problemy"
+        >
+          <span class="i i-list" aria-hidden="true"></span>Problemy
+          <span class="count">7</span>
+        </button>
+      </div>
+
+      <div class="ws">
+        <!-- 1. lista problemów -->
+        <section class="pane" id="problemy" aria-labelledby="problemy-h">
+          <div class="pane__head">
+            <h2 id="problemy-h">
+              Problemy <span class="num not-czysto">(7)</span>
+            </h2>
+            <div class="end not-czysto">
+              <label class="visually-hidden" for="filtr">Pokaż</label>
+              <select class="select" id="filtr">
+                <option>Wszystkie</option>
+                <option>Błędy</option>
+                <option>Niska pewność</option>
+              </select>
+            </div>
+          </div>
+          <div class="pane__body">
+            <ol class="issues not-czysto">
+              <li>
+                <button class="issue" type="button">
+                  <span class="issue__kind issue__kind--error"
+                    ><span class="i i-x-circle" aria-hidden="true"></span
+                    >Błąd</span
+                  ><span>Strona końcowa zawiera pole do wypełnienia.</span
+                  ><span class="issue__path">Strona końcowa, Uwagi</span>
+                </button>
+              </li>
+              <li>
+                <button class="issue" type="button">
+                  <span class="issue__kind issue__kind--error"
+                    ><span class="i i-x-circle" aria-hidden="true"></span
+                    >Błąd</span
+                  ><span>Pole adresu e-mail nie ma walidatora EMAIL.</span
+                  ><span class="issue__path"
+                    >Kontakt z urzędem, Adres e-mail</span
+                  >
+                </button>
+              </li>
+              <li>
+                <button class="issue" type="button" aria-current="true">
+                  <span class="issue__row"
+                    ><span class="issue__kind issue__kind--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>Do
+                      sprawdzenia</span
+                    ><span class="badge badge--low"
+                      ><span class="visually-hidden">Pewność: </span>Niska
+                      <span class="num">0,41</span></span
+                    ></span
+                  ><span>Niepewny typ pola: tekst czy lista TERYT.</span
+                  ><span class="issue__path"
+                    >Informacje o budynku, Miejscowość</span
+                  >
+                </button>
+              </li>
+              <li>
+                <button class="issue" type="button">
+                  <span class="issue__row"
+                    ><span class="issue__kind issue__kind--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>Do
+                      sprawdzenia</span
+                    ><span class="badge badge--low"
+                      ><span class="visually-hidden">Pewność: </span>Niska
+                      <span class="num">0,52</span></span
+                    ></span
+                  ><span>Etykieta odczytana z nieczytelnego skanu.</span
+                  ><span class="issue__path"
+                    >Informacje o budynku, Numer ewidencyjny działki</span
+                  >
+                </button>
+              </li>
+              <li>
+                <button class="issue" type="button">
+                  <span class="issue__row"
+                    ><span class="issue__kind issue__kind--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>Do
+                      sprawdzenia</span
+                    ><span class="badge badge--medium"
+                      ><span class="visually-hidden">Pewność: </span>Średnia
+                      <span class="num">0,68</span></span
+                    ></span
+                  ><span>Niepewna lista opcji pola wyboru.</span
+                  ><span class="issue__path"
+                    >Informacje o budynku, Rodzaj budynku</span
+                  >
+                </button>
+              </li>
+              <li>
+                <button class="issue" type="button">
+                  <span class="issue__row"
+                    ><span class="issue__kind issue__kind--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>Do
+                      sprawdzenia</span
+                    ><span class="badge badge--medium"
+                      ><span class="visually-hidden">Pewność: </span>Średnia
+                      <span class="num">0,74</span></span
+                    ></span
+                  ><span>Niepewny warunek wyświetlania sekcji.</span
+                  ><span class="issue__path">Dane, Pełnomocnictwo</span>
+                </button>
+              </li>
+              <li>
+                <button class="issue" type="button">
+                  <span class="issue__row"
+                    ><span class="issue__kind issue__kind--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>Do
+                      sprawdzenia</span
+                    ><span class="badge badge--medium"
+                      ><span class="visually-hidden">Pewność: </span>Średnia
+                      <span class="num">0,81</span></span
+                    ></span
+                  ><span>Niepewny tytuł sekcji.</span
+                  ><span class="issue__path"
+                    >Kontakt z urzędem, Sposób kontaktu</span
+                  >
+                </button>
+              </li>
+            </ol>
+            <div
+              class="only-czysto"
+              style="padding: var(--space-6) var(--space-4)"
+            >
+              <p><strong>Nic do poprawy</strong></p>
+              <p
+                class="muted"
+                style="margin-top: var(--space-1); font-size: var(--text-sm)"
+              >
+                Gdy zmienisz JSON, nowe błędy schematu pojawią się tutaj.
+              </p>
+            </div>
+          </div>
+          <div class="pane__foot muted">
+            <kbd>F8</kbd> następny problem, <kbd>Shift</kbd>+<kbd>F8</kbd>
+            poprzedni
+          </div>
+        </section>
+
+        <!-- 2. edytor JSON -->
+        <section class="pane" id="edytor" aria-labelledby="edytor-h">
+          <div class="pane__head">
+            <h2 id="edytor-h">JSON</h2>
+            <div class="end">
+              <button class="btn btn--ghost btn--sm" type="button">
+                Formatuj
+              </button>
+            </div>
+          </div>
+          <div
+            class="pane__body"
+            tabindex="0"
+            role="region"
+            aria-label="Edytor JSON. Esc, potem Tab wychodzi z edytora."
+            aria-describedby="schema-state"
+          >
+            <!-- prettier-ignore -->
+            <div class="code">
+          <div class="ln"><span class="ln__no">118</span><span class="ln__mark"></span><span class="ln__icon"></span><code>    <span class="p">{</span></code></div>
+          <div class="ln"><span class="ln__no">119</span><span class="ln__mark"></span><span class="ln__icon"></span><code>      <span class="k">"id"</span><span class="p">:</span> <span class="s">"455397a7-3d93-48d6-9528-19c18aafe2e9"</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">120</span><span class="ln__mark"></span><span class="ln__icon"></span><code>      <span class="k">"title"</span><span class="p">:</span> <span class="s">"Informacje o budynku"</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">121</span><span class="ln__mark"></span><span class="ln__icon"></span><code>      <span class="k">"type"</span><span class="p">:</span> <span class="s">"MAIN"</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">122</span><span class="ln__mark"></span><span class="ln__icon"></span><code>      <span class="k">"questions"</span><span class="p">: [</span></code></div>
+          <div class="ln"><span class="ln__no">123</span><span class="ln__mark"></span><span class="ln__icon"></span><code>        <span class="p">{</span> <span class="k">"x"</span><span class="p">:</span> <span class="n">0</span><span class="p">,</span> <span class="k">"y"</span><span class="p">:</span> <span class="n">0</span><span class="p">,</span> <span class="k">"rows"</span><span class="p">:</span> <span class="n">5</span><span class="p">,</span> <span class="k">"cols"</span><span class="p">:</span> <span class="n">3</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">124</span><span class="ln__mark"></span><span class="ln__icon"></span><code>          <span class="k">"field"</span><span class="p">: {</span></code></div>
+          <div class="ln"><span class="ln__no">125</span><span class="ln__mark"></span><span class="ln__icon"></span><code>            <span class="k">"type"</span><span class="p">:</span> <span class="s">"SECTION"</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">126</span><span class="ln__mark"></span><span class="ln__icon"></span><code>            <span class="k">"techName"</span><span class="p">:</span> <span class="s">"lokalizacja_budynku"</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">127</span><span class="ln__mark"></span><span class="ln__icon"></span><code>            <span class="k">"title"</span><span class="p">:</span> <span class="s">"Lokalizacja budynku"</span><span class="p">,</span></code></div>
+          <div class="ln"><span class="ln__no">128</span><span class="ln__mark"></span><span class="ln__icon"></span><code>            <span class="k">"repeatingSectionGrid"</span><span class="p">: [</span></code></div>
+          <div class="ln"><span class="ln__no">129</span><span class="ln__mark"></span><span class="ln__icon"></span><code>              <span class="p">{</span> <span class="k">"x"</span><span class="p">:</span> <span class="n">0</span><span class="p">,</span> <span class="k">"y"</span><span class="p">:</span> <span class="n">0</span><span class="p">,</span> <span class="k">"rows"</span><span class="p">:</span> <span class="n">1</span><span class="p">,</span> <span class="k">"cols"</span><span class="p">:</span> <span class="n">3</span><span class="p">,</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">130</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                <span class="k">"field"</span><span class="p">: {</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">131</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"id"</span><span class="p">:</span> <span class="s">"ef58feef-c56d-471f-8c20-bd4a2e717eb4"</span><span class="p">,</span></code></div>
+          <div class="ln is-current not-schemat" data-mark="low"><span class="ln__no">132</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"type"</span><span class="p">:</span> <span class="s">"TEXT_FIELD"</span><span class="p">,</span></code></div>
+          <div class="ln is-current is-error only-schemat" data-mark="low"><span class="ln__no">132</span><span class="ln__mark"></span><span class="ln__icon"><span class="i i-x-circle" aria-hidden="true"></span></span><code>                  <span class="k">"type"</span><span class="p">:</span> <span class="s">"TEXT_FELD"</span><span class="p">,</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">133</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"techName"</span><span class="p">:</span> <span class="s">"miejscowosc"</span><span class="p">,</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">134</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"title"</span><span class="p">:</span> <span class="s">"Miejscowość"</span><span class="p">,</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">135</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"options"</span><span class="p">: [],</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">136</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"validation"</span><span class="p">: [</span><span class="s">"REQUIRED"</span><span class="p">],</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">137</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"readOnly"</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">138</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                  <span class="k">"questionOrder"</span><span class="p">:</span> <span class="n">0</span></code></div>
+          <div class="ln is-current" data-mark="low"><span class="ln__no">139</span><span class="ln__mark"></span><span class="ln__icon"></span><code>                <span class="p">}</span></code></div>
+          <div class="ln"><span class="ln__no">140</span><span class="ln__mark"></span><span class="ln__icon"></span><code>              <span class="p">},</span></code></div>
+          <div class="ln"><span class="ln__no">141</span><span class="ln__mark"></span><span class="ln__icon"></span><code>              <span class="p">{</span> <span class="fold">Ulica, 14 linii</span> <span class="p">},</span></code></div>
+          <div class="ln" data-mark="low"><span class="ln__no">156</span><span class="ln__mark"></span><span class="ln__icon"></span><code>              <span class="p">{</span> <span class="fold">Numer ewidencyjny działki, 14 linii</span> <span class="p">},</span></code></div>
+          <div class="ln"><span class="ln__no">171</span><span class="ln__mark"></span><span class="ln__icon"></span><code>              <span class="p">{</span> <span class="fold">Obręb, 14 linii</span> <span class="p">}</span></code></div>
+          <div class="ln"><span class="ln__no">186</span><span class="ln__mark"></span><span class="ln__icon"></span><code>            <span class="p">]</span></code></div>
+          <div class="ln"><span class="ln__no">187</span><span class="ln__mark"></span><span class="ln__icon"></span><code>          <span class="p">}</span></code></div>
+          <div class="ln"><span class="ln__no">188</span><span class="ln__mark"></span><span class="ln__icon"></span><code>        <span class="p">},</span></code></div>
+          <div class="ln" data-mark="medium"><span class="ln__no">189</span><span class="ln__mark"></span><span class="ln__icon"></span><code>        <span class="p">{</span> <span class="fold">Rodzaj budynku, 38 linii</span> <span class="p">}</span></code></div>
+          <div class="ln"><span class="ln__no">228</span><span class="ln__mark"></span><span class="ln__icon"></span><code>      <span class="p">]</span></code></div>
+          <div class="ln"><span class="ln__no">229</span><span class="ln__mark"></span><span class="ln__icon"></span><code>    <span class="p">},</span></code></div>
+        </div>
+          </div>
+          <div class="pane__foot" id="schema-state" aria-live="polite">
+            <span class="schema schema--ok not-schemat"
+              ><span class="i i-check-circle" aria-hidden="true"></span>Zgodny
+              ze schematem eUsługi</span
+            >
+            <div class="only-schemat">
+              <span class="schema" style="color: var(--color-error)"
+                ><span class="i i-x-circle" aria-hidden="true"></span>1
+                niezgodność ze schematem</span
+              >
+              <ul class="schema-errors">
+                <li>
+                  <a href="#edytor">Linia 132</a>: „type” ma niedozwoloną
+                  wartość „TEXT_FELD”. Czy chodziło o „TEXT_FIELD”?
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. podgląd formularza eUsługi -->
+        <section class="pane" id="podglad" aria-labelledby="podglad-h">
+          <div class="pane__head">
+            <h2 id="podglad-h">Podgląd formularza</h2>
+            <span class="muted note" style="font-size: var(--text-sm)"
+              >tak zobaczy go wnioskodawca w eUsłudze</span
+            >
+          </div>
+          <div class="pane__body">
+            <div
+              class="alert alert--info only-schemat"
+              style="border-radius: 0"
+            >
+              <span class="i i-info" aria-hidden="true"></span>
+              <p>
+                Podgląd sprzed ostatniej zmiany: JSON nie przechodzi schematu.
+              </p>
+            </div>
+            <div class="eu">
+              <ol class="eu-steps" aria-label="Strony formularza">
+                <li>
+                  <button type="button" aria-label="Strona 1, Dane, 1 problem">
+                    <span class="n-step">1</span>Dane
+                    <span class="flag flag--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>1</span
+                    >
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    aria-current="step"
+                    aria-label="Strona 2, Informacje o budynku, 3 problemy"
+                  >
+                    <span class="n-step">2</span>Informacje o budynku
+                    <span class="flag flag--check"
+                      ><span class="i i-alert" aria-hidden="true"></span>3</span
+                    >
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    aria-label="Strona 3, Kontakt z urzędem, 2 problemy"
+                  >
+                    <span class="n-step">3</span>Kontakt z urzędem
+                    <span class="flag"
+                      ><span class="i i-x-circle" aria-hidden="true"></span
+                      >2</span
+                    >
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    aria-label="Strona 4, Strona końcowa, 1 problem"
+                  >
+                    <span class="n-step">4</span>Strona końcowa
+                    <span class="flag"
+                      ><span class="i i-x-circle" aria-hidden="true"></span
+                      >1</span
+                    >
+                  </button>
+                </li>
+              </ol>
+              <h3 class="eu-title">Informacje o budynku</h3>
+
+              <div class="eu-card">
+                <h4>Lokalizacja budynku</h4>
+                <div class="eu-q is-current">
+                  <span class="mark mark--low" aria-hidden="true"></span>
+                  <div class="eu-q__body">
+                    <span class="eu-q__label"
+                      >Miejscowość
+                      <span class="badge badge--low"
+                        ><span class="visually-hidden">Pewność: </span>Niska
+                        <span class="num">0,41</span></span
+                      ></span
+                    >
+                    <span class="eu-input">&nbsp;</span>
+                  </div>
+                </div>
+                <div class="eu-q">
+                  <span class="mark" aria-hidden="true"></span>
+                  <div class="eu-q__body">
+                    <span class="eu-q__label">Ulica</span
+                    ><span class="eu-input">&nbsp;</span>
+                  </div>
+                </div>
+                <div class="eu-q">
+                  <span class="mark mark--low" aria-hidden="true"></span>
+                  <div class="eu-q__body">
+                    <span class="eu-q__label"
+                      >Numer ewidencyjny działki
+                      <span class="badge badge--low"
+                        ><span class="visually-hidden">Pewność: </span>Niska
+                        <span class="num">0,52</span></span
+                      ></span
+                    >
+                    <span class="eu-input">&nbsp;</span>
+                  </div>
+                </div>
+                <div class="eu-q">
+                  <span class="mark" aria-hidden="true"></span>
+                  <div class="eu-q__body">
+                    <span class="eu-q__label">Obręb</span
+                    ><span class="eu-input">&nbsp;</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="eu-card">
+                <h4>
+                  Rodzaj budynku
+                  <span class="badge badge--medium"
+                    ><span class="visually-hidden">Pewność: </span>Średnia
+                    <span class="num">0,68</span></span
+                  >
+                </h4>
+                <div class="eu-q">
+                  <span class="mark mark--medium" aria-hidden="true"></span>
+                  <div class="eu-q__body">
+                    <span class="eu-q__label">Wybierz rodzaj budynku</span>
+                    <div
+                      class="eu-radio"
+                      role="radiogroup"
+                      aria-label="Wybierz rodzaj budynku"
+                    >
+                      <label
+                        ><input type="radio" name="rodzaj" checked />Budynek
+                        mieszkalny</label
+                      >
+                      <label
+                        ><input type="radio" name="rodzaj" />Budynek
+                        niemieszkalny</label
+                      >
+                      <label
+                        ><input type="radio" name="rodzaj" />Budynek w
+                        budowie</label
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="eu-foot">
+                <a href="#podglad">Wróć</a
+                ><button class="eu-next" type="button">Dalej</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="overlay only-wyjscie">
+      <div
+        class="dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="wyj-h"
+        aria-describedby="wyj-p"
+      >
+        <h2 id="wyj-h">Masz niepobrane poprawki</h2>
+        <p id="wyj-p">
+          Zmieniłeś JSON po ostatnim pobraniu. Po wyjściu poprawki przepadną, bo
+          serwer ich nie przechowuje.
+        </p>
+        <div class="dialog__actions">
+          <a class="btn btn--destructive" href="zadania.html"
+            >Wyjdź bez pobierania</a
+          >
+          <a class="btn btn--primary" href="#">Zostań</a>
+        </div>
+      </div>
+    </div>
+
+    <nav class="proto-bar" aria-label="Stany makiety">
+      Makieta, stan: <a href="#">problemy</a>
+      <a href="#s-schemat">błąd schematu</a>
+      <a href="#s-czysto">bez problemów</a>
+      <a href="#s-wyjscie">wyjście z poprawkami</a>
+    </nav>
+    <script>
+      // zakładki na wąskim ekranie; bez JS obszary stoją jeden pod drugim
+      document.documentElement.classList.add("js");
+      const tabs = [...document.querySelectorAll(".ws-tabs [role=tab]")];
+      const show = (tab) =>
+        tabs.forEach((t) => {
+          t.setAttribute("aria-selected", String(t === tab));
+          document
+            .getElementById(t.getAttribute("aria-controls"))
+            .toggleAttribute("data-hidden", t !== tab);
+        });
+      tabs.forEach((t) => t.addEventListener("click", () => show(t)));
+      show(tabs[0]);
+    </script>
+  </body>
+</html>

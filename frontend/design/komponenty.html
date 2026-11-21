@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Komponenty: forms2json</title>
+    <meta
+      name="description"
+      content="Arkusz komponentów bazowych systemu wizualnego we wszystkich stanach."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="ui.css" />
+    <style>
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+        gap: var(--space-4) var(--space-6);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        align-items: center;
+      }
+      .cap {
+        font-size: var(--text-xs);
+        color: var(--color-muted);
+        margin-top: var(--space-1);
+      }
+      .swatch {
+        display: grid;
+        gap: var(--space-1);
+        font-size: var(--text-xs);
+      }
+      .swatch span:first-child {
+        height: 3rem;
+        border-radius: var(--radius-control);
+        border: 1px solid var(--color-rule);
+      }
+      .states {
+        display: grid;
+        grid-template-columns: 7rem repeat(6, max-content);
+        gap: var(--space-3) var(--space-4);
+        align-items: center;
+        overflow-x: auto;
+        font-size: var(--text-sm);
+      }
+      .states .h {
+        color: var(--color-muted);
+        font-size: var(--text-xs);
+      }
+      .type-scale p {
+        display: flex;
+        gap: var(--space-4);
+        align-items: baseline;
+      }
+      .type-scale code {
+        width: 7rem;
+        flex: none;
+        color: var(--color-muted);
+        font-size: var(--text-xs);
+      }
+      .marks {
+        display: flex;
+        gap: var(--space-6);
+        align-items: end;
+      }
+      .marks div {
+        display: grid;
+        gap: var(--space-2);
+        justify-items: center;
+        font-size: var(--text-xs);
+      }
+      .marks .mark {
+        height: 3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="shell">
+      <div class="shell__in">
+        <a class="wordmark" href="#" aria-label="forms2json, strona główna"
+          >forms2json <span>blankiet do eUsługi</span></a
+        >
+        <nav aria-label="Główna"><a href="zadania.html">Zadania</a></nav>
+      </div>
+    </header>
+    <main class="page stack">
+      <div class="page-head">
+        <div>
+          <h1>Komponenty</h1>
+          <p class="page-head__meta">
+            Tokeny i stany z DESIGN.md, wyrenderowane. Hover, fokus i wciśnięcie
+            pokazane klasami pomocniczymi.
+          </p>
+        </div>
+      </div>
+
+      <section class="sheet" aria-labelledby="kol-h">
+        <div class="sheet__head"><h2 id="kol-h">Kolory</h2></div>
+        <div class="sheet__body grid">
+          <div class="swatch">
+            <span style="background: var(--color-paper)"></span
+            ><code>paper</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-sheet)"></span
+            ><code>sheet</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-shell)"></span
+            ><code>shell</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-accent)"></span
+            ><code>accent</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-accent-subtle)"></span
+            ><code>accent-subtle</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-ink)"></span><code>ink</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-muted)"></span
+            ><code>muted</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-field-border)"></span
+            ><code>field-border</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-error)"></span
+            ><code>error</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-warning-mark)"></span
+            ><code>warning-mark</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-success)"></span
+            ><code>success</code>
+          </div>
+          <div class="swatch">
+            <span style="background: var(--color-eu-ground)"></span
+            ><code>eu-ground</code>
+          </div>
+        </div>
+      </section>
+
+      <section class="sheet" aria-labelledby="typ-h">
+        <div class="sheet__head"><h2 id="typ-h">Typografia</h2></div>
+        <div class="sheet__body type-scale stack">
+          <p>
+            <code>text-2xl 600</code
+            ><span style="font-size: var(--text-2xl); font-weight: 600"
+              >Zadania</span
+            >
+          </p>
+          <p>
+            <code>text-xl 600</code
+            ><span style="font-size: var(--text-xl); font-weight: 600"
+              >Wniosek o ustalenie numeru porządkowego</span
+            >
+          </p>
+          <p>
+            <code>text-lg 600</code
+            ><span style="font-size: var(--text-lg); font-weight: 600"
+              >Lokalizacja budynku</span
+            >
+          </p>
+          <p>
+            <code>text-md 400</code
+            ><span
+              >Przeciągnij pliki tutaj albo wybierz je z dysku. Zażółć gęślą
+              jaźń.</span
+            >
+          </p>
+          <p>
+            <code>text-sm 400</code
+            ><span style="font-size: var(--text-sm)"
+              >Etykiety, tabela, komunikaty. Il1| O0 rn/m: 1,2 MB, 10:42</span
+            >
+          </p>
+          <p>
+            <code>mono sm</code
+            ><code style="font-size: var(--text-sm)"
+              >"techName": "numer_ewidencyjny_dzialki", e52b8a07</code
+            >
+          </p>
+        </div>
+      </section>
+
+      <section class="sheet" aria-labelledby="btn-h">
+        <div class="sheet__head"><h2 id="btn-h">Przyciski</h2></div>
+        <div class="sheet__body">
+          <div class="states">
+            <span></span><span class="h">spoczynek</span
+            ><span class="h">hover</span><span class="h">fokus</span
+            ><span class="h">wciśnięty</span><span class="h">wyłączony</span
+            ><span class="h">ładowanie</span>
+            <span>główny</span>
+            <button class="btn btn--primary" type="button">Pobierz JSON</button>
+            <button class="btn btn--primary is-hover" type="button">
+              Pobierz JSON
+            </button>
+            <button class="btn btn--primary is-focus" type="button">
+              Pobierz JSON
+            </button>
+            <button class="btn btn--primary is-active is-hover" type="button">
+              Pobierz JSON
+            </button>
+            <button class="btn btn--primary" type="button" disabled>
+              Pobierz JSON
+            </button>
+            <button
+              class="btn btn--primary"
+              type="button"
+              aria-busy="true"
+              disabled
+            >
+              <span class="i i-loader" aria-hidden="true"></span>Wysyłanie
+            </button>
+            <span>drugorzędny</span>
+            <button class="btn btn--secondary" type="button">
+              Wybierz pliki
+            </button>
+            <button class="btn btn--secondary is-hover" type="button">
+              Wybierz pliki
+            </button>
+            <button class="btn btn--secondary is-focus" type="button">
+              Wybierz pliki
+            </button>
+            <button class="btn btn--secondary is-active is-hover" type="button">
+              Wybierz pliki
+            </button>
+            <button class="btn btn--secondary" type="button" disabled>
+              Wybierz pliki
+            </button>
+            <button
+              class="btn btn--secondary"
+              type="button"
+              aria-busy="true"
+              disabled
+            >
+              <span class="i i-loader" aria-hidden="true"></span>Wczytywanie
+            </button>
+            <span>tekstowy</span>
+            <button class="btn btn--ghost" type="button">Formatuj</button>
+            <button class="btn btn--ghost is-hover" type="button">
+              Formatuj
+            </button>
+            <button class="btn btn--ghost is-focus" type="button">
+              Formatuj
+            </button>
+            <button class="btn btn--ghost is-active is-hover" type="button">
+              Formatuj
+            </button>
+            <button class="btn btn--ghost" type="button" disabled>
+              Formatuj
+            </button>
+            <span></span>
+            <span>usuwający</span>
+            <button class="btn btn--destructive" type="button">
+              Wyjdź bez pobierania
+            </button>
+            <button class="btn btn--destructive is-hover" type="button">
+              Wyjdź bez pobierania
+            </button>
+            <button class="btn btn--destructive is-focus" type="button">
+              Wyjdź bez pobierania
+            </button>
+            <button
+              class="btn btn--destructive is-active is-hover"
+              type="button"
+            >
+              Wyjdź bez pobierania
+            </button>
+            <button class="btn btn--destructive" type="button" disabled>
+              Wyjdź bez pobierania
+            </button>
+            <span></span>
+          </div>
+          <p class="cap" style="margin-top: var(--space-4)">
+            Mały wariant (32 px, obszar kliknięcia 44 px):
+            <button class="btn btn--secondary btn--sm" type="button">
+              Pokaż postęp
+            </button>
+          </p>
+        </div>
+      </section>
+
+      <section class="sheet" aria-labelledby="pole-h">
+        <div class="sheet__head"><h2 id="pole-h">Pola</h2></div>
+        <div class="sheet__body grid">
+          <div class="field">
+            <label class="field__label" for="f1">Spoczynek</label
+            ><input class="input" id="f1" placeholder="np. 12/3" />
+            <p class="field__hint">Podpowiedź pod polem.</p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f2">Hover</label
+            ><input class="input is-hover" id="f2" value="Elbląg" />
+            <p class="field__hint"></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f3">Fokus</label
+            ><input class="input is-focus" id="f3" value="Elbląg" />
+            <p class="field__hint"></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f4"
+              >Błąd <span class="req">(wymagane)</span></label
+            ><input
+              class="input"
+              id="f4"
+              aria-invalid="true"
+              aria-describedby="f4m"
+              value=""
+            />
+            <p class="field__msg" id="f4m">
+              <span class="i i-x" aria-hidden="true"></span>Wpisz token dostępu.
+            </p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f5">Tylko do odczytu</label
+            ><input class="input" id="f5" readonly value="a3f9c2e1" />
+            <p class="field__hint"></p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="f6">Wyłączone</label
+            ><input class="input" id="f6" disabled value="20 MB" />
+            <p class="field__hint">Limit ustawia administrator.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="sheet" aria-labelledby="pew-h">
+        <div class="sheet__head"><h2 id="pew-h">Pewność (confidence)</h2></div>
+        <div class="sheet__body grid">
+          <div class="stack">
+            <div class="row">
+              <span class="badge badge--high"
+                ><span class="visually-hidden">Pewność: </span>Wysoka
+                <span class="num">0,93</span></span
+              >
+              <span class="badge badge--medium"
+                ><span class="visually-hidden">Pewność: </span>Średnia
+                <span class="num">0,71</span></span
+              >
+              <span class="badge badge--low"
+                ><span class="visually-hidden">Pewność: </span>Niska
+                <span class="num">0,34</span></span
+              >
+            </div>
+            <p class="cap">
+              Badge: wzór (obrys, kreskowanie, pełny) + słowo + wartość + kolor.
+              Czytany jako „Pewność: niska 0,34”.
+            </p>
+          </div>
+          <div class="stack">
+            <div class="marks">
+              <div><span class="mark mark--high"></span>wysoka</div>
+              <div><span class="mark mark--medium"></span>średnia</div>
+              <div><span class="mark mark--low"></span>niska</div>
+            </div>
+            <p class="cap">
+              Znacznik marginesu: długość = wysokość elementu. Dekoracyjny
+              (aria-hidden), informację niesie badge lub lista problemów.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="sheet" aria-labelledby="st-h">
+        <div class="sheet__head">
+          <h2 id="st-h">Stany zadania i komunikaty</h2>
+        </div>
+        <div class="sheet__body stack">
+          <div class="row">
+            <span class="status status--queued"
+              ><span class="i i-clock" aria-hidden="true"></span>W kolejce</span
+            >
+            <span class="status status--running"
+              ><span class="i i-loader" aria-hidden="true"></span>Analiza
+              treści, krok 2 z 4</span
+            >
+            <span class="status status--done"
+              ><span class="i i-check-circle" aria-hidden="true"></span
+              >Gotowe</span
+            >
+            <span class="status status--failed"
+              ><span class="i i-x-circle" aria-hidden="true"></span>Błąd: plik
+              zaszyfrowany hasłem</span
+            >
+          </div>
+          <div class="grid">
+            <div class="alert alert--info">
+              <span class="i i-info" aria-hidden="true"></span>
+              <p class="alert__title">Informacja</p>
+              <p>Podgląd sprzed ostatniej zmiany.</p>
+            </div>
+            <div class="alert alert--success">
+              <span class="i i-check-circle" aria-hidden="true"></span>
+              <p class="alert__title">Sukces</p>
+              <p>Zgodny ze schematem eUsługi.</p>
+            </div>
+            <div class="alert alert--warning">
+              <span class="i i-alert" aria-hidden="true"></span>
+              <p class="alert__title">Ostrzeżenie</p>
+              <p>Utracono połączenie na żywo.</p>
+            </div>
+            <div class="alert alert--error">
+              <span class="i i-x-circle" aria-hidden="true"></span>
+              <p class="alert__title">Błąd</p>
+              <p>Nie udało się odczytać pliku.</p>
+            </div>
+          </div>
+          <progress
+            class="progress"
+            max="9"
+            value="4"
+            aria-label="Przykładowy postęp, 4 z 9"
+          >
+            4 z 9
+          </progress>
+          <div class="tabs" role="tablist" aria-label="Przykładowe zakładki">
+            <button class="tab" role="tab" aria-selected="true" type="button">
+              Wszystkie <span class="count">6</span>
+            </button>
+            <button class="tab" role="tab" aria-selected="false" type="button">
+              W toku <span class="count">2</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

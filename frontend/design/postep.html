@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Postęp zadania: forms2json</title>
+    <meta
+      name="description"
+      content="Makieta postępu przetwarzania na żywo: kroki pipeline'u, ostrzeżenia, błąd i utrata połączenia."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="ui.css" />
+    <style>
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        gap: var(--space-6);
+        align-items: start;
+      }
+      .steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 4.5rem 1.5rem minmax(0, 1fr);
+        gap: 0 var(--space-3);
+      }
+      .step__time {
+        font-family: var(--font-mono);
+        font-size: var(--text-sm);
+        color: var(--color-muted);
+        text-align: right;
+        padding-top: 0.1rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .step__rail {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        justify-items: center;
+      }
+      .step__dot {
+        display: grid;
+        place-items: center;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        border: 1.5px solid var(--color-field-border);
+        background: var(--color-sheet);
+        color: var(--color-muted);
+      }
+      .step__line {
+        width: 1.5px;
+        background: var(--color-rule);
+        margin: var(--space-1) 0;
+      }
+      .step:last-child .step__line {
+        display: none;
+      }
+      .step__body {
+        padding-bottom: var(--space-6);
+      }
+      .step__title {
+        font-weight: var(--weight-strong);
+      }
+      .step__msg {
+        color: var(--color-muted);
+        font-size: var(--text-sm);
+        margin-top: var(--space-1);
+      }
+      .step__body .progress {
+        margin-top: var(--space-3);
+        max-width: 28rem;
+      }
+      .step__body .alert {
+        margin-top: var(--space-3);
+      }
+      .step[data-state="done"] .step__dot {
+        background: var(--color-success);
+        border-color: var(--color-success);
+        color: var(--color-on-accent);
+      }
+      .step[data-state="done"] .step__line {
+        background: var(--color-success-mark);
+      }
+      .step[data-state="running"] .step__dot {
+        border-color: var(--color-accent);
+        color: var(--color-accent);
+      }
+      .step[data-state="failed"] .step__dot {
+        background: var(--color-error);
+        border-color: var(--color-error);
+        color: var(--color-on-accent);
+      }
+      .step[data-state="pending"] .step__title {
+        color: var(--color-muted);
+        font-weight: var(--weight-regular);
+      }
+      .live {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-sm);
+        color: var(--color-muted);
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--space-2) var(--space-4);
+        margin: 0;
+        font-size: var(--text-sm);
+      }
+      .facts dt {
+        color: var(--color-muted);
+      }
+      .facts dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+      }
+      .warn-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: var(--space-3);
+        font-size: var(--text-sm);
+      }
+      .warn-list li {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: var(--space-2);
+      }
+      .warn-list .i {
+        color: var(--color-warning);
+        margin-top: 0.2em;
+      }
+      .warn-list small {
+        display: block;
+        color: var(--color-muted);
+        font-size: var(--text-xs);
+      }
+      .result {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-3) var(--space-6);
+      }
+      /* stany makiety: element bez swojego stanu znika, reszta zachowuje własny display */
+      body:not(:has(#s-gotowe:target)) .only-gotowe,
+      body:has(#s-gotowe:target) .not-gotowe,
+      body:not(:has(#s-blad:target)) .only-blad,
+      body:has(#s-blad:target) .not-blad,
+      body:not(:has(#s-przerwane:target)) .only-przerwane,
+      body:has(#s-przerwane:target) .not-przerwane {
+        display: none;
+      }
+      @media (max-width: 60rem) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .step {
+          grid-template-columns: 3.5rem 1.5rem minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <span class="anchor" id="s-gotowe"></span
+    ><span class="anchor" id="s-blad"></span
+    ><span class="anchor" id="s-przerwane"></span>
+    <header class="shell">
+      <div class="shell__in">
+        <a class="wordmark" href="#" aria-label="forms2json, strona główna"
+          >forms2json <span>blankiet do eUsługi</span></a
+        >
+        <nav aria-label="Główna">
+          <a href="zadania.html" aria-current="page">Zadania</a>
+        </nav>
+        <div class="shell__end">
+          <span class="who">Sesja do 17:40</span
+          ><button type="button">
+            <span class="i i-log-out" aria-hidden="true"></span>Wyloguj
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page page--narrow">
+      <a class="back" href="zadania.html"
+        ><span class="i i-arrow-left" aria-hidden="true"></span>Zadania</a
+      >
+      <div class="page-head">
+        <div>
+          <h1 class="not-blad">Wniosek o wynajęcie świetlicy.docx</h1>
+          <p class="page-head__meta not-blad">
+            <span class="mono">a3f9c2e1</span>, wgrano o 10:42, 1,2 MB
+          </p>
+          <h1 class="only-blad">Pas drogowy roboty.pdf</h1>
+          <p class="page-head__meta only-blad">
+            <span class="mono">5be27d30</span>, wgrano o 9:47, 2,4 MB
+          </p>
+        </div>
+        <div class="page-head__actions">
+          <span class="live not-przerwane not-gotowe not-blad"
+            ><span class="i i-loader" aria-hidden="true"></span>Na żywo, trwa 1
+            min 12 s</span
+          >
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="alert alert--warning only-przerwane" role="status">
+          <span class="i i-refresh" aria-hidden="true"></span>
+          <p class="alert__title">Utracono połączenie na żywo</p>
+          <p>
+            Przetwarzanie trwa dalej. Sprawdzamy stan co 5 sekund, ostatnio o
+            10:44:05.
+          </p>
+        </div>
+
+        <div class="sheet only-gotowe">
+          <div class="sheet__body result">
+            <div>
+              <h2>Wynik gotowy</h2>
+              <p class="muted" style="margin-top: var(--space-1)">
+                Ocena ogólna
+                <span class="badge badge--medium"
+                  ><span class="visually-hidden">Pewność: </span>Średnia
+                  <span class="num">0,81</span></span
+                >, 1 błąd, 4 elementy do sprawdzenia.
+              </p>
+            </div>
+            <a
+              class="btn btn--primary"
+              href="przeglad.html"
+              style="margin-left: auto"
+              >Przejrzyj wynik</a
+            >
+          </div>
+        </div>
+
+        <div class="alert alert--error only-blad" role="alert">
+          <span class="i i-x-circle" aria-hidden="true"></span>
+          <p class="alert__title">Nie udało się odczytać pliku</p>
+          <p>
+            PDF jest zaszyfrowany hasłem. Zapisz go bez hasła (Drukuj, potem
+            Zapisz jako PDF) i wgraj ponownie.
+          </p>
+          <div class="alert__actions">
+            <a class="btn btn--secondary" href="zadania.html"
+              ><span class="i i-upload" aria-hidden="true"></span>Wgraj inny
+              plik</a
+            >
+          </div>
+        </div>
+
+        <div class="layout">
+          <section class="sheet" aria-labelledby="kroki-h">
+            <div class="sheet__head"><h2 id="kroki-h">Przebieg</h2></div>
+            <div class="sheet__body">
+              <ol class="steps" aria-live="polite">
+                <li class="step only-blad" data-state="failed">
+                  <span class="step__time">09:47:03</span>
+                  <span class="step__rail"
+                    ><span class="step__dot"
+                      ><span class="i i-x" aria-hidden="true"></span></span
+                    ><span class="step__line"></span
+                  ></span>
+                  <div class="step__body">
+                    <p class="step__title">
+                      Odczyt pliku <span class="visually-hidden">(błąd)</span>
+                    </p>
+                    <p class="step__msg">
+                      Przerwano po 1 s: plik jest zaszyfrowany hasłem.
+                    </p>
+                  </div>
+                </li>
+                <li class="step not-blad" data-state="done">
+                  <span class="step__time">10:42:08</span>
+                  <span class="step__rail"
+                    ><span class="step__dot"
+                      ><span class="i i-check" aria-hidden="true"></span></span
+                    ><span class="step__line"></span
+                  ></span>
+                  <div class="step__body">
+                    <p class="step__title">
+                      Odczyt pliku
+                      <span class="visually-hidden">(zakończony)</span>
+                    </p>
+                    <p class="step__msg">
+                      Odczytano 4 strony, 2 tabele i 11 pól wyboru w 18 s.
+                    </p>
+                  </div>
+                </li>
+
+                <li class="step not-blad" data-state="running">
+                  <span class="step__time">10:42:26</span>
+                  <span class="step__rail"
+                    ><span class="step__dot not-gotowe"
+                      ><span class="i i-loader" aria-hidden="true"></span></span
+                    ><span
+                      class="step__dot only-gotowe"
+                      style="
+                        background: var(--color-success);
+                        border-color: var(--color-success);
+                        color: var(--color-on-accent);
+                      "
+                      ><span class="i i-check" aria-hidden="true"></span></span
+                    ><span class="step__line"></span
+                  ></span>
+                  <div class="step__body">
+                    <p class="step__title">
+                      Analiza treści przez model
+                      <span class="visually-hidden not-gotowe">(w toku)</span>
+                    </p>
+                    <p class="step__msg not-gotowe">
+                      Rozpoznawanie pól i warunków: fragment 4 z 9.
+                    </p>
+                    <p class="step__msg only-gotowe">
+                      Rozpoznano 23 pola, 2 warunki wyświetlania i 3 zgody w 1
+                      min 31 s.
+                    </p>
+                    <progress
+                      class="progress not-gotowe"
+                      max="9"
+                      value="4"
+                      aria-label="Analiza treści, fragment 4 z 9"
+                    >
+                      4 z 9
+                    </progress>
+                  </div>
+                </li>
+
+                <li class="step only-blad" data-state="pending">
+                  <span class="step__time">czeka</span>
+                  <span class="step__rail"
+                    ><span class="step__dot"></span
+                    ><span class="step__line"></span
+                  ></span>
+                  <div class="step__body">
+                    <p class="step__title">
+                      Analiza treści przez model
+                      <span class="visually-hidden">(nie rozpoczęto)</span>
+                    </p>
+                    <p class="step__msg">Nie rozpoczęto.</p>
+                  </div>
+                </li>
+
+                <li class="step" data-state="pending">
+                  <span class="step__time">czeka</span>
+                  <span class="step__rail"
+                    ><span class="step__dot"></span
+                    ><span class="step__line"></span
+                  ></span>
+                  <div class="step__body">
+                    <p class="step__title">
+                      Budowa formularza
+                      <span class="visually-hidden">(oczekuje)</span>
+                    </p>
+                    <p class="step__msg">
+                      Strony, sekcje i bloki ze Standardów.
+                    </p>
+                  </div>
+                </li>
+                <li class="step" data-state="pending">
+                  <span class="step__time">czeka</span>
+                  <span class="step__rail"
+                    ><span class="step__dot"></span
+                    ><span class="step__line"></span
+                  ></span>
+                  <div class="step__body">
+                    <p class="step__title">
+                      Sprawdzenie reguł
+                      <span class="visually-hidden">(oczekuje)</span>
+                    </p>
+                    <p class="step__msg">
+                      Reguły techniczne, Standardy i schemat JSON.
+                    </p>
+                  </div>
+                </li>
+              </ol>
+            </div>
+          </section>
+
+          <div class="stack">
+            <section class="sheet not-blad" aria-labelledby="ostrz-h">
+              <div class="sheet__head">
+                <h2 id="ostrz-h">Ostrzeżenia <span class="num">(2)</span></h2>
+              </div>
+              <div class="sheet__body">
+                <ul class="warn-list">
+                  <li>
+                    <span class="i i-alert" aria-hidden="true"></span
+                    ><span
+                      >Strona 3 jest obrócona o 90°. Odczytano ją po
+                      obróceniu.<small>Odczyt pliku, 10:42:15</small></span
+                    >
+                  </li>
+                  <li>
+                    <span class="i i-alert" aria-hidden="true"></span
+                    ><span
+                      >Tabela „Wyposażenie świetlicy” ma scalone komórki.
+                      Sprawdź listę opcji w wyniku.<small
+                        >Odczyt pliku, 10:42:22</small
+                      ></span
+                    >
+                  </li>
+                </ul>
+              </div>
+            </section>
+            <section class="sheet" aria-labelledby="plik-h">
+              <div class="sheet__head"><h2 id="plik-h">Plik</h2></div>
+              <div class="sheet__body">
+                <dl class="facts">
+                  <dt>Format</dt>
+                  <dd>
+                    <span class="not-blad">DOCX</span
+                    ><span class="only-blad">PDF</span>
+                  </dd>
+                  <dt>Na serwerze</dt>
+                  <dd>
+                    <span class="not-blad">do końca przetwarzania</span
+                    ><span class="only-blad">usunięty o 9:47</span>
+                  </dd>
+                </dl>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+    <nav class="proto-bar" aria-label="Stany makiety">
+      Makieta, stan: <a href="#">w toku</a> <a href="#s-gotowe">gotowe</a>
+      <a href="#s-blad">błąd</a> <a href="#s-przerwane">utrata połączenia</a>
+    </nav>
+  </body>
+</html>
