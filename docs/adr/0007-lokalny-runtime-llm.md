@@ -11,8 +11,8 @@ Rozwiązanie nie może używać LLM dostępnych tylko przez API (Z 5). Modele mu
 ## Decyzja
 
 - Osobny kontener `llm-runtime` z **Ollama** (MIT), który wystawia API zgodne z OpenAI.
-- Worker mówi z modelem tylko przez bramkę ([ADR-0008](0008-bramka-llm.md)) i port `LlmClient`. Adapter używa klienta `openai` (Apache-2.0) z `base_url` bramki.
-- Model wybieramy na podstawie evali ([ADR-0010](0010-ewaluacje-pytest.md)). Kandydaci z licencją Apache-2.0: **Bielik** (polski) i **Qwen** (rodzina z dobrym wyjściem strukturalnym, także wersje VL do obrazów). Wybór zapisujemy w osobnym ADR.
+- Worker mówi z modelem bezpośrednio, przez port `LlmClient` (bez bramki, [ADR-0008](0008-bramka-llm.md)). Adapter używa klienta `openai` (Apache-2.0) z `base_url` runtime'u.
+- Model wybieramy na podstawie evali ([ADR-0010](0010-ewaluacje-pytest.md)). Kandydaci z licencją Apache-2.0: **Bielik** (polski) i **Qwen3** (część modeli Qwen2.5, np. 3B i VL-3B, ma własną licencję Qwen, więc sprawdzamy każdy model osobno; rodzina z dobrym wyjściem strukturalnym, także wersje VL do obrazów). Wybór zapisujemy w osobnym ADR.
 
 ## Rozważone alternatywy
 
@@ -27,4 +27,4 @@ Rozwiązanie nie może używać LLM dostępnych tylko przez API (Z 5). Modele mu
 ## Konsekwencje
 
 - Wagi modeli są duże: nie wkładamy ich do obrazu, tylko pobieramy do wolumenu przy pierwszym uruchomieniu (opis w README).
-- Każdy runtime z API OpenAI da się podstawić zmianą konfiguracji bramki.
+- Każdy runtime z API OpenAI da się podstawić zmianą `LLM_BASE_URL`.

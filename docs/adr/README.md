@@ -31,8 +31,8 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0005](0005-pliki-tymczasowe-tmpfs.md) | Pliki tymczasowe na współdzielonym tmpfs | Zaakceptowana |
 | [0006](0006-pipeline-czysty-python.md) | Pipeline w czystym Pythonie, bez frameworka orkiestracji | Zaakceptowana |
 | [0007](0007-lokalny-runtime-llm.md) | Lokalny runtime LLM: Ollama, API zgodne z OpenAI | Proponowana |
-| [0008](0008-bramka-llm.md) | Bramka LLM: Bifrost zamiast LiteLLM | Proponowana |
-| [0009](0009-obserwowalnosc-opentelemetry.md) | OTel Collector + Jaeger + Prometheus + Grafana (opcjonalnie) | Proponowana |
+| [0008](0008-bramka-llm.md) | Bramka LLM: Bifrost zamiast LiteLLM | Odrzucona: bez bramki |
+| [0009](0009-obserwowalnosc-opentelemetry.md) | OTel Collector + Jaeger + Prometheus, bez Grafany | Zaakceptowana |
 | [0010](0010-ewaluacje-pytest.md) | Ewaluacje: własny runner na pytest, DeepEval odłożony | Proponowana |
 | [0011](0011-frontend-react-vite.md) | Frontend: React + Vite + TypeScript + TanStack Query | Zaakceptowana |
 | [0012](0012-obraz-bazowy-slim.md) | Obraz workera: `python:3.14-slim` zamiast Alpine | Proponowana |
