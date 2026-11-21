@@ -2,3 +2,5 @@ dist
 package-lock.json
 # dokumenty projektowe pisane ręcznie, Prettier pilnuje tylko kodu
 *.md
+# kopie wzorców COI 1:1 z data/
+src/features/form-preview/fixtures
