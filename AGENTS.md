@@ -11,7 +11,22 @@ Zespół H-kwadrat to dwie osoby. Każda ma swojego agenta. Agenci pracują rów
 
 **Ustal, którym agentem jesteś**, zanim cokolwiek zrobisz: `gh api user -q .login`. Wynik `benhus8` oznacza agenta Benka, każdy inny login to agent Kuby. Nie zgaduj z nazwy brancha ani z historii rozmowy.
 
-Źródłem prawdy o zadaniach są **GitHub Issues**. Kontekst domenowy (dane, wymagania, niespójności) znajdziesz w [docs/analiza-i-charakterystyka-danych.md](docs/analiza-i-charakterystyka-danych.md). Przeczytaj go przed pierwszym zadaniem.
+Źródłem prawdy o zadaniach są **GitHub Issues**.
+
+## Dokumentacja projektu: przeczytaj przed pierwszym zadaniem
+
+| Plik | Po co |
+| --- | --- |
+| [docs/requirements.md](docs/requirements.md) | wymagania FR/NFR z ID, konflikty w wymaganiach i decyzje robocze |
+| [docs/architecture.md](docs/architecture.md) | usługi, przepływ, pipeline, struktura katalogów |
+| [docs/coding-rules.md](docs/coding-rules.md) | jak piszemy kod (backend i frontend) |
+| [docs/adr/README.md](docs/adr/README.md) | rejestr decyzji: co wybraliśmy, co odrzuciliśmy i dlaczego |
+| [docs/analiza-i-charakterystyka-danych.md](docs/analiza-i-charakterystyka-danych.md) | dane wejściowe, wzorcowe JSON-y, niespójności |
+
+Zasady:
+- Issue i PR odwołują się do ID wymagań (np. `FR-08`, `NFR-06`).
+- **Nowa biblioteka, framework albo usługa = nowy ADR w tym samym PR-ze.** Najpierw sprawdź [politykę licencji](docs/adr/0013-polityka-licencji.md).
+- Kod niezgodny z ADR albo z coding-rules nie przechodzi przeglądu. Chcesz to zmienić? Napisz nowy ADR.
 
 ## Branie zadań
 1. Wolne issue = otwarte, **bez assignee** i **bez etykiety `agent:*`**. Tylko takie wolno brać.
@@ -31,6 +46,6 @@ Zespół H-kwadrat to dwie osoby. Każda ma swojego agenta. Agenci pracują rów
 - Merge'uje człowiek, w imieniu którego działa agent (albo agent, jeśli jego człowiek wprost na to pozwolił).
 
 ## Pisanie kodu
+- Zasady: [docs/coding-rules.md](docs/coding-rules.md) (KISS, YAGNI, SOLID, architektura heksagonalna z portami na ABC, czytelny pipeline).
 - Przy każdym zadaniu z kodem stosuj skill **ponytail** na poziomie `full` ([.claude/skills/ponytail/SKILL.md](.claude/skills/ponytail/SKILL.md)). Przegląd zmian: `ponytail-review`, audyt repo: `ponytail-audit`.
-
-_Reszta do uzupełnienia (konwencje, styl, testy)._
+- Komendy testów i lintów dopiszemy tutaj, gdy powstanie kod.
