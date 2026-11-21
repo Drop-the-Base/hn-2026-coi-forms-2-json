@@ -1,4 +1,4 @@
-# ADR-0024: Warunki `states` w podglądzie formularza: biblioteka `jsonata`
+# ADR-0025: Warunki `states` w podglądzie formularza: biblioteka `jsonata`
 
 - Status: Proponowana
 - Data: 2026-11-21
