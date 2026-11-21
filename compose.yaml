@@ -13,7 +13,7 @@ x-backend: &backend
   environment: &backend-env
     RABBITMQ_URL: amqp://${RABBITMQ_USER:?ustaw w .env}:${RABBITMQ_PASSWORD:?ustaw w .env}@rabbitmq:5672/
     FILE_STORE_DIR: /jobs
-    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318  # OTLP/HTTP (ADR-0024)
   volumes:
     - jobs:/jobs
   depends_on:
@@ -43,6 +43,8 @@ services:
     environment:
       <<: *backend-env
       OTEL_SERVICE_NAME: forms2json-api
+      # Stabilne konwencje HTTP: metryka http.server.request.duration zamiast starej http.server.duration.
+      OTEL_SEMCONV_STABILITY_OPT_IN: http
     tmpfs:
       # Starlette zapisuje upload > 1 MB w /tmp: ma zostać w RAM (ADR-0022, NFR-06).
       - /tmp:size=64m
@@ -98,6 +100,9 @@ services:
     <<: *hardening
     profiles: [observability]
     image: jaegertracing/jaeger:2.23.0
+    command: ["--config=/etc/jaeger/config.yaml"]
+    volumes:
+      - ./deploy/jaeger.yaml:/etc/jaeger/config.yaml:ro
     ports:
       - "127.0.0.1:16686:16686"  # UI bez logowania, więc tylko z localhosta
 

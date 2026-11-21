@@ -1,0 +1,49 @@
+# Jaeger v2 z zakładką Monitor (SPM), wzór: config-spm.yaml z repo Jaegera (ADR-0009).
+# span_metrics liczy z trace'ów liczbę wywołań, błędy i latencję; Prometheus je scrapuje
+# z jaeger:8889, a jaeger_query czyta je z powrotem z Prometheusa. Rdzeń otel-collectora
+# nie ma konektora span_metrics, a Jaeger ma, więc liczymy je tutaj.
+service:
+  extensions: [jaeger_storage, jaeger_query]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [jaeger_storage_exporter, span_metrics]
+    metrics/spanmetrics:
+      receivers: [span_metrics]
+      exporters: [prometheus]
+
+extensions:
+  jaeger_query:
+    storage:
+      traces: memory
+      metrics: prometheus
+  jaeger_storage:
+    backends:
+      memory:
+        memory:
+          max_traces: 10000
+    metric_backends:
+      prometheus:
+        prometheus:
+          endpoint: http://prometheus:9090
+          normalize_calls: true
+          normalize_duration: true
+
+connectors:
+  span_metrics:
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+
+exporters:
+  jaeger_storage_exporter:
+    trace_storage: memory
+  prometheus:
+    endpoint: 0.0.0.0:8889

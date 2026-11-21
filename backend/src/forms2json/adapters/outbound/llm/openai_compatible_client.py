@@ -5,13 +5,19 @@ from typing import Any
 import httpx2
 import openai
 from openai import OpenAI
-from opentelemetry import trace
+from opentelemetry import metrics, trace
 
 from forms2json.application.ports.llm_client import LlmCallFailed, LlmClient, LlmResult, LlmUsage
 
 MAX_ATTEMPTS = 3
 
 _tracer = trace.get_tracer(__name__)
+# GenAI semantic conventions: name, unit and buckets from the spec.
+_token_usage = metrics.get_meter(__name__).create_histogram(
+    "gen_ai.client.token.usage",
+    unit="{token}",
+    explicit_bucket_boundaries_advisory=[4**i for i in range(14)],
+)
 
 
 class OpenAiCompatibleLlmClient(LlmClient):
@@ -39,14 +45,13 @@ class OpenAiCompatibleLlmClient(LlmClient):
 
     def generate_json(self, system: str, user: str, schema: dict[str, Any]) -> LlmResult:
         # GenAI semantic conventions; "openai" names the API flavor, not who hosts the model.
+        attributes = {
+            "gen_ai.operation.name": "chat",
+            "gen_ai.provider.name": "openai",
+            "gen_ai.request.model": self._model,
+        }
         with _tracer.start_as_current_span(
-            f"chat {self._model}",
-            kind=trace.SpanKind.CLIENT,
-            attributes={
-                "gen_ai.operation.name": "chat",
-                "gen_ai.provider.name": "openai",
-                "gen_ai.request.model": self._model,
-            },
+            f"chat {self._model}", kind=trace.SpanKind.CLIENT, attributes=attributes
         ) as span:
             result = self._generate_json(system, user, schema)
             span.set_attributes(
@@ -54,6 +59,12 @@ class OpenAiCompatibleLlmClient(LlmClient):
                     "gen_ai.usage.input_tokens": result.usage.prompt_tokens,
                     "gen_ai.usage.output_tokens": result.usage.completion_tokens,
                 }
+            )
+            _token_usage.record(
+                result.usage.prompt_tokens, {**attributes, "gen_ai.token.type": "input"}
+            )
+            _token_usage.record(
+                result.usage.completion_tokens, {**attributes, "gen_ai.token.type": "output"}
             )
             return result
 

@@ -178,9 +178,9 @@ Typy API generujemy z OpenAPI FastAPI, więc kontrakt ma jedno źródło prawdy.
 |---|---|---|
 | Trace żądania end-to-end | OTel SDK w `api` i `worker`, propagacja kontekstu w nagłówkach wiadomości RabbitMQ | Jaeger |
 | Span per krok pipeline'u i per wywołanie LLM | OTel, konwencje GenAI (`gen_ai.*`) | Jaeger |
-| Latencja, liczba żądań, błędy | OTel metrics | Prometheus → Jaeger Monitor (SPM) |
-| Tokeny i koszt per żądanie | adapter `LlmClient`, atrybuty `gen_ai.usage.*` | Prometheus |
-| Confidence ogólny per zadanie | metryka z workera | Prometheus |
+| Latencja, liczba żądań, błędy | OTel metrics (`http.server.request.duration`, czas kroków i zadania), `span_metrics` w Jaegerze | Prometheus → Jaeger Monitor (SPM) |
+| Tokeny i koszt per żądanie | adapter `LlmClient` (`gen_ai.client.token.usage`), koszt zadania w adapterze `JobMetrics` | Prometheus |
+| Confidence ogólny per zadanie | metryka z workera (`JobMetrics`) | Prometheus |
 
 Koszt modeli lokalnych to nie faktura, tylko czas obliczeń. Liczymy go z konfigurowalnej stawki (`COST_PER_1K_TOKENS` lub `COST_PER_GPU_SECOND`), żeby porównywać modele i pokazać koszt wdrożenia (NFR-13).
 

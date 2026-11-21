@@ -28,6 +28,7 @@
 
 ## Konsekwencje
 
-- Metryki (tokeny, koszt, latencja) to osobne zadanie (#40); ten ADR dotyczy tylko traces.
+- Metryki (#40) nie wymagają nowych pakietów: `opentelemetry-sdk` ma `MeterProvider`, a `opentelemetry-exporter-otlp-proto-http` eksporter metryk. `configure_telemetry` włącza je razem z tracingiem (ten sam warunek `OTEL_EXPORTER_OTLP_ENDPOINT`). Adaptery: `MetricsObserver` (czas kroków, port `PipelineObserver`), `JobMetrics` (czas, wynik, koszt i confidence zadania, port `JobObserver`), histogram `gen_ai.client.token.usage` w `OpenAiCompatibleLlmClient`.
+- Metryki z trace'ów dla zakładki Monitor liczy konektor `span_metrics` w Jaegerze v2 (`deploy/jaeger.yaml`), bo obraz rdzenia otel-collectora go nie ma; dzięki temu nie zmieniamy obrazu Collectora na `contrib`.
 - Span LLM, który się nie powiódł, ma status błędu, ale nie ma atrybutów `gen_ai.usage.*`.
 - Testy jednostkowe używają `InMemorySpanExporter`; globalny `TracerProvider` w procesie testów ustawia tylko `tests/unit/test_tracing.py`.
