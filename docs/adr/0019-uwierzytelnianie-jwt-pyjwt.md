@@ -1,4 +1,4 @@
-# ADR-0018: Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu
+# ADR-0019: Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu
 
 - Status: Proponowana
 - Data: 2026-11-21
