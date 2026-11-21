@@ -49,4 +49,6 @@ Zasady:
 ## Pisanie kodu
 - Zasady: [docs/coding-rules.md](docs/coding-rules.md) (KISS, YAGNI, SOLID, architektura heksagonalna z portami na ABC, czytelny pipeline).
 - Przy każdym zadaniu z kodem stosuj skill **ponytail** na poziomie `full` ([.claude/skills/ponytail/SKILL.md](.claude/skills/ponytail/SKILL.md)). Przegląd zmian: `ponytail-review`, audyt repo: `ponytail-audit`.
-- Komendy testów i lintów dopiszemy tutaj, gdy powstanie kod.
+- Przed PR (to samo puszcza CI, [.github/workflows/ci.yml](.github/workflows/ci.yml)):
+  - backend (`cd backend`): `uv sync`, `uv run ruff check`, `uv run ruff format --check`, `uv run mypy src tests`, `uv run pytest` (testy `integration` i `evals` są domyślnie pomijane, uruchom je przez `-m integration` / `-m evals`)
+  - frontend (`cd frontend`): `npm ci`, `npm run lint`, `npx prettier --check .`, `npx vitest run`, `npm run build`
