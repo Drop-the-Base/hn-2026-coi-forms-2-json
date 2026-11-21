@@ -32,6 +32,7 @@ from forms2json.adapters.outbound.observability.log_observer import (
 from forms2json.adapters.outbound.observability.metrics import JobMetrics, MetricsObserver
 from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
 from forms2json.adapters.outbound.ocr.tesseract_ocr import TesseractOcr
+from forms2json.adapters.outbound.preview.libreoffice_pdf_renderer import LibreOfficePdfRenderer
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
 from forms2json.adapters.outbound.readers.doc_reader import DocReader
 from forms2json.adapters.outbound.readers.docx_reader import DocxReader
@@ -54,6 +55,7 @@ from forms2json.application.ports.llm_client import LlmClient
 from forms2json.application.ports.pipeline_observer import PipelineObserver
 from forms2json.application.use_cases.get_job_result import GetJobResult
 from forms2json.application.use_cases.process_job import ProcessJob
+from forms2json.application.use_cases.render_preview import RenderPreview
 from forms2json.application.use_cases.submit_job import SubmitJob
 from forms2json.config import Settings, get_settings
 from forms2json.domain.cost import CostRates
@@ -112,6 +114,9 @@ async def _api_lifespan(app: FastAPI) -> AsyncIterator[None]:
     cleanup = asyncio.create_task(_delete_expired_files_forever(files))
     app.state.submit_job = SubmitJob(files, queue, results, settings.max_upload_bytes)
     app.state.get_job_result = GetJobResult(results)
+    app.state.render_preview = RenderPreview(
+        LibreOfficePdfRenderer(settings.doc_conversion_timeout_seconds), settings.max_upload_bytes
+    )
     app.state.progress_hub = hub
     try:
         yield

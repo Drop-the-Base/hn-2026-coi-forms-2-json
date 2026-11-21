@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   elementPath,
   evaluateStates,
+  hiddenBy,
   initialAnswers,
   pageOrder,
   type Answer,
@@ -17,10 +18,17 @@ interface Props {
   confidence?: Record<string, number>;
   /** A new object moves the preview to the page of `path` and marks its element. */
   selection?: { path: string } | null;
+  /** Clicking an element in the preview picks it (the review screen opens it in the inspector). */
+  onSelect?: (path: string) => void;
 }
 
 // Interactive render of an eUsługa form JSON (FR-E5). Answers stay local; give a new `key` for a new form.
-export function FormPreview({ form, confidence = {}, selection }: Props) {
+export function FormPreview({
+  form,
+  confidence = {},
+  selection,
+  onSelect,
+}: Props) {
   const { tabs, consistent } = pageOrder(form);
   const [page, setPage] = useState(0);
   const [shownSelection, setShownSelection] = useState(selection);
@@ -84,6 +92,13 @@ export function FormPreview({ form, confidence = {}, selection }: Props) {
           </li>
         ))}
       </ol>
+      {selection && hiddenBy(form, elementPath(selection.path), statuses) && (
+        <p className="eu-alert" role="status">
+          Wybrane pole jest teraz ukryte: „
+          {hiddenBy(form, elementPath(selection.path), statuses)}” pokazuje się
+          dopiero po spełnieniu warunku. Edytujesz je w widoku „Pole”.
+        </p>
+      )}
       {tab && (
         <>
           <h3 className="eu-page-title" ref={titleRef} tabIndex={-1}>
@@ -97,6 +112,7 @@ export function FormPreview({ form, confidence = {}, selection }: Props) {
             answers={answers}
             statuses={statuses}
             onAnswer={answer}
+            onSelect={onSelect}
           />
         </>
       )}

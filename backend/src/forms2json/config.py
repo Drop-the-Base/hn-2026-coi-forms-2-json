@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr = SecretStr("local")
     # Not every OpenAI-compatible provider supports strict json_schema; json_object is the fallback.
     llm_response_format: Literal["json_schema", "json_object"] = "json_schema"
-    # soffice can hang on a broken .doc; the worker kills it after this (#24).
+    # soffice can hang on a broken file; the worker (.doc) and the api (preview) kill it after this.
     doc_conversion_timeout_seconds: float = Field(default=60.0, gt=0)
     ocr_lang: str = "pol"  # Tesseract language pack installed in the worker image (ADR-0029)
     rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)

@@ -203,6 +203,15 @@ SCHEMA_TYPES: dict[str, type | tuple[type, ...]] = {
 SUPPORTED_KEYWORDS = {"$schema", "title", "type", "properties", "items"}
 
 
+SCHEMA_PATH = Path(__file__).with_name("schema.json")
+
+
+def read_schema() -> JsonObject:
+    """The official schema exactly as published (served to the frontend by /form-schema)."""
+    schema: JsonObject = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    return schema
+
+
 def load_schema() -> JsonObject:
     """The official schema with the K-09 typo fixed in our copy.
 
@@ -210,7 +219,7 @@ def load_schema() -> JsonObject:
     references, so we rename the key before validating. Its items stay {} as in the original:
     nested fields are not checked by the schema, the R-rules walk them (K-09).
     """
-    text = Path(__file__).with_name("form_schema.json").read_text(encoding="utf-8")
+    text = SCHEMA_PATH.read_text(encoding="utf-8")
     schema: JsonObject = json.loads(text.replace('"repetingSectionGrid"', '"repeatingSectionGrid"'))
     return schema
 

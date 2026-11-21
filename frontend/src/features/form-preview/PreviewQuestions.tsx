@@ -24,6 +24,8 @@ interface Props {
   answers: Answers;
   statuses: Record<string, FieldStatus> | null;
   onAnswer: (fieldId: string, value: Answer) => void;
+  /** Mouse shortcut to pick the element for editing; keyboard users pick it in the structure list. */
+  onSelect?: (path: string) => void;
 }
 
 // Renders questions on the 3-column eUsługa grid; sections recurse into their own grid.
@@ -48,6 +50,11 @@ export function PreviewQuestions(props: Props) {
               path === props.current ? "eu-cell is-current" : "eu-cell"
             }
             style={{ gridColumn: `${q.x + 1} / span ${q.cols}` }}
+            onClick={(e) => {
+              // The innermost cell wins, so a field inside a section selects the field.
+              e.stopPropagation();
+              props.onSelect?.(path);
+            }}
           >
             {flagged && (
               <span
@@ -81,6 +88,7 @@ function PreviewField({
   answers,
   statuses,
   onAnswer,
+  onSelect,
 }: Props & {
   badge: ReactNode;
   field: FormField;
@@ -138,6 +146,7 @@ function PreviewField({
             current={current}
             questions={field.repeatingSectionGrid ?? []}
             answers={answers}
+            onSelect={onSelect}
             statuses={statuses}
             onAnswer={onAnswer}
           />

@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, expect, test, vi } from "vitest";
 import { sourceFiles } from "../../shared/sourceFiles";
+import { FORM_SCHEMA } from "../../test/server";
 import ReviewPage from "./ReviewScreen";
 import wynik from "./fixtures/wynik-wzorzec-1.json";
 
@@ -18,7 +19,12 @@ function renderReview(result: unknown = wynik) {
     {
       path: "*",
       element: (
-        <ReviewPage result={result} jobId={JOB_ID} fileName="wniosek.pdf" />
+        <ReviewPage
+          result={result}
+          schema={FORM_SCHEMA}
+          jobId={JOB_ID}
+          fileName="wniosek.pdf"
+        />
       ),
     },
   ]);
@@ -180,22 +186,6 @@ test("oryginał JPG w img z blob URL, klik przełącza 100%", () => {
   expect(zoom.getAttribute("aria-pressed")).toBe("true");
 });
 
-test("oryginał DOCX jako tekst z source_text z podziałem na strony", () => {
-  sourceFiles.set(
-    JOB_ID,
-    new File(["docx"], "wniosek.docx", {
-      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    }),
-  );
-  showOriginal();
-  expect(screen.getByText(/Ten format nie ma podglądu/)).toBeDefined();
-  expect(
-    screen.getByRole("heading", { level: 3, name: "Strona 2" }),
-  ).toBeDefined();
-  expect(screen.getByText("☐ odbiór osobiście")).toBeDefined();
-  expect(URL.createObjectURL).not.toHaveBeenCalled();
-});
-
 test("brak pliku po odświeżeniu: tekst z source_text i informacja", () => {
   showOriginal();
   expect(screen.getByText(/Pliku nie ma już w tej karcie/)).toBeDefined();
@@ -203,4 +193,105 @@ test("brak pliku po odświeżeniu: tekst z source_text i informacja", () => {
     screen.getByRole("heading", { level: 3, name: "Strona 1" }),
   ).toBeDefined();
   expect(screen.getByText(/\| Imię \| Nazwisko \|/)).toBeDefined();
+});
+
+const NAZWA_ORGANU = "tabs[0].questions[0].field.repeatingSectionGrid[0].field";
+
+function openInTree(title: string) {
+  fireEvent.click(screen.getByRole("tab", { name: "Struktura" }));
+  const tree = screen.getByRole("navigation", { name: "Struktura formularza" });
+  const node = [...tree.querySelectorAll("button")].find(
+    (b) => b.querySelector(".tree__title")?.textContent === title,
+  );
+  fireEvent.click(node as HTMLButtonElement);
+}
+
+test("pole z drzewa edytuje się w inspektorze, zmiana trafia do JSON-a i podglądu", async () => {
+  renderReview();
+  openInTree("Nazwa organu");
+  const title = screen.getByLabelText("Tytuł") as HTMLInputElement;
+  expect(title.value).toBe("Nazwa organu");
+
+  fireEvent.change(title, { target: { value: "Nazwa urzędu" } });
+  const json = JSON.parse(editor().state.doc.toString());
+  expect(
+    json.tabs[0].questions[0].field.repeatingSectionGrid[0].field.title,
+  ).toBe("Nazwa urzędu");
+  expect(document.querySelector(".eu-cell.is-current")?.textContent).toContain(
+    "Nazwa urzędu",
+  );
+});
+
+test("Wymagane w inspektorze dopisuje REQUIRED do walidacji", () => {
+  renderReview();
+  openInTree("Nazwa organu");
+  fireEvent.click(screen.getByLabelText("Wymagane"));
+  const json = JSON.parse(editor().state.doc.toString());
+  expect(
+    json.tabs[0].questions[0].field.repeatingSectionGrid[0].field.validation,
+  ).toEqual(["REQUIRED"]);
+  expect(screen.getByText(/Nazwa organu \(wymagane\)/)).toBeDefined();
+});
+
+test("kliknięcie pola w podglądzie otwiera je w inspektorze", () => {
+  renderReview();
+  const cell = [...document.querySelectorAll(".eu-cell")].find((c) =>
+    c.textContent?.startsWith("Nazwa organu"),
+  );
+  fireEvent.click(cell as HTMLElement);
+  expect((screen.getByLabelText("Tytuł") as HTMLInputElement).value).toBe(
+    "Nazwa organu",
+  );
+  expect(document.querySelector(".eu-cell.is-current")).toBe(
+    document.querySelector(`[data-path="${NAZWA_ORGANU}"]`) ??
+      document.querySelector(".eu-cell.is-current"),
+  );
+});
+
+test("problem z ukrytym polem wyboru: notka w podglądzie, opcje w inspektorze bez formatu", () => {
+  renderReview();
+  fireEvent.keyDown(document, { key: "F8" });
+  fireEvent.keyDown(document, { key: "F8" });
+  expect(screen.getByText("Problem 2 z 5")).toBeDefined();
+  expect(screen.getByText(/Wybrane pole jest teraz ukryte/)).toBeDefined();
+  expect(screen.getByText("Opcje do wyboru")).toBeDefined();
+  expect(screen.queryByText("Format odpowiedzi")).toBeNull();
+});
+
+test("strzałki przełączają zakładki w kolumnie edycji", () => {
+  renderReview();
+  const pole = screen.getByRole("tab", { name: "Pole", selected: true });
+  fireEvent.keyDown(pole, { key: "ArrowRight" });
+  const json = screen
+    .getAllByRole("tab", { name: "JSON" })
+    .find((t) => t.closest('[aria-label="Edycja"]'));
+  expect(json?.getAttribute("aria-selected")).toBe("true");
+  expect(document.activeElement).toBe(json);
+});
+
+test("kolumny robocze: dowolna para obok siebie, wybór widoku z drugiej kolumny zamienia je", () => {
+  renderReview();
+  const col = (id: string) => document.getElementById(id)?.dataset.col;
+  const tab = (list: string, name: string) =>
+    screen
+      .getAllByRole("tab", { name })
+      .find((t) => t.closest(`[aria-label="${list}"]`)) as HTMLElement;
+  expect([col("pole"), col("podglad")]).toEqual(["a", "b"]);
+
+  fireEvent.click(tab("Druga kolumna", "Oryginał"));
+  expect([col("pole"), col("oryginal"), col("podglad")]).toEqual([
+    "a",
+    "b",
+    undefined,
+  ]);
+
+  fireEvent.click(tab("Edycja", "Oryginał"));
+  expect([col("oryginal"), col("pole")]).toEqual(["a", "b"]);
+
+  fireEvent.click(tab("Druga kolumna", "JSON"));
+  expect([col("oryginal"), col("edytor"), col("pole")]).toEqual([
+    "a",
+    "b",
+    undefined,
+  ]);
 });

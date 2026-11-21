@@ -6,7 +6,7 @@ from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, FastAPI, Request, UploadFile, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel
 from starlette.types import Lifespan
@@ -14,10 +14,13 @@ from starlette.types import Lifespan
 from forms2json.adapters.inbound.http.auth import require_jwt
 from forms2json.adapters.inbound.http.progress_hub import ProgressHub, job_finished
 from forms2json.application.ports.job_queue import JobResult, ProgressEvent
+from forms2json.application.ports.pdf_renderer import PreviewFailed
 from forms2json.application.ports.result_store import UnknownJob
 from forms2json.application.use_cases.get_job_result import GetJobResult
+from forms2json.application.use_cases.render_preview import RenderPreview
 from forms2json.application.use_cases.submit_job import SubmitJob
 from forms2json.config import Settings, get_settings
+from forms2json.domain.standards import read_schema
 from forms2json.domain.upload import FileTooLarge, InvalidFileName, UnsupportedFileType
 
 
@@ -40,6 +43,7 @@ _HTTP_STATUS: dict[type[Exception], int] = {
     FileTooLarge: status.HTTP_413_CONTENT_TOO_LARGE,
     UnsupportedFileType: status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
     UnknownJob: status.HTTP_404_NOT_FOUND,
+    PreviewFailed: status.HTTP_422_UNPROCESSABLE_CONTENT,
 }
 
 
@@ -59,6 +63,10 @@ def _submit_job(request: Request) -> SubmitJob:
 
 def _get_job_result(request: Request) -> GetJobResult:
     return cast(GetJobResult, request.app.state.get_job_result)
+
+
+def _render_preview(request: Request) -> RenderPreview:
+    return cast(RenderPreview, request.app.state.render_preview)
 
 
 # Handlers are async on purpose: the in-memory ResultStore is then only touched by the event loop.
@@ -120,6 +128,31 @@ async def job_events(
 async def get_config(settings: Annotated[Settings, Depends(get_settings)]) -> ApiConfig:
     """Limits the frontend checks before uploading (FR-05)."""
     return ApiConfig(max_upload_bytes=settings.max_upload_bytes)
+
+
+@router.get("/form-schema")
+async def get_form_schema() -> dict[str, Any]:
+    """The official eUsługi FormDefinition JSON Schema, as published (K-09 typo included)."""
+    return read_schema()
+
+
+@router.post(
+    "/preview",
+    response_class=Response,
+    responses={
+        200: {"content": {"application/pdf": {}}, "description": "Plik jako PDF"},
+        422: {"description": "Konwersja do PDF nie powiodła się"},
+    },
+)
+async def render_preview(
+    file: UploadFile,
+    render: Annotated[RenderPreview, Depends(_render_preview)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> Response:
+    """The uploaded DOC, DOCX, XLSX or ODS as PDF, for the review screen's original (FR-E4)."""
+    content = await file.read(settings.max_upload_bytes + 1)
+    pdf = await render.execute(file.filename or "", content)
+    return Response(pdf, media_type="application/pdf")
 
 
 @router.post(

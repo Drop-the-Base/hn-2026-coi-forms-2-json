@@ -3,11 +3,42 @@ import { setupServer } from "msw/node";
 
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
+/** A slice of the official schema (backend schema.json), with its K-09 typo, enough for the tests. */
+export const FORM_SCHEMA = {
+  type: "object",
+  properties: {
+    title: { type: "string" },
+    tabs: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          questions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                field: {
+                  type: "object",
+                  properties: {
+                    repetingSectionGrid: { type: "array", items: {} },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
 // Default API for tests; a test overrides single endpoints with server.use().
 export const server = setupServer(
   http.get("*/api/v1/config", () =>
     HttpResponse.json({ max_upload_bytes: MAX_UPLOAD_BYTES }),
   ),
+  http.get("*/api/v1/form-schema", () => HttpResponse.json(FORM_SCHEMA)),
 );
 
 /** Unsigned JWT-shaped token; only the API checks the signature. */
