@@ -45,6 +45,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0019](0019-uwierzytelnianie-jwt-pyjwt.md) | Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu | Proponowana |
 | [0020](0020-pydantic-w-domenie.md) | Pydantic w domenie: tylko dla modeli-kontraktów z LLM (`FormDraft`) | Zaakceptowana |
 | [0021](0021-kolejka-aio-pika.md) | Kolejka zadań: `aio-pika` za portem `JobQueue` | Proponowana |
+| [0022](0022-serwer-uvicorn-python-multipart.md) | Serwer ASGI `uvicorn` i `python-multipart` dla uploadu | Proponowana |
 
 ## Szablon
 
