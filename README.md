@@ -50,7 +50,7 @@ Potem:
 
 Koniec: `docker compose down` (pliki i wyniki w tmpfs znikają, obrazy zostają).
 
-Jedno zadanie trwa ok. 1 min na Apple M-series (krok `understand` w Ollamie); na CPU bez GPU dłużej. Jeśli Ollama nie zdąży, zadanie kończy się `LlmCallFailed`: podnieś `LLM_TIMEOUT_SECONDS` w `.env` i `docker compose up -d`.
+Jedno zadanie trwa 1–2 min na Apple M-series (krok `understand` w Ollamie); na CPU bez GPU dłużej. Jeśli Ollama nie zdąży, zadanie kończy się `LlmCallFailed`: podnieś `LLM_TIMEOUT_SECONDS` w `.env` i `docker compose up -d`.
 
 ## Konfiguracja
 
@@ -146,7 +146,7 @@ curl -N -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/jobs/<job
 
 ### OpenAPI
 
-nginx nie wystawia Swaggera. Opcje:
+nginx nie przekazuje `/docs` do api (http://localhost:8080/docs to strona SPA). Opcje:
 - specyfikacja w repo: [frontend/openapi.json](frontend/openapi.json);
 - świeża z działającego kontenera:
   `docker compose exec -T api python -c "import json; from forms2json.adapters.inbound.http.app import create_app; print(json.dumps(create_app().openapi()))" > openapi.json`;
