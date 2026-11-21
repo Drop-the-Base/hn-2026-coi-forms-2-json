@@ -1,4 +1,4 @@
-# ADR-0024: Frontend: typy API z `openapi-typescript`, MSW w testach, CSS z design systemu zamiast Tailwind
+# ADR-0026: Frontend: typy API z `openapi-typescript`, MSW w testach, CSS z design systemu zamiast Tailwind
 
 - Status: Proponowana
 - Data: 2026-11-21

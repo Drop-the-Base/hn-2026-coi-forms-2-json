@@ -9,7 +9,9 @@ from aio_pika.abc import (
     AbstractExchange,
     AbstractIncomingMessage,
     AbstractRobustConnection,
+    HeadersType,
 )
+from opentelemetry import propagate, trace
 from pydantic import TypeAdapter, ValidationError
 
 from forms2json.application.ports.job_queue import Job, JobQueue, JobResult, ProgressEvent
@@ -23,6 +25,7 @@ _result = TypeAdapter(JobResult)
 _progress = TypeAdapter(ProgressEvent)
 
 logger = logging.getLogger(__name__)
+_tracer = trace.get_tracer(__name__)
 
 
 class RabbitMqJobQueue(JobQueue):
@@ -87,13 +90,33 @@ class RabbitMqJobQueue(JobQueue):
                         "Dropping malformed %s message %s", queue_name, message.message_id
                     )
                     return
-                await handler(item)
+                await _handle_in_trace(message, item, handler)
 
         queue = await self._channel.get_queue(queue_name)
         await queue.consume(on_message)
 
     async def _publish(self, exchange: AbstractExchange, routing_key: str, body: bytes) -> None:
+        headers: HeadersType = {}
+        propagate.inject(headers)  # traceparent: the worker continues the api's trace (NFR-14)
         message = Message(
-            body, content_type="application/json", delivery_mode=DeliveryMode.NOT_PERSISTENT
+            body,
+            content_type="application/json",
+            delivery_mode=DeliveryMode.NOT_PERSISTENT,
+            headers=headers,
         )
         await exchange.publish(message, routing_key=routing_key)
+
+
+async def _handle_in_trace[T](
+    message: AbstractIncomingMessage, item: T, handler: Callable[[T], Awaitable[None]]
+) -> None:
+    context = propagate.extract(message.headers)
+    if not trace.get_current_span(context).get_span_context().is_valid:
+        # Progress events from the pipeline thread carry no trace; a root trace each is noise.
+        await handler(item)
+        return
+    destination = message.exchange or message.routing_key  # "jobs", "results" or "progress"
+    with _tracer.start_as_current_span(
+        f"process {destination}", context=context, kind=trace.SpanKind.CONSUMER
+    ):
+        await handler(item)
