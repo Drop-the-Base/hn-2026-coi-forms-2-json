@@ -22,6 +22,7 @@ Zespół H-kwadrat to dwie osoby. Każda ma swojego agenta. Agenci pracują rów
 | [docs/coding-rules.md](docs/coding-rules.md) | jak piszemy kod (backend i frontend) |
 | [docs/adr/README.md](docs/adr/README.md) | rejestr decyzji: co wybraliśmy, co odrzuciliśmy i dlaczego |
 | [docs/analiza-i-charakterystyka-danych.md](docs/analiza-i-charakterystyka-danych.md) | dane wejściowe, wzorcowe JSON-y, niespójności |
+| [docs/propozycja-slownika.md](docs/propozycja-slownika.md) | propozycja nowego słownika `DYSCYPLINY_SPORTOWE` (FR-E2) |
 
 Zasady:
 - Issue i PR odwołują się do ID wymagań (np. `FR-08`, `NFR-06`).
