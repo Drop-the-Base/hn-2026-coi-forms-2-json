@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = Field(default=120.0, gt=0)
     # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
     llm_max_input_chars: int = Field(default=30_000, gt=0)
+    # FR-T1: below this an element is not "high" in frontend/DESIGN.md and needs a human look.
+    confidence_review_threshold: float = Field(default=0.85, ge=0, le=1)
 
     # FR-10. No default secret: the API must not start with a guessable key (NFR-07).
     # 32 bytes is the HS256 minimum from RFC 7518 §3.2.
