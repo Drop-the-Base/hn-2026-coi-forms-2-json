@@ -1,0 +1,286 @@
+# Dashboard kosztu i jakości (NFR-13, NFR-14), metryki z README › Metryki.
+# Wartości są skumulowane od startu workera, bez rate(): po jednym zadaniu dashboard już coś pokazuje.
+# shortcut: restart workera zeruje sumy; gdy będzie ruch ciągły, przejść na increase()/rate().
+kind: Dashboard
+metadata:
+  name: koszty
+  project: forms2json
+spec:
+  display:
+    name: "forms2json: koszt i jakość"
+  duration: 1h
+  refreshInterval: 30s
+  panels:
+    kosztLaczny:
+      kind: Panel
+      spec:
+        display:
+          name: Koszt łączny
+          description: Suma usage.cost zadań zakończonych (COST_CURRENCY)
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format:
+              unit: decimal
+              decimalPlaces: 6
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum(forms2json_job_cost_sum)
+    kosztNaZadanie:
+      kind: Panel
+      spec:
+        display:
+          name: Średni koszt zadania
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format:
+              unit: decimal
+              decimalPlaces: 6
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum(forms2json_job_cost_sum) / sum(forms2json_job_cost_count)
+    kosztNaWywolanie:
+      kind: Panel
+      spec:
+        display:
+          name: Średni koszt wywołania LLM
+          description: Tokeny wejścia i wyjścia, bez czasu GPU
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format:
+              unit: decimal
+              decimalPlaces: 6
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  # Każde wywołanie zapisuje jeden punkt input i jeden output.
+                  query: sum(forms2json_llm_call_cost_sum) / sum(forms2json_llm_call_cost_count{gen_ai_token_type="input"})
+    sredniConfidence:
+      kind: Panel
+      spec:
+        display:
+          name: Średni confidence
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format:
+              unit: percent-decimal
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum(forms2json_job_confidence_sum) / sum(forms2json_job_confidence_count)
+    kosztWCzasie:
+      kind: Panel
+      spec:
+        display:
+          name: Koszt łączny w czasie wg modelu
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (gen_ai_request_model) (forms2json_job_cost_sum)
+                  seriesNameFormat: "{{gen_ai_request_model}}"
+    kosztWywolanWeWy:
+      kind: Panel
+      spec:
+        display:
+          name: Koszt wywołań LLM - wejście / wyjście
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (gen_ai_token_type) (forms2json_llm_call_cost_sum)
+                  seriesNameFormat: "{{gen_ai_token_type}}"
+    tokenyNaZadanie:
+      kind: Panel
+      spec:
+        display:
+          name: Tokeny na zadanie - wejście / wyjście
+          description: Wszystkie zadania, także nieudane (one też zużywają tokeny)
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (gen_ai_token_type) (gen_ai_client_token_usage_sum) / scalar(sum(forms2json_job_duration_seconds_count))
+                  seriesNameFormat: "{{gen_ai_token_type}}"
+    tokenyWCzasie:
+      kind: Panel
+      spec:
+        display:
+          name: Tokeny łącznie - wejście / wyjście
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (gen_ai_token_type) (gen_ai_client_token_usage_sum)
+                  seriesNameFormat: "{{gen_ai_token_type}}"
+    zadaniaWgWyniku:
+      kind: Panel
+      spec:
+        display:
+          name: Zadania wg wyniku
+          description: done / failed z typem błędu
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (outcome, error_type) (forms2json_job_duration_seconds_count)
+                  seriesNameFormat: "{{outcome}} {{error_type}}"
+    bledyLlm:
+      kind: Panel
+      spec:
+        display:
+          name: Błędy LLM wg typu
+          description: 429 limit, 413 za duże zapytanie, APITimeoutError; jedna próba = jeden błąd
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (error_type) (forms2json_llm_errors_total)
+                  seriesNameFormat: "{{error_type}}"
+    czasZadania:
+      kind: Panel
+      spec:
+        display:
+          name: Czas zadania p50 / p95
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: seconds
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: histogram_quantile(0.5, sum by (le) (forms2json_job_duration_seconds_bucket))
+                  seriesNameFormat: p50
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: histogram_quantile(0.95, sum by (le) (forms2json_job_duration_seconds_bucket))
+                  seriesNameFormat: p95
+    czasKrokow:
+      kind: Panel
+      spec:
+        display:
+          name: Czas kroków pipeline'u p50 / p95
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: seconds
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: histogram_quantile(0.5, sum by (le, step) (forms2json_pipeline_step_duration_seconds_bucket))
+                  seriesNameFormat: "{{step}} p50"
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: histogram_quantile(0.95, sum by (le, step) (forms2json_pipeline_step_duration_seconds_bucket))
+                  seriesNameFormat: "{{step}} p95"
+  layouts:
+    - kind: Grid
+      spec:
+        display:
+          title: Koszt
+        items:
+          - {x: 0, y: 0, width: 6, height: 4, content: {$ref: "#/spec/panels/kosztLaczny"}}
+          - {x: 6, y: 0, width: 6, height: 4, content: {$ref: "#/spec/panels/kosztNaZadanie"}}
+          - {x: 12, y: 0, width: 6, height: 4, content: {$ref: "#/spec/panels/kosztNaWywolanie"}}
+          - {x: 18, y: 0, width: 6, height: 4, content: {$ref: "#/spec/panels/sredniConfidence"}}
+          - {x: 0, y: 4, width: 12, height: 8, content: {$ref: "#/spec/panels/kosztWCzasie"}}
+          - {x: 12, y: 4, width: 12, height: 8, content: {$ref: "#/spec/panels/kosztWywolanWeWy"}}
+    - kind: Grid
+      spec:
+        display:
+          title: Tokeny i zadania
+        items:
+          - {x: 0, y: 0, width: 12, height: 8, content: {$ref: "#/spec/panels/tokenyNaZadanie"}}
+          - {x: 12, y: 0, width: 12, height: 8, content: {$ref: "#/spec/panels/tokenyWCzasie"}}
+          - {x: 0, y: 8, width: 12, height: 8, content: {$ref: "#/spec/panels/zadaniaWgWyniku"}}
+          - {x: 12, y: 8, width: 12, height: 8, content: {$ref: "#/spec/panels/bledyLlm"}}
+    - kind: Grid
+      spec:
+        display:
+          title: Czasy
+        items:
+          - {x: 0, y: 0, width: 12, height: 8, content: {$ref: "#/spec/panels/czasZadania"}}
+          - {x: 12, y: 0, width: 12, height: 8, content: {$ref: "#/spec/panels/czasKrokow"}}

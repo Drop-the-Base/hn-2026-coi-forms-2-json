@@ -78,8 +78,10 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
 | `OCR_LANG` | `pol` | `pol` | język Tesseracta dla obrazów i skanów PDF ([ADR-0029](docs/adr/0029-ocr-tesseract.md)) |
-| `COST_PER_1K_TOKENS` | `0` | `0` | umowna stawka za 1000 tokenów w metryce kosztu ([Metryki](#metryki)) |
-| `COST_PER_GPU_SECOND` | `0` | `0` | umowna stawka za sekundę pracy LLM w metryce kosztu |
+| `COST_PER_1M_INPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wejścia ([Koszt](#koszt)) |
+| `COST_PER_1M_OUTPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wyjścia |
+| `COST_PER_GPU_SECOND` | `0` | `0` | umowna stawka za sekundę pracy LLM (model lokalny) |
+| `COST_CURRENCY` | `USD` | `USD` | waluta stawek, trafia do `usage.currency` |
 
 ### LLM w chmurze albo u organizatorów
 
@@ -101,7 +103,7 @@ Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/
 | Profil | Usługi | Użycie |
 | --- | --- | --- |
 | domyślny | `frontend` (:8080), `api`, `worker`, `rabbitmq`, `otel-collector` | `docker compose up -d` |
-| `observability` | `jaeger` (http://127.0.0.1:16686), `prometheus` (http://127.0.0.1:9090) | `docker compose --profile observability up -d` |
+| `observability` | `jaeger` (http://127.0.0.1:16686), `prometheus` (http://127.0.0.1:9090), `perses` (http://127.0.0.1:8081) | `docker compose --profile observability up -d` |
 | `llm` | `llm-runtime` (Ollama w kontenerze) | w `.env`: `LLM_BASE_URL=http://llm-runtime:11434/v1`, potem `docker compose --profile llm up -d` i `docker compose exec llm-runtime ollama pull qwen2.5:7b-instruct` |
 
 Na zewnątrz wystawiony jest tylko port 8080 (nginx: SPA + proxy `/api/` i `/health` do api). UI obserwowalności tylko na 127.0.0.1.
@@ -157,7 +159,7 @@ curl -N -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/jobs/<job
   "issues": [
     {"code": "S-TITLE", "message": "…", "path": "title", "severity": "WARNING"}
   ],
-  "usage": {"prompt_tokens": 1425, "completion_tokens": 521, "seconds": 61.2},
+  "usage": {"prompt_tokens": 1425, "completion_tokens": 521, "seconds": 61.2, "cost": 0.000526, "currency": "USD"},
   "source_text": "## Strona 1\nWniosek o wydanie zaświadczenia\n| Imię | Nazwisko |\n☐ odbiór osobiście…"
 }
 ```
@@ -180,7 +182,8 @@ http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wg
 
 `docker compose --profile observability up -d`, potem:
 - Jaeger http://127.0.0.1:16686: trace zadania ze spanem na każdy krok pipeline'u; zakładka Monitor: liczba wywołań, błędy i latencja per usługa i operacja;
-- Prometheus http://127.0.0.1:9090: metryki z otel-collectora.
+- Prometheus http://127.0.0.1:9090: metryki z otel-collectora;
+- Perses http://127.0.0.1:8081/projects/forms2json/dashboards/koszty: dashboard kosztu i jakości (koszt łączny, na zadanie i na wywołanie LLM, tokeny we/wy, zadania wg wyniku, błędy LLM, czasy p50/p95, confidence). Dashboard jest kodem w `deploy/perses/resources/` (ADR-0030); UI jest tylko do odczytu, zmiany rób w pliku i zrestartuj `perses`.
 
 Bez tego profilu otel-collector loguje błąd eksportu do jaegera; nie wpływa to na działanie.
 
@@ -205,12 +208,18 @@ Eksport co 60 s (NFR-13, NFR-14). Nazwy w Prometheusie:
 | `forms2json_job_duration_seconds` | czas zadania; `_count` to liczba zadań | `outcome` (`done`/`failed`), `error_type` |
 | `forms2json_pipeline_step_duration_seconds` | czas kroku pipeline'u | `step`, `error_type` |
 | `gen_ai_client_token_usage` | tokeny na wywołanie LLM | `gen_ai_token_type` (`input`/`output`), `gen_ai_request_model` |
-| `forms2json_job_cost` | koszt zadania: tokeny × `COST_PER_1K_TOKENS` / 1000 + czas LLM × `COST_PER_GPU_SECOND` (umowne jednostki, domyślnie 0) | `gen_ai_request_model` |
+| `forms2json_job_cost` | koszt zadania, to samo co `usage.cost` w wyniku ([Koszt](#koszt)) | `gen_ai_request_model` |
+| `forms2json_llm_call_cost` | koszt tokenów jednego wywołania LLM | `gen_ai_token_type` (`input`/`output`), `gen_ai_request_model` |
+| `forms2json_llm_errors_total` | nieudane próby wywołania LLM | `error_type` (`429`, `413`, `APITimeoutError`, ...), `gen_ai_request_model` |
 | `forms2json_job_confidence` | confidence ogólny zadania | |
 | `http_server_request_duration_seconds` | żądania HTTP do `api` | `http_route`, `http_response_status_code` |
 | `traces_span_metrics_*` | metryki z trace'ów liczone przez Jaegera dla zakładki Monitor | `service_name`, `span_name` |
 
 Przykłady: `sum by (outcome) (forms2json_job_duration_seconds_count)`, `histogram_quantile(0.95, sum by (le, step) (rate(forms2json_pipeline_step_duration_seconds_bucket[5m])))`, `forms2json_job_cost_sum / forms2json_job_cost_count`.
+
+### Koszt
+
+`usage.cost` w wyniku zadania = tokeny wejścia × `COST_PER_1M_INPUT_TOKENS` / 1M + tokeny wyjścia × `COST_PER_1M_OUTPUT_TOKENS` / 1M + czas LLM × `COST_PER_GPU_SECOND`, w walucie `usage.currency` (`COST_CURRENCY`). Ponowienia też kosztują, więc są wliczone. Stawki ustaw w `.env` z cennika dostawcy (np. Groq gpt-oss-120b ok. 0.15 / 0.60 USD za 1M, do potwierdzenia), domyślnie 0. Dashboard: Perses (wyżej).
 
 ## Rozwój lokalny
 
@@ -273,7 +282,7 @@ Złote JSON-y formularzy 2, 3, 4, 6, 7, 8, 9 i decyzje przy ich tworzeniu: [back
 | `backend/src/forms2json/adapters` | HTTP (FastAPI), worker, czytniki plików, LLM, RabbitMQ, tmpfs |
 | `backend/tests` | `unit`, `integration`, `evals` |
 | `frontend/` | SPA React + Vite, `design/` z prototypami ekranów |
-| `deploy/` | konfiguracja otel-collectora, Jaegera i Prometheusa |
+| `deploy/` | konfiguracja otel-collectora, Jaegera, Prometheusa i Perses (dashboard jako kod) |
 | `data/` | materiały konkursowe (formularze 1–9) |
 | `docs/` | wymagania, architektura, ADR |
 
