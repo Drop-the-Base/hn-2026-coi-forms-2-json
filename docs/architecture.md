@@ -73,6 +73,8 @@ Postęp na żywo (FR-T5, [ADR-0014](adr/0014-sse-postep-pipeline.md)): worker pu
 
 Tryb synchroniczny (`POST /api/v1/forms:convert`) robi to samo, ale czeka na wynik do `SYNC_TIMEOUT_SECONDS` i zwraca JSON w odpowiedzi (FR-01, FR-06). Po przekroczeniu limitu zwraca `202` z `job_id`.
 
+Podgląd oryginału na ekranie przeglądu (FR-E4, [ADR-0031](adr/0031-podglad-oryginalu-pdf-w-api.md)): frontend wysyła plik DOC, DOCX, XLSX albo ODS z pamięci karty na `POST /api/v1/preview`, a API zwraca go jako PDF z LibreOffice headless. Bez kolejki i bez zapisu poza katalogiem tymczasowym.
+
 Gwarancje NFR-06 (pliki tylko tymczasowo):
 - plik leży na wolumenie `tmpfs` (RAM), nigdy na dysku;
 - worker usuwa plik po zakończeniu zadania, a sprzątacz usuwa pliki starsze niż `FILE_TTL_SECONDS`;

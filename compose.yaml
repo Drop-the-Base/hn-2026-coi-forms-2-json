@@ -47,7 +47,9 @@ services:
       OTEL_SEMCONV_STABILITY_OPT_IN: http
     tmpfs:
       # Starlette zapisuje upload > 1 MB w /tmp: ma zostać w RAM (ADR-0022, NFR-06).
-      - /tmp:size=64m
+      # Podgląd oryginału (ADR-0031) trzyma tam jeszcze kopię pliku, PDF i profil soffice.
+      - /tmp:size=160m
+      - /home/app  # profil LibreOffice (soffice) przy podglądzie oryginału
     healthcheck:  # test z obrazu (backend/Dockerfile), tu tylko szybszy start
       interval: 10s
       timeout: 3s

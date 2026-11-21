@@ -51,6 +51,7 @@ def test_endpoints_without_token_are_401(api: Api) -> None:
     assert api.client.post("/api/v1/jobs", files={"file": ("a.pdf", PDF)}).status_code == 401
     assert api.client.get(f"/api/v1/jobs/{uuid.uuid4()}").status_code == 401
     assert api.client.get("/api/v1/config").status_code == 401
+    assert api.client.get("/api/v1/form-schema").status_code == 401
     assert api.queue.jobs == []
 
 
@@ -112,6 +113,12 @@ def test_unknown_job_is_404(api: Api) -> None:
 
 def test_config_exposes_upload_limit(api: Api) -> None:
     assert api.client.get("/api/v1/config").json() == {"max_upload_bytes": MAX_BYTES}
+
+
+def test_form_schema_is_the_official_schema_as_published(api: Api) -> None:
+    schema = api.client.get("/api/v1/form-schema").json()
+    assert schema["title"] == "FormDefinition"
+    assert "repetingSectionGrid" in json.dumps(schema)
 
 
 def sse_events(api: Api, job_id: uuid.UUID) -> list[dict[str, Any]]:

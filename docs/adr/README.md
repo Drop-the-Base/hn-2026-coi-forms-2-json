@@ -54,6 +54,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0028](0028-model-wymienny-open-source-w-chmurze.md) | Model wymienny: open source u organizatorów, development na modelu open-weights w chmurze | Proponowana |
 | [0029](0029-ocr-tesseract.md) | OCR obrazów i skanów PDF: Tesseract + pytesseract | Proponowana |
 | [0030](0030-dashboard-kosztow-perses.md) | Dashboard kosztów w Perses, stawki za tokeny wejścia i wyjścia | Zaakceptowana |
+| [0031](0031-podglad-oryginalu-pdf-w-api.md) | Podgląd oryginału: DOC, DOCX, XLSX i ODS jako PDF z LibreOffice w API | Proponowana |
 
 ## Szablon
 
