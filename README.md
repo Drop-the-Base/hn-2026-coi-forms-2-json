@@ -77,6 +77,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
 | `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
+| `OCR_LANG` | `pol` | `pol` | język Tesseracta dla obrazów i skanów PDF ([ADR-0029](docs/adr/0029-ocr-tesseract.md)) |
 | `COST_PER_1K_TOKENS` | `0` | `0` | umowna stawka za 1000 tokenów w metryce kosztu ([Metryki](#metryki)) |
 | `COST_PER_GPU_SECOND` | `0` | `0` | umowna stawka za sekundę pracy LLM w metryce kosztu |
 
