@@ -54,6 +54,7 @@ from forms2json.application.use_cases.get_job_result import GetJobResult
 from forms2json.application.use_cases.process_job import ProcessJob
 from forms2json.application.use_cases.submit_job import SubmitJob
 from forms2json.config import Settings, get_settings
+from forms2json.domain.cost import CostRates
 
 FILE_CLEANUP_INTERVAL_SECONDS = 60
 
@@ -141,7 +142,9 @@ def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineOb
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
         understand = UnderstandStep(llm, settings.llm_max_input_chars)
         compose = ComposeStep()
-        report = ReportStep(understand, compose, settings.confidence_review_threshold)
+        report = ReportStep(
+            understand, compose, settings.confidence_review_threshold, cost_rates(settings)
+        )
         return Pipeline(
             [IngestStep(readers), understand, compose, ValidateStep(), report],
             tracing,
@@ -161,6 +164,16 @@ def new_llm_client(settings: Settings) -> LlmClient:
         settings.llm_max_output_tokens,
         api_key=settings.llm_api_key.get_secret_value(),
         response_format=settings.llm_response_format,
+        cost_rates=cost_rates(settings),
+    )
+
+
+def cost_rates(settings: Settings) -> CostRates:
+    return CostRates(
+        settings.cost_per_1m_input_tokens,
+        settings.cost_per_1m_output_tokens,
+        settings.cost_per_gpu_second,
+        settings.cost_currency,
     )
 
 
@@ -170,7 +183,4 @@ async def build_worker(settings: Settings) -> tuple[RabbitMqJobQueue, ProcessJob
     queue = await RabbitMqJobQueue.connect(settings.rabbitmq_url)
     files = TmpfsFileStore(settings.file_store_dir, settings.file_ttl_seconds)
     pipelines = pipeline_factory(settings, new_llm_client(settings))
-    job_metrics = JobMetrics(
-        settings.llm_model, settings.cost_per_1k_tokens, settings.cost_per_gpu_second
-    )
-    return queue, ProcessJob(files, pipelines, queue, [job_metrics, JobLog()])
+    return queue, ProcessJob(files, pipelines, queue, [JobMetrics(settings.llm_model), JobLog()])

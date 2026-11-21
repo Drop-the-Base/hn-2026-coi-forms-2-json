@@ -52,7 +52,26 @@ def test_docx_becomes_form_with_confidence_issues_and_usage() -> None:
     assert confidence["elements"]["tabs[0]"] == 1.0
     # numer_rachunku: field 0.8, condition 0.6 -> below the 0.85 review threshold
     assert any(confidence["elements"][p] == 0.6 for p in confidence["to_review"])
-    assert result["usage"] == {"prompt_tokens": 10, "completion_tokens": 5, "seconds": 1.0}
+    assert result["usage"] == {
+        "prompt_tokens": 10,
+        "completion_tokens": 5,
+        "seconds": 1.0,
+        "cost": 0.0,  # rates default to 0
+        "currency": "USD",
+    }
+
+
+def test_usage_cost_comes_from_configured_rates() -> None:
+    settings = Settings(
+        cost_per_1m_input_tokens=1_000_000, cost_per_1m_output_tokens=2_000_000, cost_currency="PLN"
+    )
+    pipeline = pipeline_factory(settings, FakeLlm(VALID))(LogObserver())
+
+    result = pipeline.run(SourceFile(DOCX_5.read_bytes(), DOCX))
+
+    # 10 input tokens at 1 per token + 5 output tokens at 2 per token
+    assert isinstance(result, dict)
+    assert (result["usage"]["cost"], result["usage"]["currency"]) == (20.0, "PLN")
 
 
 def test_unsupported_format_fails_with_readable_error() -> None:

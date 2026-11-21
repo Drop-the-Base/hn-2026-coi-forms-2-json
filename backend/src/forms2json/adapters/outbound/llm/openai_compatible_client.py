@@ -17,6 +17,7 @@ from forms2json.application.ports.llm_client import (
     LlmResult,
     LlmUsage,
 )
+from forms2json.domain.cost import CostRates
 
 MAX_ATTEMPTS = 3
 # shortcut: 429 is not retried, a per-minute limit outlasts our attempts; add a backoff
@@ -30,11 +31,18 @@ logger = logging.getLogger(__name__)
 
 _tracer = trace.get_tracer(__name__)
 # GenAI semantic conventions: name, unit and buckets from the spec.
-_token_usage = metrics.get_meter(__name__).create_histogram(
+_meter = metrics.get_meter(__name__)
+_token_usage = _meter.create_histogram(
     "gen_ai.client.token.usage",
     unit="{token}",
     explicit_bucket_boundaries_advisory=[4**i for i in range(14)],
 )
+# Per call and token type, so the dashboard splits input and output cost (NFR-13).
+_call_cost = _meter.create_histogram(
+    "forms2json.llm.call.cost", unit="{cost}", description="Token cost in COST_CURRENCY"
+)
+# One per failed attempt: timeouts are retried, 413/429 end the job.
+_errors = _meter.create_counter("forms2json.llm.errors", unit="{error}")
 
 
 class OpenAiCompatibleLlmClient(LlmClient):
@@ -49,8 +57,10 @@ class OpenAiCompatibleLlmClient(LlmClient):
         http_client: httpx2.Client | None = None,
         api_key: str = "local",
         response_format: Literal["json_schema", "json_object"] = "json_schema",
+        cost_rates: CostRates | None = None,
     ) -> None:
         self._model = model
+        self._cost_rates = cost_rates or CostRates()
         self._max_output_tokens = max_output_tokens
         self._response_format = response_format
         # Local runtimes ignore the key, but the SDK requires one. Retries are ours (below),
@@ -80,12 +90,13 @@ class OpenAiCompatibleLlmClient(LlmClient):
                     "gen_ai.usage.output_tokens": result.usage.completion_tokens,
                 }
             )
-            _token_usage.record(
-                result.usage.prompt_tokens, {**attributes, "gen_ai.token.type": "input"}
-            )
-            _token_usage.record(
-                result.usage.completion_tokens, {**attributes, "gen_ai.token.type": "output"}
-            )
+            input_attributes = {**attributes, "gen_ai.token.type": "input"}
+            output_attributes = {**attributes, "gen_ai.token.type": "output"}
+            _token_usage.record(result.usage.prompt_tokens, input_attributes)
+            _token_usage.record(result.usage.completion_tokens, output_attributes)
+            rates = self._cost_rates
+            _call_cost.record(rates.input_cost(result.usage.prompt_tokens), input_attributes)
+            _call_cost.record(rates.output_cost(result.usage.completion_tokens), output_attributes)
             return result
 
     def _generate_json(self, system: str, user: str, schema: dict[str, Any]) -> LlmResult:
@@ -122,6 +133,8 @@ class OpenAiCompatibleLlmClient(LlmClient):
                     MAX_ATTEMPTS,
                     type(error).__name__,
                 )
+                error_name = type(error).__name__  # APITimeoutError or APIConnectionError
+                _errors.add(1, {"gen_ai.request.model": self._model, "error.type": error_name})
                 last_error = error
                 continue
             except openai.APIError as error:
@@ -129,6 +142,9 @@ class OpenAiCompatibleLlmClient(LlmClient):
                 logger.warning("LLM %s attempt %d rejected: HTTP %s", self._model, attempt, status)
                 # The job error is only the type name, so the user sees which limit was hit.
                 error_type = _REJECTION_ERRORS.get(status, LlmCallFailed)
+                # HTTP status as error.type (OTel convention), e.g. 429 or 413.
+                error_name = str(status or type(error).__name__)
+                _errors.add(1, {"gen_ai.request.model": self._model, "error.type": error_name})
                 raise error_type(f"LLM runtime rejected the request: {error}") from error
             if response.usage:
                 prompt_tokens += response.usage.prompt_tokens

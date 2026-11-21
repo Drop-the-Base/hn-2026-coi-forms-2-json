@@ -1,0 +1,13 @@
+# Perses (ADR-0030): dashboardy jako kod z resources/. Baza w tmpfs, więc nic nie przeżywa restartu.
+database:
+  file:
+    folder: /perses/data
+plugin:
+  # Obraz rozpakowuje pluginy przy starcie, a /etc jest read-only.
+  path: /perses/plugins
+provisioning:
+  folders:
+    - /etc/perses/resources
+security:
+  # Dashboard zmieniamy w repo, nie w UI.
+  readonly: true

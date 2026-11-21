@@ -1,5 +1,5 @@
 # Uruchomienie: cp .env.example .env, uzupełnij sekrety, docker compose up -d --build (NFR-07, NFR-08).
-# Profile: `observability` (jaeger, prometheus), `llm` (Ollama w kontenerze zamiast na hoście).
+# Profile: `observability` (jaeger, prometheus, perses), `llm` (Ollama w kontenerze zamiast na hoście).
 
 x-hardening: &hardening
   read_only: true
@@ -117,6 +117,22 @@ services:
       - /prometheus:uid=65534,gid=65534
     ports:
       - "127.0.0.1:9090:9090"
+
+  perses:
+    <<: *hardening
+    profiles: [observability]
+    image: persesdev/perses:v0.55.1  # obraz działa jako nonroot (65532)
+    volumes:
+      # Dashboard jako kod (ADR-0030): zmiana pliku + restart usługi.
+      - ./deploy/perses/config.yaml:/etc/perses/config.yaml:ro
+      - ./deploy/perses/resources:/etc/perses/resources:ro
+    tmpfs:
+      # Baza plików i rozpakowane pluginy: stan odtwarzany z repo przy każdym starcie.
+      - /perses:uid=65532,gid=65532
+    ports:
+      - "127.0.0.1:8081:8080"  # UI bez logowania, więc tylko z localhosta
+    depends_on:
+      - prometheus
 
   llm-runtime:
     <<: *hardening
