@@ -24,7 +24,12 @@ class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
         self._review_threshold = review_threshold
 
     def run(self, data: ValidatedForm) -> dict[str, Any]:
-        report = score(self._compose.confidence, data.issues, self._review_threshold)
+        report = score(
+            self._compose.confidence,
+            data.issues,
+            self._review_threshold,
+            self._understand.ocr_confidence,
+        )
         usage = self._understand.usage
         return {
             "form": data.form.to_dict(),

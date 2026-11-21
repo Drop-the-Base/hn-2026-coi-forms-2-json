@@ -31,9 +31,11 @@ from forms2json.adapters.outbound.observability.log_observer import (
 )
 from forms2json.adapters.outbound.observability.metrics import JobMetrics, MetricsObserver
 from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
+from forms2json.adapters.outbound.ocr.tesseract_ocr import TesseractOcr
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
 from forms2json.adapters.outbound.readers.doc_reader import DocReader
 from forms2json.adapters.outbound.readers.docx_reader import DocxReader
+from forms2json.adapters.outbound.readers.image_reader import ImageReader
 from forms2json.adapters.outbound.readers.ods_reader import OdsReader
 from forms2json.adapters.outbound.readers.pdf_reader import PdfReader
 from forms2json.adapters.outbound.readers.xlsx_reader import XlsxReader
@@ -129,12 +131,14 @@ async def _delete_expired_files_forever(files: FileStore) -> None:
 
 def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineObserver], Pipeline]:
     """Adapters are created once; steps per job, because Understand and Compose keep run state."""
+    ocr = TesseractOcr(settings.ocr_lang)
     readers = [
         DocxReader(),
         DocReader(settings.doc_conversion_timeout_seconds),
         XlsxReader(),
         OdsReader(),
-        PdfReader(),
+        PdfReader(ocr),
+        ImageReader(ocr),
     ]
     tracing, logs, step_metrics = TracingObserver(), LogObserver(), MetricsObserver()
 

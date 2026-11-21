@@ -3,17 +3,18 @@ from pathlib import Path
 import pytest
 
 from forms2json.adapters.outbound.readers import pdf_reader
-from forms2json.adapters.outbound.readers.pdf_reader import PdfReader, ScannedPdf
+from forms2json.adapters.outbound.readers.pdf_reader import PdfReader
 from forms2json.application.ports.document_reader import ExtractionFailed
 from forms2json.domain.document import Block, Checkbox, NormalizedDocument, Table, TextBlock
 from forms2json.domain.upload import DOCX, PDF
+from tests.unit.test_ocr import FakeOcr
 
 DATA = Path(__file__).parents[3] / "data"
 
 
 def read_form(pattern: str) -> NormalizedDocument:
     (path,) = DATA.glob(pattern)
-    return PdfReader().read(path.read_bytes())
+    return PdfReader(FakeOcr()).read(path.read_bytes())
 
 
 def all_blocks(document: NormalizedDocument) -> list[Block]:
@@ -44,8 +45,8 @@ def scanned_pdf() -> bytes:
 
 
 def test_supports_only_pdf() -> None:
-    assert PdfReader().supports(PDF)
-    assert not PdfReader().supports(DOCX)
+    assert PdfReader(FakeOcr()).supports(PDF)
+    assert not PdfReader(FakeOcr()).supports(DOCX)
 
 
 def test_pages_keep_their_numbers() -> None:
@@ -74,9 +75,20 @@ def test_ruled_tables_are_read_once_in_reading_order() -> None:
     assert title < page.blocks.index(tables[0])
 
 
-def test_page_without_text_layer_needs_ocr() -> None:
-    with pytest.raises(ScannedPdf, match="wymaga OCR"):
-        PdfReader().read(scanned_pdf())
+def test_page_without_text_layer_is_read_by_ocr() -> None:
+    ocr = FakeOcr(TextBlock("Wniosek", 0.9))
+
+    document = PdfReader(ocr).read(scanned_pdf())
+
+    assert document.pages[0].blocks == (TextBlock("Wniosek", 0.9),)
+    assert ocr.images[0].startswith(b"\x89PNG")
+
+
+def test_oversized_scan_is_rejected_before_rendering(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(pdf_reader, "MAX_PIXELS", 100)
+
+    with pytest.raises(ExtractionFailed, match="za duża do OCR"):
+        PdfReader(FakeOcr()).read(scanned_pdf())
 
 
 def test_too_many_pages_are_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -88,4 +100,4 @@ def test_too_many_pages_are_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_damaged_pdf_fails_with_extraction_failed() -> None:
     with pytest.raises(ExtractionFailed, match="uszkodzony"):
-        PdfReader().read(b"%PDF-1.4\n" + b"\x00" * 64)
+        PdfReader(FakeOcr()).read(b"%PDF-1.4\n" + b"\x00" * 64)
