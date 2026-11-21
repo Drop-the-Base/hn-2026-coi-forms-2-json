@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from typing import Any, Literal
 
@@ -11,6 +12,8 @@ from opentelemetry import metrics, trace
 from forms2json.application.ports.llm_client import LlmCallFailed, LlmClient, LlmResult, LlmUsage
 
 MAX_ATTEMPTS = 3
+
+logger = logging.getLogger(__name__)
 
 _tracer = trace.get_tracer(__name__)
 # GenAI semantic conventions: name, unit and buckets from the spec.
@@ -85,7 +88,8 @@ class OpenAiCompatibleLlmClient(LlmClient):
         prompt_tokens = completion_tokens = 0
         started = time.perf_counter()
         last_error: Exception | None = None
-        for _ in range(MAX_ATTEMPTS):
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            attempt_started = time.perf_counter()
             try:
                 response = self._client.chat.completions.create(
                     model=self._model,
@@ -98,14 +102,34 @@ class OpenAiCompatibleLlmClient(LlmClient):
                     max_tokens=self._max_output_tokens,
                 )
             except openai.APIConnectionError as error:  # includes APITimeoutError
+                logger.warning(
+                    "LLM %s attempt %d/%d: %s",
+                    self._model,
+                    attempt,
+                    MAX_ATTEMPTS,
+                    type(error).__name__,
+                )
                 last_error = error
                 continue
             except openai.APIError as error:
+                status = getattr(error, "status_code", None)  # 429 = rate limit
+                logger.warning("LLM %s attempt %d rejected: HTTP %s", self._model, attempt, status)
                 raise LlmCallFailed(f"LLM runtime rejected the request: {error}") from error
             if response.usage:
                 prompt_tokens += response.usage.prompt_tokens
                 completion_tokens += response.usage.completion_tokens
-            if response.choices[0].finish_reason == "length":
+            finish_reason = response.choices[0].finish_reason
+            logger.info(
+                "LLM %s attempt %d/%d: tokens in %d out %d, %.1fs, finish_reason %s",
+                self._model,
+                attempt,
+                MAX_ATTEMPTS,
+                response.usage.prompt_tokens if response.usage else 0,
+                response.usage.completion_tokens if response.usage else 0,
+                time.perf_counter() - attempt_started,
+                finish_reason,
+            )
+            if finish_reason == "length":
                 # temperature=0 repeats the same cut-off answer, so a retry only wastes time.
                 raise LlmCallFailed(
                     f"answer cut off at {self._max_output_tokens} tokens"
@@ -114,6 +138,7 @@ class OpenAiCompatibleLlmClient(LlmClient):
             try:
                 data = json.loads(response.choices[0].message.content or "")
             except json.JSONDecodeError as error:
+                logger.warning("LLM %s attempt %d: answer is not JSON", self._model, attempt)
                 last_error = error
                 continue
             if isinstance(data, dict):

@@ -1,11 +1,12 @@
 import asyncio
 import logging
 import time
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Sequence
 from contextlib import contextmanager
 from typing import Literal
 from uuid import UUID
 
+from forms2json.application.log_context import job_id_var
 from forms2json.application.pipeline.pipeline import Pipeline
 from forms2json.application.ports.file_store import FileStore
 from forms2json.application.ports.job_observer import JobObserver
@@ -26,16 +27,24 @@ class ProcessJob:
         files: FileStore,
         pipelines: Callable[[PipelineObserver], Pipeline],
         queue: JobQueue,
-        observer: JobObserver | None = None,
+        observers: Sequence[JobObserver] = (),
     ) -> None:
         self._files = files
         # A fresh pipeline per job: steps keep per-run state, and progress belongs to the job.
         self._pipelines = pipelines
         self._queue = queue
-        self._observer = observer
+        self._observers = observers
 
     async def execute(self, job: Job) -> None:
+        token = job_id_var.set(str(job.job_id))
+        try:
+            await self._execute(job)
+        finally:
+            job_id_var.reset(token)
+
+    async def _execute(self, job: Job) -> None:
         job_id = str(job.job_id)
+        logger.info("Job received: %s", job.mime_type)
         progress = _ProgressObserver(job.job_id, self._queue, asyncio.get_running_loop())
         start = time.monotonic()
         try:
@@ -44,15 +53,14 @@ class ProcessJob:
             output = await asyncio.to_thread(self._pipelines(progress).run, source)
             result = JobResult(job.job_id, result=output)
         except Exception as error:
-            logger.exception("Job %s failed", job_id)
-            # Only the type: parser messages may quote document content.
+            # Only the type, in logs too (JobLog): parser messages may quote document content.
             result = JobResult(job.job_id, error=type(error).__name__)
         finally:
             self._files.delete(job_id)
 
-        if self._observer:
+        for observer in self._observers:
             try:
-                self._observer.job_finished(result, time.monotonic() - start)
+                observer.job_finished(result, time.monotonic() - start)
             except Exception:  # metrics are best effort: the result must still go out
                 logger.warning("Observing job %s failed", job_id, exc_info=True)
         await self._queue.publish_result(result)

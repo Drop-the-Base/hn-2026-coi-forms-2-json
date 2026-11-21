@@ -182,6 +182,18 @@ http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wg
 
 Bez tego profilu otel-collector loguje błąd eksportu do jaegera; nie wpływa to na działanie.
 
+### Logi
+
+`docker compose logs -f api worker`. Format: `czas poziom serwis [job_id] [trace_id] komunikat`, poziom z `LOG_LEVEL` (domyślnie `INFO`):
+
+```
+2026-11-21 10:00:01,234 INFO worker [3f2c…] [4bf92f3577b34da6a3ce929d0e0e4736] LLM qwen3:8b attempt 1/3: tokens in 5120 out 812, 41.3s, finish_reason stop
+```
+
+Zdarzenia: api: przyjęto/odrzucono plik, wynik dotarł; worker: zadanie odebrane, start/koniec kroku z czasem, każde wywołanie LLM (429 i timeout jako `WARNING`), koniec zadania (confidence, liczba ERROR/WARNING, tokeny). Treść dokumentu, odpowiedź modelu, nazwa pliku, klucz API i JWT nie trafiają do logów; błąd to tylko typ wyjątku.
+
+Z logu do trace'a: skopiuj `trace_id` i wklej w pole wyszukiwania Jaegera (http://127.0.0.1:16686/trace/<trace_id>). `-` znaczy brak spanu (np. start usługi albo brak `OTEL_EXPORTER_OTLP_ENDPOINT`).
+
 ### Metryki
 
 Eksport co 60 s (NFR-13, NFR-14). Nazwy w Prometheusie:
