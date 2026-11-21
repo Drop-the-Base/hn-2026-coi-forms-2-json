@@ -41,6 +41,8 @@ echo "==> $TARGET:$VPS_PATH: git pull, przebudowa kontenerów"
   cd '$VPS_PATH'
   git pull --ff-only
   git log -1 --oneline
+  # Grupa docker.sock dla otel-collectora (receiver docker_stats); na Linuksie to zwykle grupa docker, nie 0.
+  export DOCKER_GID=\$(stat -c %g /var/run/docker.sock)
   docker compose up -d --build --remove-orphans
   docker compose ps
   curl -fsS --retry 10 --retry-connrefused --retry-delay 3 http://localhost:8080/health && echo"

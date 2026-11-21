@@ -95,8 +95,9 @@ services:
     <<: *hardening
     image: otel/opentelemetry-collector-contrib:0.165.0  # contrib: receiver docker_stats
     command: ["--config=/etc/otelcol/config.yaml"]
-    # Socket Docker Desktop jest root:root 0660; grupa 0 zamiast user: "0" (ADR-0030).
-    group_add: ["0"]
+    # Dostęp do docker.sock przez grupę jego właściciela zamiast user: "0" (ADR-0030). Docker Desktop: root:root,
+    # więc 0; Linux: grupa docker, deploy.sh ustawia DOCKER_GID z socketu. Bez dostępu cały Collector nie wstaje.
+    group_add: ["${DOCKER_GID:-0}"]
     volumes:
       - ./deploy/otel-collector.yaml:/etc/otelcol/config.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
