@@ -6,7 +6,15 @@ the prompt. These generic checks know no specific form: they compare the draft w
 
 import re
 
-from forms2json.domain.form_draft import Applicant, ApplicantKind, DraftField, FormDraft, Text
+from forms2json.domain.form_draft import (
+    Applicant,
+    ApplicantKind,
+    Attachment,
+    DraftField,
+    FieldType,
+    FormDraft,
+    Text,
+)
 
 SUBJECT_FALLBACK = "Informacje o wniosku"
 PAGE_NAME = re.compile(r"^\s*strona\s+\d+\s*$", re.IGNORECASE)
@@ -42,6 +50,9 @@ def clean_draft(draft: FormDraft) -> FormDraft:
     """Drop paper, addressee and applicant-data fields; fix all-caps text and page-number sections.
 
     Applicant data name the applicant kinds instead: a name of a company means LEGAL_ENTITY.
+    A repeated key gets a number suffix. A condition whose source is not a field or whose target
+    is neither a field nor an attachment is dropped, and its target, now always shown, gets at
+    most INFERRED_CONFIDENCE so the review screen flags it (FR-T1).
     """
     addressee = f" {_norm(draft.addressee.value)} " if draft.addressee.value.strip() else ""
     applicant_data = [f for f in draft.fields if _is_applicant_data(f)]
@@ -64,11 +75,44 @@ def clean_draft(draft: FormDraft) -> FormDraft:
         for f in draft.fields
         if f not in applicant_data and not _is_noise(f.label, addressee)
     ]
-    keys = {f.key for f in fields}
-    conditions = [c for c in draft.conditions if {c.source, c.target} <= keys]
+    seen: set[str] = set()
+    fields, attachments = _unique_keys(fields, seen), _unique_keys(draft.attachments, seen)
+    # An address or a person is no answer to compare.
+    sources = {f.key for f in fields if f.type not in (FieldType.ADDRESS, FieldType.PERSON)}
+    conditions = [c for c in draft.conditions if c.source in sources and c.target in seen]
+    unsure = {c.target for c in draft.conditions if c not in conditions}
+    fields, attachments = _lower(fields, unsure), _lower(attachments, unsure)
     title = Text(value=sentence_case(draft.title.value), confidence=draft.title.confidence)
-    update = {"title": title, "applicants": applicants, "fields": fields, "conditions": conditions}
+    update = {
+        "title": title,
+        "applicants": applicants,
+        "fields": fields,
+        "conditions": conditions,
+        "attachments": attachments,
+    }
     return draft.model_copy(update=update)
+
+
+def _unique_keys[T: (DraftField, Attachment)](items: list[T], seen: set[str]) -> list[T]:
+    """`key`, `key_2`, `key_3`… so a repeated key never makes two targets of one condition."""
+    unique = []
+    for item in items:
+        key, n = item.key, 1
+        while key in seen:
+            n += 1
+            key = f"{item.key}_{n}"
+        seen.add(key)
+        unique.append(item if key == item.key else item.model_copy(update={"key": key}))
+    return unique
+
+
+def _lower[T: (DraftField, Attachment)](items: list[T], keys: set[str]) -> list[T]:
+    return [
+        i.model_copy(update={"confidence": min(i.confidence, INFERRED_CONFIDENCE)})
+        if i.key in keys
+        else i
+        for i in items
+    ]
 
 
 def sentence_case(text: str) -> str:

@@ -7,9 +7,9 @@ JSON Schema for structured output and the validation of the answer.
 """
 
 from enum import StrEnum
-from typing import Annotated, Self
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from forms2json.domain.form_definition import JsonObject
 
@@ -80,7 +80,11 @@ class DraftField(_Strict):
 
 
 class Condition(_Strict):
-    """Field `target` is shown only when field `source` has answer `value`."""
+    """Field or attachment `target` is shown only when field `source` has answer `value`.
+
+    Keys are not checked here: clean_draft drops a condition with an unknown key, so one bad
+    reference costs that condition, not the whole form.
+    """
 
     target: str
     source: str
@@ -89,6 +93,7 @@ class Condition(_Strict):
 
 
 class Attachment(_Strict):
+    key: str  # a condition target, in one namespace with field keys
     name: str
     required: bool
     confidence: Confidence
@@ -116,24 +121,15 @@ class FormDraft(_Strict):
     fees: list[Fee]
     consents: list[Consent]
 
-    @model_validator(mode="after")
-    def _check_field_references(self) -> Self:
-        # Compose builds SHOW conditions by key, so a dangling or duplicate key breaks the form.
-        keys = [f.key for f in self.fields]
-        if len(keys) != len(set(keys)):
-            raise ValueError("field keys must be unique")
-        for condition in self.conditions:
-            for key in (condition.target, condition.source):
-                if key not in keys:
-                    raise ValueError(f"condition refers to unknown field '{key}'")
-        return self
-
     @classmethod
     def from_dict(cls, data: JsonObject) -> FormDraft:
         try:
             return cls.model_validate(data)
         except ValidationError as error:
-            raise InvalidFormDraft(str(error)) from error
+            # Locations and messages only, no input values: the message reaches logs (NFR-06).
+            errors = error.errors(include_url=False, include_input=False)
+            details = "; ".join(f"{'.'.join(map(str, e['loc']))}: {e['msg']}" for e in errors)
+            raise InvalidFormDraft(details) from error
 
 
 FORM_DRAFT_SCHEMA: JsonObject = FormDraft.model_json_schema()

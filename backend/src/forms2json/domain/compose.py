@@ -92,10 +92,18 @@ def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confid
             for field in shown[f.key]:
                 confidence[field.tech_name] = f.confidence
 
+    if draft.attachments:
+        attachments_name = names.new(ATTACHMENTS_SECTION)
+        uploads = []
+        for a in draft.attachments:
+            upload = _field(FieldType.FILE_UPLOADER, a.name, a.required, names)
+            uploads.append(upload)
+            shown[a.key] = [upload]
+            confidence[upload.tech_name] = a.confidence
+        sections.append(_section(ATTACHMENTS_SECTION, attachments_name, uploads))
+
     targets: dict[str, list[str]] = {}
-    for c in draft.conditions:
-        if c.source not in sources:  # an address or a person is no answer to compare
-            continue
+    for c in draft.conditions:  # clean_draft kept only conditions with a source and a target
         section_name, source = sources[c.source]
         targets.setdefault(c.target, []).append(
             answer_is(c.value, title, section_name, source.tech_name)
@@ -106,14 +114,6 @@ def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confid
         for target in shown[key]:
             target.states = [show(any_of(*queries))]
 
-    if draft.attachments:
-        attachments_name = names.new(ATTACHMENTS_SECTION)
-        uploads = []
-        for a in draft.attachments:
-            upload = _field(FieldType.FILE_UPLOADER, a.name, a.required, names)
-            uploads.append(upload)
-            confidence[upload.tech_name] = a.confidence
-        sections.append(_section(ATTACHMENTS_SECTION, attachments_name, uploads))
     if draft.fees:
         fees_name = names.new(FEES_SECTION)
         infos = []
