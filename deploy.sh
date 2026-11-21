@@ -26,7 +26,11 @@ command -v sshpass >/dev/null || {
   exit 1
 }
 
-TARGET="$VPS_USER@$VPS_HOSTNAME"
+# VPS_HOSTNAME może już zawierać użytkownika (root@1.2.3.4); wtedy VPS_USER jest pomijany.
+case $VPS_HOSTNAME in
+  *@*) TARGET=$VPS_HOSTNAME ;;
+  *) TARGET="$VPS_USER@$VPS_HOSTNAME" ;;
+esac
 # accept-new: pierwsze połączenie zapisuje klucz hosta bez pytania (sshpass nie odpowie na prompt).
 SSH=(sshpass -e ssh -o StrictHostKeyChecking=accept-new "$TARGET")
 
@@ -40,4 +44,4 @@ echo "==> $TARGET:$VPS_PATH: git pull, przebudowa kontenerów"
   docker compose ps
   curl -fsS --retry 10 --retry-connrefused --retry-delay 3 http://localhost:8080/health && echo"
 
-echo "==> Gotowe: http://$VPS_HOSTNAME:8080"
+echo "==> Gotowe: http://${VPS_HOSTNAME#*@}:8080"
