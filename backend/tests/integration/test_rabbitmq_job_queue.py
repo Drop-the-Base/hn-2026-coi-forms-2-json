@@ -58,7 +58,7 @@ async def round_trip(tmp_path: Path) -> None:
 
     try:
         await queue.consume_jobs(
-            ProcessJob(files, Pipeline([Size()], NullObserver()), queue).execute
+            ProcessJob(files, lambda: Pipeline([Size()], NullObserver()), queue).execute
         )
         await queue.publish_job(job)
 

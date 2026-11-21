@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from forms2json.application.pipeline.compose_step import ComposeStep
+from forms2json.domain import rules
 from forms2json.domain.form_definition import Field, FormDefinition, JsonObject, JsonValue, Question
 from forms2json.domain.form_draft import FormDraft
 from forms2json.domain.rules import Severity, check_rules
@@ -87,6 +88,10 @@ def _fields(form: FormDefinition) -> list[Field]:
     return [f for tab in form.tabs for f in walk(tab.questions)]
 
 
+def _paths(form: FormDefinition) -> list[tuple[str, Field]]:
+    return [(p.path, p.field) for p in rules._walk(form)]
+
+
 def _reference(number: int) -> FormDefinition:
     (path,) = DATA.glob(f"{number}. */konfiguracja_form_*.json")
     return FormDefinition.from_json(path.read_text(encoding="utf-8"))
@@ -145,8 +150,11 @@ def test_condition_gives_show_state_matching_reference() -> None:
         states = next(f.states for f in _fields(form) if f.tech_name == name)
         assert states == golden[name]
         assert states is not None and [s.type for s in states] == ["SHOW"]
-    assert step.confidence["numer_rachunku"] == 0.6  # min of field 0.8 and condition 0.6
-    assert step.confidence["plik_deklaracji_podatkowej"] == 0.7
+    paths = {f.tech_name: path for path, f in _paths(form)}
+    assert step.confidence[paths["numer_rachunku"]] == 0.6  # min of field 0.8 and condition 0.6
+    assert step.confidence[paths["plik_deklaracji_podatkowej"]] == 0.7
+    assert step.confidence["tabs[0].questions[0].field"] == 1.0  # predefined applicant block
+    assert step.confidence["tabs[0]"] == 1.0
 
 
 def test_fees_become_info_section_with_payment_proof() -> None:
