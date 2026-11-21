@@ -36,7 +36,11 @@ cp .env.example .env
 # uzupełnij dwa sekrety w .env:
 sed -i.bak "s/^JWT_SECRET=$/JWT_SECRET=$(openssl rand -hex 32)/; s/^RABBITMQ_PASSWORD=$/RABBITMQ_PASSWORD=$(openssl rand -hex 16)/" .env && rm .env.bak
 
+# LLM: ustaw LLM_BASE_URL, LLM_MODEL i LLM_API_KEY (patrz "LLM w chmurze albo u organizatorów")
+
 docker compose up -d --build
+# z dashboardami (Jaeger, Prometheus, Perses):
+# docker compose --profile observability up -d --build
 docker compose ps          # api i rabbitmq: (healthy), reszta: Up
 curl http://localhost:8080/health   # {"status":"ok"}
 
@@ -50,7 +54,7 @@ Potem:
 
 Koniec: `docker compose down` (pliki i wyniki w tmpfs znikają, obrazy zostają).
 
-Jedno zadanie trwa 1–2 min na Apple M-series (krok `understand` w Ollamie); na CPU bez GPU dłużej. Jeśli Ollama nie zdąży, zadanie kończy się `LlmCallFailed`: podnieś `LLM_TIMEOUT_SECONDS` w `.env` i `docker compose up -d`.
+Jedno zadanie trwa kilka sekund z modelem w chmurze (Groq gpt-oss-120b) i 1–2 min z lokalną Ollamą na Apple M-series. Jeśli model nie zdąży, zadanie kończy się `LlmCallFailed`: podnieś `LLM_TIMEOUT_SECONDS` w `.env` i `docker compose up -d`.
 
 ## Konfiguracja
 
