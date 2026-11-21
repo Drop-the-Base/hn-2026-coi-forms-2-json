@@ -109,7 +109,8 @@ services:
     volumes:
       - ./deploy/jaeger.yaml:/etc/jaeger/config.yaml:ro
     ports:
-      - "127.0.0.1:16686:16686"  # UI bez logowania, więc tylko z localhosta
+      # UI bez logowania: domyślnie tylko z localhosta, na serwerze OBSERVABILITY_BIND=0.0.0.0 wystawia je na zewnątrz.
+      - "${OBSERVABILITY_BIND:-127.0.0.1}:16686:16686"
 
   prometheus:
     <<: *hardening
@@ -121,7 +122,7 @@ services:
     tmpfs:
       - /prometheus:uid=65534,gid=65534
     ports:
-      - "127.0.0.1:9090:9090"
+      - "${OBSERVABILITY_BIND:-127.0.0.1}:9090:9090"
 
   perses:
     <<: *hardening
@@ -135,7 +136,7 @@ services:
       # Baza plików i rozpakowane pluginy: stan odtwarzany z repo przy każdym starcie.
       - /perses:uid=65532,gid=65532
     ports:
-      - "127.0.0.1:8081:8080"  # UI bez logowania, więc tylko z localhosta
+      - "${OBSERVABILITY_BIND:-127.0.0.1}:8081:8080"
     depends_on:
       - prometheus
 
