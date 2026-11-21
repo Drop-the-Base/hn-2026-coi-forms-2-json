@@ -1,5 +1,6 @@
 import json
 from collections.abc import Callable
+from typing import Any
 
 import httpx2
 import pytest
@@ -34,7 +35,7 @@ def completion(content: str, finish_reason: str = "stop") -> httpx2.Response:
 
 
 def client_with(
-    handler: Callable[[httpx2.Request], httpx2.Response],
+    handler: Callable[[httpx2.Request], httpx2.Response], **options: Any
 ) -> tuple[OpenAiCompatibleLlmClient, list[httpx2.Request]]:
     requests: list[httpx2.Request] = []
 
@@ -43,7 +44,10 @@ def client_with(
         return handler(request)
 
     http_client = httpx2.Client(transport=httpx2.MockTransport(recording))
-    return OpenAiCompatibleLlmClient("http://llm/v1", "m", 5.0, 100, http_client), requests
+    return (
+        OpenAiCompatibleLlmClient("http://llm/v1", "m", 5.0, 100, http_client, **options),
+        requests,
+    )
 
 
 def test_returns_parsed_json_with_usage_and_sends_the_schema() -> None:
@@ -56,6 +60,8 @@ def test_returns_parsed_json_with_usage_and_sends_the_schema() -> None:
     body = json.loads(requests[0].content)
     assert requests[0].url.path == "/v1/chat/completions"
     assert body["response_format"]["json_schema"]["schema"] == SCHEMA
+    assert body["response_format"]["json_schema"]["strict"] is True
+    assert body["messages"][0]["content"] == "system"
     assert body["max_tokens"] == 100
 
 
@@ -104,3 +110,25 @@ def test_rejected_request_is_not_retried() -> None:
     with pytest.raises(LlmCallFailed):
         client.generate_json("system", "user", SCHEMA)
     assert len(requests) == 1
+
+
+def test_api_key_goes_to_the_authorization_header() -> None:
+    client, requests = client_with(lambda _: completion('{"title": "ok"}'), api_key="sk-test")
+
+    client.generate_json("system", "user", SCHEMA)
+
+    assert requests[0].headers["authorization"] == "Bearer sk-test"
+
+
+def test_json_object_mode_puts_the_schema_in_the_system_prompt() -> None:
+    client, requests = client_with(
+        lambda _: completion('{"title": "ok"}'), response_format="json_object"
+    )
+
+    assert client.generate_json("system", "user", SCHEMA).data == {"title": "ok"}
+
+    body = json.loads(requests[0].content)
+    assert body["response_format"] == {"type": "json_object"}
+    system = body["messages"][0]["content"]
+    assert system.startswith("system\n")
+    assert json.dumps(SCHEMA) in system

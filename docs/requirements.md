@@ -65,6 +65,8 @@ Oznaczenia:
 | NFR-15 | Dostępność: generowane formularze i nasz frontend celują w WCAG 2.1 AA. | S (Ogólne zasady) | TEAM |
 | NFR-16 | Wymiana dostawców (model, OCR, broker) przez zmianę adaptera i konfiguracji, bez zmian w domenie. | T | TEAM |
 
+**Ustalenie z organizatorami (NFR-03, NFR-13):** dokładność jest pierwsza, koszt drugorzędny. Organizatorzy sami postawią model open source. Development i ewaluacje idą na modelu open-weights w chmurze przez API zgodne z OpenAI, tylko z dokumentami z publicznego `data/` ([ADR-0028](adr/0028-model-wymienny-open-source-w-chmurze.md)).
+
 ## 3. Konflikty i niejasności w wymaganiach
 
 Wszystkie konflikty rozstrzyga zespół, bez pytań do mentorów COI. Zasada: gdy reguły i wzorce mówią co innego, idziemy za wzorcami, bo to JSON-y, które system docelowy przyjął. Wyjątek: tam, gdzie wzorce czegoś nie mają, a Standardy tego wymagają (K-05). Numerów nie zmieniamy, bo odwołują się do nich ADR-y.

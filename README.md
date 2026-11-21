@@ -71,12 +71,27 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `SYNC_TIMEOUT_SECONDS` | `120` | `120` | ile czeka `forms:convert`, zanim odda `202` |
 | `LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | `http://llm-runtime:11434/v1` | API zgodne z OpenAI (Ollama) |
 | `LLM_MODEL` | `qwen2.5:7b-instruct` | `qwen3:1.7b` | model, musi być pobrany |
+| `LLM_API_KEY` | `local` | `local` | klucz API dostawcy (nagłówek `Authorization`); Ollama go ignoruje; sekret, nie jest logowany |
+| `LLM_RESPONSE_FORMAT` | `json_schema` | `json_schema` | `json_schema` (strict) albo `json_object` (schemat w prompcie) dla dostawców bez strict structured output |
 | `LLM_TIMEOUT_SECONDS` | `120` | `120` | timeout jednego wywołania LLM |
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
 | `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
 | `COST_PER_1K_TOKENS` | `0` | `0` | umowna stawka za 1000 tokenów w metryce kosztu ([Metryki](#metryki)) |
 | `COST_PER_GPU_SECOND` | `0` | `0` | umowna stawka za sekundę pracy LLM w metryce kosztu |
+
+### LLM w chmurze albo u organizatorów
+
+Dowolny endpoint zgodny z OpenAI, tylko modele open source zgodne z [ADR-0013](docs/adr/0013-polityka-licencji.md) ([ADR-0028](docs/adr/0028-model-wymienny-open-source-w-chmurze.md)). Do chmury wysyłamy tylko pliki z publicznego `data/`. Przykład (OpenRouter, gpt-oss) w `.env`:
+
+```bash
+LLM_BASE_URL=https://openrouter.ai/api/v1
+LLM_MODEL=openai/gpt-oss-120b
+LLM_API_KEY=<klucz dostawcy>
+LLM_RESPONSE_FORMAT=json_object   # gdy dostawca odrzuca strict json_schema
+```
+
+Potem `docker compose up -d`. Klucz trzymaj tylko w `.env` (poza repo).
 
 Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/jobs`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `OTEL_SEMCONV_STABILITY_OPT_IN`.
 
