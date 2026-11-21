@@ -22,6 +22,8 @@ export interface ReviewResult {
     to_review: string[];
   };
   issues: ReviewIssue[];
+  /** The document text the model read (#132); missing in results from before it. */
+  source_text?: string;
 }
 
 /** The API result after a shape check at the trust boundary; null when it is not a review result. */

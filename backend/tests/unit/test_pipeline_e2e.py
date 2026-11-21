@@ -39,12 +39,12 @@ def _run(llm: LlmClient, mime_type: str = DOCX) -> object:
     )
 
 
-def test_docx_becomes_form_with_confidence_issues_and_usage() -> None:
+def test_docx_becomes_form_with_confidence_issues_usage_and_source_text() -> None:
     result = _run(FakeLlm(VALID))
 
     assert isinstance(result, dict)
     json.dumps(result)  # the queue adapter serializes it
-    assert set(result) == {"form", "confidence", "issues", "usage"}
+    assert set(result) == {"form", "confidence", "issues", "usage", "source_text"}
     assert result["form"]["title"] == DRAFT_5.title.value
     assert [i for i in result["issues"] if i["severity"] == "ERROR"] == []
     confidence = result["confidence"]
@@ -59,6 +59,8 @@ def test_docx_becomes_form_with_confidence_issues_and_usage() -> None:
         "cost": 0.0,  # rates default to 0
         "currency": "USD",
     }
+    assert result["source_text"].startswith("## Strona 1\n")
+    assert "nadpłat" in result["source_text"]
 
 
 def test_usage_cost_comes_from_configured_rates() -> None:
@@ -75,8 +77,8 @@ def test_usage_cost_comes_from_configured_rates() -> None:
 
 
 def test_unsupported_format_fails_with_readable_error() -> None:
-    with pytest.raises(UnsupportedFormat, match="image/png jeszcze nieobsługiwany"):
-        _run(FakeLlm(), "image/png")
+    with pytest.raises(UnsupportedFormat, match="text/plain jeszcze nieobsługiwany"):
+        _run(FakeLlm(), "text/plain")
 
 
 def test_usage_does_not_leak_between_jobs() -> None:

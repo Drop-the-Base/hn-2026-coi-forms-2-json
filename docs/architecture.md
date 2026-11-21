@@ -109,7 +109,7 @@ Dlaczego AI jest tylko w kroku 2: 85–93% wzorcowego JSON-a to powtarzalne blok
 | Reguły | element naruszający regułę R/S dostaje karę |
 | Pochodzenie | element z bloku predefiniowanego ma 1.0 |
 
-Wynik ogólny to ważona średnia. Frontend podświetla elementy poniżej progu `CONFIDENCE_REVIEW_THRESHOLD`.
+Pewność OCR (średnia dokumentu) ogranicza z góry confidence każdego elementu; poniżej progu dochodzi ostrzeżenie `OCR-LOW-CONFIDENCE` ([ADR-0029](adr/0029-ocr-tesseract.md)). Wynik ogólny to ważona średnia. Frontend podświetla elementy poniżej progu `CONFIDENCE_REVIEW_THRESHOLD`.
 
 ## 5. Architektura heksagonalna (backend)
 

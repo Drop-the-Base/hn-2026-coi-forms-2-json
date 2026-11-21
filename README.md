@@ -77,6 +77,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
 | `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
+| `OCR_LANG` | `pol` | `pol` | język Tesseracta dla obrazów i skanów PDF ([ADR-0029](docs/adr/0029-ocr-tesseract.md)) |
 | `COST_PER_1M_INPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wejścia ([Koszt](#koszt)) |
 | `COST_PER_1M_OUTPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wyjścia |
 | `COST_PER_GPU_SECOND` | `0` | `0` | umowna stawka za sekundę pracy LLM (model lokalny) |
@@ -158,11 +159,12 @@ curl -N -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/jobs/<job
   "issues": [
     {"code": "S-TITLE", "message": "…", "path": "title", "severity": "WARNING"}
   ],
-  "usage": {"prompt_tokens": 1425, "completion_tokens": 521, "seconds": 61.2, "cost": 0.000526, "currency": "USD"}
+  "usage": {"prompt_tokens": 1425, "completion_tokens": 521, "seconds": 61.2, "cost": 0.000526, "currency": "USD"},
+  "source_text": "## Strona 1\nWniosek o wydanie zaświadczenia\n| Imię | Nazwisko |\n☐ odbiór osobiście…"
 }
 ```
 
-`form` to JSON formularza eUsług (to samo, co zwraca `forms:convert`). `severity`: `ERROR` albo `WARNING`. Ścieżki w `elements`, `to_review` i `path` wskazują element w `form`.
+`form` to JSON formularza eUsług (to samo, co zwraca `forms:convert`). `severity`: `ERROR` albo `WARNING`. Ścieżki w `elements`, `to_review` i `path` wskazują element w `form`. `source_text` to tekst dokumentu w tej postaci, którą dostał model (strony `## Strona N`, tabele, pola wyboru `☐`/`☒`); serwer nie trzyma pliku po przetworzeniu (NFR-06), więc ekran przeglądu pokazuje ten tekst, gdy nie ma oryginału w pamięci karty.
 
 ### OpenAPI
 

@@ -32,6 +32,8 @@ class UnderstandStep(PipelineStep[NormalizedDocument, FormDraft]):
 
     Invalid output gets one retry with the validation error in the prompt, then
     InvalidFormDraft propagates. `usage` sums both attempts of the last run, failed or not (NFR-13).
+    `source_text` keeps the last serialized document for the review screen (FR-E4).
+    `ocr_confidence` is the last document's, for the confidence report (FR-T1).
     """
 
     name = "understand"
@@ -40,13 +42,16 @@ class UnderstandStep(PipelineStep[NormalizedDocument, FormDraft]):
         self._llm = llm
         self._max_input_chars = max_input_chars
         self.usage: LlmUsage | None = None
+        self.source_text = ""
+        self.ocr_confidence: float | None = None
 
     def run(self, data: NormalizedDocument) -> FormDraft:
-        text = serialize(data)
+        text = self.source_text = serialize(data)
         # shortcut: no chunking, a longer document fails; split by pages when real files hit it.
         if len(text) > self._max_input_chars:
             raise DocumentTooLong(f"{len(text)} chars > limit {self._max_input_chars}")
         self.usage = None
+        self.ocr_confidence = data.ocr_confidence
         try:
             return self._ask(text)
         except InvalidFormDraft as error:

@@ -10,7 +10,7 @@ from forms2json.domain.cost import CostRates
 
 
 class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
-    """Job result: form, confidence (FR-T1), issues and LLM usage (NFR-13), ready for JSON.
+    """Job result: form, confidence (FR-T1), issues, LLM usage (NFR-13) and source text, as JSON.
 
     Reads the last-run state of the Understand and Compose steps, so all of them must belong
     to one pipeline built for one job (bootstrap.new_pipeline).
@@ -31,7 +31,12 @@ class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
         self._cost_rates = cost_rates
 
     def run(self, data: ValidatedForm) -> dict[str, Any]:
-        report = score(self._compose.confidence, data.issues, self._review_threshold)
+        report = score(
+            self._compose.confidence,
+            data.issues,
+            self._review_threshold,
+            self._understand.ocr_confidence,
+        )
         usage = self._understand.usage or LlmUsage(0, 0, 0.0)
         return {
             "form": data.form.to_dict(),
@@ -53,4 +58,6 @@ class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
                 ),
                 "currency": self._cost_rates.currency,
             },
+            # the server drops the file (NFR-06), so the review screen shows this text instead
+            "source_text": self._understand.source_text,
         }

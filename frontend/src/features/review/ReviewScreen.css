@@ -97,6 +97,42 @@
   min-height: 0;
   display: grid;
   grid-template-columns: 19rem minmax(0, 1fr) minmax(0, 1.1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+/* problemy i edytor na całą wysokość; prawa kolumna: przełącznik nad podglądem albo oryginałem */
+.ws > #problemy,
+.ws > #edytor {
+  grid-row: 1 / -1;
+}
+.right-head {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 3rem;
+  padding-inline: var(--space-4);
+  border-bottom: 1px solid var(--color-rule);
+  background: var(--color-sheet);
+}
+.right-head .tabs {
+  border-bottom: 0;
+}
+.right-head .note {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ws > #podglad,
+.ws > #oryginal {
+  grid-column: 3;
+  border-right: 0;
+}
+.ws > #podglad > .pane__head,
+.ws > #oryginal > .pane__head,
+.pane[data-off] {
+  display: none;
 }
 @media (max-width: 80rem) {
   .ws {
@@ -256,6 +292,54 @@
   color: var(--color-error);
 }
 
+/* oryginał: PDF z wbudowanego podglądu przeglądarki, obraz, albo tekst odczytany z dokumentu */
+.source__pdf {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.source__zoom {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--color-paper);
+  cursor: zoom-in;
+  outline-offset: -2px;
+}
+.source__zoom[aria-pressed="true"] {
+  width: max-content;
+  cursor: zoom-out;
+}
+.source__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.source__img--full {
+  width: auto;
+  max-width: none;
+}
+.source__page {
+  padding: var(--space-3) var(--space-4);
+}
+.source__page + .source__page {
+  border-top: 1px solid var(--color-rule);
+}
+.source__page h3 {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-bottom: var(--space-2);
+}
+.source__page pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 /* wąski ekran: obszary jako zakładki */
 .ws-tabs {
   display: none;
@@ -298,6 +382,19 @@
   }
   .ws {
     display: block;
+  }
+  .right-head {
+    display: none;
+  }
+  .ws > #podglad > .pane__head,
+  .ws > #oryginal > .pane__head {
+    display: flex;
+  }
+  .pane[data-off]:not([data-hidden]) {
+    display: flex;
+  }
+  .source__pdf {
+    height: 80vh;
   }
   .pane {
     border-right: 0;
