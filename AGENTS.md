@@ -35,7 +35,7 @@ Zasady:
 3. Sprawdź jeszcze raz: `gh issue view <N> --json assignees,labels`. Jeśli drugi agent też się przypisał, wycofaj się i zostaw komentarz.
 4. Issue z etykietą drugiego agenta jest zajęte. Nie ruszaj go, nie komentuj go i nie zamykaj.
 5. Nie bierz zadań na zapas: tylko tyle, ile zrobisz w najbliższej godzinie.
-6. Jeśli zadanie wymaga decyzji człowieka (np. pytania do mentorów COI), dodaj etykietę `pytanie` i napisz w komentarzu, do kogo jest pytanie: Benek, Kuba czy obaj.
+6. Jeśli zadanie wymaga decyzji człowieka (np. rozstrzygnięcia niejasności w wymaganiach), dodaj etykietę `pytanie` i napisz w komentarzu, do kogo jest pytanie: Benek, Kuba czy obaj.
 
 ## Praca
 - Branch: `<benek|kuba>/<nr issue>-<krotka-nazwa>`, np. `kuba/12-parser-docx`.
