@@ -168,10 +168,8 @@
             "validation": [
               "REQUIRED"
             ],
-            "readOnly": true,
+            "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.name",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 0,
             "tooltipMessage": ""
@@ -192,10 +190,8 @@
             "validation": [
               "REQUIRED"
             ],
-            "readOnly": true,
+            "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.surname",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 1,
             "tooltipMessage": ""
@@ -217,10 +213,8 @@
               "REQUIRED",
               "PESEL"
             ],
-            "readOnly": true,
+            "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "PESEL.pesel",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 2,
             "tooltipMessage": ""
@@ -258,18 +252,13 @@
             "techName": "kraj",
             "title": "Kraj",
             "description": "",
-            "dictionaryName": "Kraje",
             "options": [],
-            "multiLevelTree": false,
             "validation": [
               "REQUIRED"
             ],
             "searchEnabled": true,
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": [
-              "Polska"
-            ],
             "states": [],
             "questionOrder": 0,
             "tooltipMessage": ""
@@ -363,16 +352,13 @@
             "techName": "wojewodztwo",
             "title": "TERYT_4G_DOWODOWY",
             "description": "",
-            "dictionaryName": "TERYT_4G_DOWODOWY",
             "options": [],
-            "multiLevelTree": true,
             "validation": [
               "REQUIRED"
             ],
             "searchEnabled": true,
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": [],
             "states": [
               {
                 "type": "SHOW",
@@ -401,8 +387,6 @@
             ],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.postCode",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [
               {
                 "type": "SHOW",
@@ -428,8 +412,6 @@
             "validation": [],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.street",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [
               {
                 "type": "SHOW",
@@ -457,8 +439,6 @@
             ],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.building",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 7,
             "tooltipMessage": ""
@@ -479,8 +459,6 @@
             "validation": [],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.apartment",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 8,
             "tooltipMessage": ""
@@ -627,18 +605,13 @@
             "techName": "kraj_siedziba",
             "title": "Kraj",
             "description": "",
-            "dictionaryName": "Kraje",
             "options": [],
-            "multiLevelTree": false,
             "validation": [
               "REQUIRED"
             ],
             "searchEnabled": true,
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": [
-              "Polska"
-            ],
             "states": [],
             "questionOrder": 0,
             "tooltipMessage": ""
@@ -732,16 +705,13 @@
             "techName": "wojewodztwo_siedziba",
             "title": "TERYT_4G_DOWODOWY",
             "description": "",
-            "dictionaryName": "TERYT_4G_DOWODOWY",
             "options": [],
-            "multiLevelTree": true,
             "validation": [
               "REQUIRED"
             ],
             "searchEnabled": true,
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": [],
             "states": [
               {
                 "type": "SHOW",
@@ -1011,18 +981,13 @@
             "techName": "kraj_inna_osoba",
             "title": "Kraj",
             "description": "",
-            "dictionaryName": "Kraje",
             "options": [],
-            "multiLevelTree": false,
             "validation": [
               "REQUIRED"
             ],
             "searchEnabled": true,
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": [
-              "Polska"
-            ],
             "states": [],
             "questionOrder": 0,
             "tooltipMessage": ""
@@ -1116,14 +1081,12 @@
             "techName": "wojewodztwo_inna_osoba",
             "title": "TERYT_4G_DOWODOWY",
             "description": "",
-            "dictionaryName": "TERYT_4G_DOWODOWY",
             "options": [],
             "validation": [
               "REQUIRED"
             ],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": [],
             "states": [
               {
                 "type": "SHOW",
@@ -1132,7 +1095,6 @@
             ],
             "questionOrder": 4,
             "tooltipMessage": "",
-            "multiLevelTree": true,
             "searchEnabled": true
           }
         },
@@ -1479,8 +1441,6 @@
             "validation": [],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.phoneNumber",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 0,
             "tooltipMessage": ""
@@ -1503,8 +1463,6 @@
             ],
             "readOnly": false,
             "repeatingSectionGrid": [],
-            "defaultValue": "MLPZ.email",
-            "defaultValueType": "EXTERNAL_SYSTEM",
             "states": [],
             "questionOrder": 1,
             "tooltipMessage": ""
