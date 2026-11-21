@@ -28,4 +28,4 @@ Wszystkie obrazy: build wieloetapowy, użytkownik bez roota, tylko porty niezbę
 
 ## Konsekwencje
 
-Obraz workera jest większy. Odstępstwo od preferencji Alpine opisujemy w README z uzasadnieniem.
+Obraz workera jest większy. `api` też stoi na `slim` (przypadek „inaczej" z tabeli): koła musllinux `pypdfium2` (zależność `pdfplumber`, ADR-0023) zawierają kod na licencji GPL, a koła manylinux nie (ADR-0013). Odstępstwo od preferencji Alpine opisujemy w README z uzasadnieniem.
