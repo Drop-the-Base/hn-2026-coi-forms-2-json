@@ -156,11 +156,12 @@ curl -N -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/jobs/<job
   "issues": [
     {"code": "S-TITLE", "message": "…", "path": "title", "severity": "WARNING"}
   ],
-  "usage": {"prompt_tokens": 1425, "completion_tokens": 521, "seconds": 61.2}
+  "usage": {"prompt_tokens": 1425, "completion_tokens": 521, "seconds": 61.2},
+  "source_text": "## Strona 1\nWniosek o wydanie zaświadczenia\n| Imię | Nazwisko |\n☐ odbiór osobiście…"
 }
 ```
 
-`form` to JSON formularza eUsług (to samo, co zwraca `forms:convert`). `severity`: `ERROR` albo `WARNING`. Ścieżki w `elements`, `to_review` i `path` wskazują element w `form`.
+`form` to JSON formularza eUsług (to samo, co zwraca `forms:convert`). `severity`: `ERROR` albo `WARNING`. Ścieżki w `elements`, `to_review` i `path` wskazują element w `form`. `source_text` to tekst dokumentu w tej postaci, którą dostał model (strony `## Strona N`, tabele, pola wyboru `☐`/`☒`); serwer nie trzyma pliku po przetworzeniu (NFR-06), więc ekran przeglądu pokazuje ten tekst, gdy nie ma oryginału w pamięci karty.
 
 ### OpenAPI
 
