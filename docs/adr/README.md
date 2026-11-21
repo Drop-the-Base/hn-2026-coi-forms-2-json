@@ -39,7 +39,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0013](0013-polityka-licencji.md) | Polityka licencji i lista zakazanych zależności | Zaakceptowana |
 | [0014](0014-sse-postep-pipeline.md) | Postęp pipeline'u na żywo przez SSE | Proponowana |
 | [0015](0015-narzedzia-backendu.md) | Narzędzia backendu: uv, ruff, mypy, pytest, pydantic-settings | Zaakceptowana |
-| [0016](0016-router-react-router.md) | Routing we frontendzie: React Router | Proponowana |
+| [0016](0016-router-react-router.md) | Routing we frontendzie: React Router | Zaakceptowana |
 | [0017](0017-uwierzytelnianie-jwt-pyjwt.md) | Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu | Proponowana |
 
 ## Szablon

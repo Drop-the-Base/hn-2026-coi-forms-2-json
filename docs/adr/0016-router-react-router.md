@@ -1,6 +1,6 @@
 # ADR-0016: Routing we frontendzie: React Router
 
-- Status: Proponowana
+- Status: Zaakceptowana
 - Data: 2026-11-21
 - Wymagania: FR-E4
 
