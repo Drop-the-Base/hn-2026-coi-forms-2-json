@@ -32,6 +32,7 @@ from forms2json.adapters.outbound.observability.log_observer import (
 from forms2json.adapters.outbound.observability.metrics import JobMetrics, MetricsObserver
 from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
+from forms2json.adapters.outbound.readers.doc_reader import DocReader
 from forms2json.adapters.outbound.readers.docx_reader import DocxReader
 from forms2json.adapters.outbound.readers.ods_reader import OdsReader
 from forms2json.adapters.outbound.readers.pdf_reader import PdfReader
@@ -128,7 +129,13 @@ async def _delete_expired_files_forever(files: FileStore) -> None:
 
 def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineObserver], Pipeline]:
     """Adapters are created once; steps per job, because Understand and Compose keep run state."""
-    readers = [DocxReader(), XlsxReader(), OdsReader(), PdfReader()]
+    readers = [
+        DocxReader(),
+        DocReader(settings.doc_conversion_timeout_seconds),
+        XlsxReader(),
+        OdsReader(),
+        PdfReader(),
+    ]
     tracing, logs, step_metrics = TracingObserver(), LogObserver(), MetricsObserver()
 
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
