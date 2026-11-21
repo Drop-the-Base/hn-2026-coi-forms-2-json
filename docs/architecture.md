@@ -161,7 +161,7 @@ frontend/
 │   ├── features/
 │   │   ├── upload/          # wgrywanie, walidacja po stronie klienta
 │   │   ├── jobs/            # lista zadań, postęp na żywo (SSE), polling jako zapas
-│   │   ├── json-editor/     # edycja JSON, walidacja schematem
+│   │   ├── review/          # ekran przeglądu: problemy, edytor JSON ze schematem, pobieranie
 │   │   └── form-preview/    # render formularza z JSON (FR-E5)
 │   ├── shared/
 │   │   ├── api/             # klient HTTP + typy generowane z OpenAPI

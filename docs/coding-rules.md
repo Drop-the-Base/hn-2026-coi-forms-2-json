@@ -123,7 +123,7 @@ Stos i uzasadnienie: [ADR-0011](adr/0011-frontend-react-vite.md).
 
 ### 3.2 Struktura
 
-- **Folder per funkcja (feature)**, nie per typ pliku: `features/upload`, `features/jobs`, `features/json-editor`, `features/form-preview`.
+- **Folder per funkcja (feature)**, nie per typ pliku: `features/upload`, `features/jobs`, `features/review`, `features/form-preview`.
 - Feature trzyma razem komponenty, hooki, zapytania API i testy. Import z innego feature'a tylko przez jego `index.ts`.
 - `shared/` zawiera tylko to, czego używają co najmniej dwa feature'y.
 - Zaczynamy płasko. Podział na podfoldery dopiero, gdy feature ma więcej niż ok. 7 plików.

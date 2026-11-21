@@ -5,6 +5,7 @@ import { expect, test } from "vitest";
 import { fakeToken, server } from "../test/server";
 import { setToken } from "../shared/api/token";
 import { App } from "./App";
+import wynik from "../features/review/fixtures/wynik-wzorzec-1.json";
 import { routes } from "./routes";
 
 const JOB_ID = "b6af199b-0000-4000-8000-000000000001";
@@ -105,9 +106,7 @@ test("upload tworzy zadanie, status przechodzi z pending na done", async () => {
     ),
     http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
       HttpResponse.json(
-        ++polls < 2
-          ? { status: "pending" }
-          : { status: "done", result: { title: "Wniosek" } },
+        ++polls < 2 ? { status: "pending" } : { status: "done", result: wynik },
       ),
     ),
   );
@@ -126,9 +125,25 @@ test("upload tworzy zadanie, status przechodzi z pending na done", async () => {
   fireEvent.click(
     list.getByRole("link", { name: "Zobacz wynik: Wniosek.pdf" }),
   );
-  expect((await screen.findByLabelText("Wynik JSON")).textContent).toContain(
-    '"title": "Wniosek"',
+  expect(
+    await screen.findByRole("heading", { level: 1, name: wynik.form.title }),
+  ).toBeDefined();
+  expect(screen.getByRole("button", { name: "Pobierz JSON" })).toBeDefined();
+});
+
+test("nieznany typ błędu zadania pokazuje polski komunikat", async () => {
+  setToken(fakeToken());
+  server.use(
+    http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
+      HttpResponse.json({ status: "failed", error: "NowyBladWorkera" }),
+    ),
   );
+  renderApp(`/zadania/${JOB_ID}`);
+  expect(
+    await screen.findByText(
+      /Nie udało się przetworzyć pliku \(kod: NowyBladWorkera\)\. Wgraj plik ponownie\./,
+    ),
+  ).toBeDefined();
 });
 
 test("błąd serwera przy uploadzie pokazuje detail", async () => {
