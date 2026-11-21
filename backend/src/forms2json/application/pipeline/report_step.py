@@ -8,7 +8,7 @@ from forms2json.domain.confidence import score
 
 
 class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
-    """Job result: form, confidence (FR-T1), issues and LLM usage (NFR-13), ready for JSON.
+    """Job result: form, confidence (FR-T1), issues, LLM usage (NFR-13) and source text, as JSON.
 
     Reads the last-run state of the Understand and Compose steps, so all of them must belong
     to one pipeline built for one job (bootstrap.new_pipeline).
@@ -42,4 +42,6 @@ class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
                 "completion_tokens": usage.completion_tokens if usage else 0,
                 "seconds": usage.duration_seconds if usage else 0.0,
             },
+            # the server drops the file (NFR-06), so the review screen shows this text instead
+            "source_text": self._understand.source_text,
         }

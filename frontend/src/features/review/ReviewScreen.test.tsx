@@ -2,21 +2,23 @@ import { EditorView } from "@codemirror/view";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, expect, test, vi } from "vitest";
+import { sourceFiles } from "../../shared/sourceFiles";
 import ReviewPage from "./ReviewScreen";
 import wynik from "./fixtures/wynik-wzorzec-1.json";
 
-afterEach(() => vi.restoreAllMocks());
+const JOB_ID = "b6af199b-0000-4000-8000-000000000001";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  sourceFiles.clear();
+});
 
 function renderReview(result: unknown = wynik) {
   const router = createMemoryRouter([
     {
       path: "*",
       element: (
-        <ReviewPage
-          result={result}
-          jobId="b6af199b-0000-4000-8000-000000000001"
-          fileName="wniosek.pdf"
-        />
+        <ReviewPage result={result} jobId={JOB_ID} fileName="wniosek.pdf" />
       ),
     },
   ]);
@@ -137,4 +139,68 @@ test("wynik w nieoczekiwanym formacie daje komunikat zamiast ekranu", () => {
   expect(screen.getByRole("alert").textContent).toContain(
     "nieoczekiwany format",
   );
+});
+
+const SOURCE_TEXT =
+  "## Strona 1\nWniosek\n| Imię | Nazwisko |\n## Strona 2\n☐ odbiór osobiście";
+
+function showOriginal(
+  result: unknown = { ...wynik, source_text: SOURCE_TEXT },
+) {
+  URL.createObjectURL = vi.fn(() => "blob:oryginal");
+  URL.revokeObjectURL = vi.fn();
+  renderReview(result);
+  const tabs = screen.getAllByRole("tab", { name: "Oryginał" });
+  // One tab in the narrow-screen tablist, one in the right column's switch.
+  expect(tabs).toHaveLength(2);
+  fireEvent.click(tabs[1]);
+  expect(tabs[1].getAttribute("aria-selected")).toBe("true");
+}
+
+test("oryginał PDF z pamięci karty w iframe z blob URL", () => {
+  sourceFiles.set(
+    JOB_ID,
+    new File(["%PDF"], "wniosek.pdf", { type: "application/pdf" }),
+  );
+  showOriginal();
+  const frame = screen.getByTitle("Oryginał: wniosek.pdf");
+  expect(frame.getAttribute("src")).toBe("blob:oryginal");
+});
+
+test("oryginał JPG w img z blob URL, klik przełącza 100%", () => {
+  sourceFiles.set(
+    JOB_ID,
+    new File(["jpg"], "skan.jpg", { type: "image/jpeg" }),
+  );
+  showOriginal();
+  const img = screen.getByAltText("Oryginał: skan.jpg");
+  expect(img.getAttribute("src")).toBe("blob:oryginal");
+  const zoom = screen.getByRole("button", { name: /Oryginał: skan.jpg/ });
+  fireEvent.click(zoom);
+  expect(zoom.getAttribute("aria-pressed")).toBe("true");
+});
+
+test("oryginał DOCX jako tekst z source_text z podziałem na strony", () => {
+  sourceFiles.set(
+    JOB_ID,
+    new File(["docx"], "wniosek.docx", {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    }),
+  );
+  showOriginal();
+  expect(screen.getByText(/Ten format nie ma podglądu/)).toBeDefined();
+  expect(
+    screen.getByRole("heading", { level: 3, name: "Strona 2" }),
+  ).toBeDefined();
+  expect(screen.getByText("☐ odbiór osobiście")).toBeDefined();
+  expect(URL.createObjectURL).not.toHaveBeenCalled();
+});
+
+test("brak pliku po odświeżeniu: tekst z source_text i informacja", () => {
+  showOriginal();
+  expect(screen.getByText(/Pliku nie ma już w tej karcie/)).toBeDefined();
+  expect(
+    screen.getByRole("heading", { level: 3, name: "Strona 1" }),
+  ).toBeDefined();
+  expect(screen.getByText(/\| Imię \| Nazwisko \|/)).toBeDefined();
 });

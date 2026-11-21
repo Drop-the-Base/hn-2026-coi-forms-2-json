@@ -1,4 +1,5 @@
 import { useState, type DragEvent } from "react";
+import { sourceFiles } from "../../shared/sourceFiles";
 import { useConfig, useSubmitJob } from "./api";
 import { EXTENSIONS, formatBytes, validateFile } from "./validateFile";
 import "./UploadPanel.css";
@@ -67,6 +68,7 @@ export function UploadPanel({
       setSending({ current: index + 1, total: ready.length });
       try {
         const { job_id } = await submit.mutateAsync(row.file);
+        sourceFiles.set(job_id, row.file);
         onUploaded(job_id, row.file.name);
         remove(row.key);
       } catch (error) {
