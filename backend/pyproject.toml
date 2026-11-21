@@ -1,0 +1,38 @@
+[project]
+name = "forms2json"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "pydantic-settings>=2.16.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.11,<0.12"]
+build-backend = "uv_build"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Integration and eval tests need running services or the dataset; run them explicitly with -m.
+addopts = "--strict-markers -m 'not integration and not evals'"
+markers = [
+    "integration: adapters against real services (RabbitMQ, LLM), run in compose",
+    "evals: output quality on the dataset (ADR-0010), does not block merge",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.6",
+]
