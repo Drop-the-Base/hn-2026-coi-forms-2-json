@@ -56,8 +56,8 @@ def test_docx_becomes_form_with_confidence_issues_and_usage() -> None:
 
 
 def test_unsupported_format_fails_with_readable_error() -> None:
-    with pytest.raises(UnsupportedFormat, match="application/pdf jeszcze nieobsługiwany"):
-        _run(FakeLlm(), "application/pdf")
+    with pytest.raises(UnsupportedFormat, match="image/png jeszcze nieobsługiwany"):
+        _run(FakeLlm(), "image/png")
 
 
 def test_usage_does_not_leak_between_jobs() -> None:
