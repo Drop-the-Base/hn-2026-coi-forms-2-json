@@ -1,13 +1,13 @@
 import asyncio
 import uuid
 from collections.abc import Awaitable, Callable
-from contextlib import AbstractContextManager, nullcontext
+
+import pytest
 
 from forms2json.application.pipeline.pipeline import Pipeline
 from forms2json.application.pipeline.step import PipelineStep
 from forms2json.application.ports.file_store import FileStore
 from forms2json.application.ports.job_queue import Job, JobQueue, JobResult, ProgressEvent
-from forms2json.application.ports.pipeline_observer import PipelineObserver
 from forms2json.application.use_cases.process_job import ProcessJob
 from forms2json.domain.document import SourceFile
 
@@ -50,10 +50,8 @@ class FakeJobQueue(JobQueue):
     async def publish_progress(self, event: ProgressEvent) -> None:
         self.events.append(event)
 
-
-class NullObserver(PipelineObserver):
-    def step(self, name: str) -> AbstractContextManager[None]:
-        return nullcontext()
+    async def consume_progress(self, handler: Callable[[ProgressEvent], Awaitable[None]]) -> None:
+        raise NotImplementedError
 
 
 class Describe(PipelineStep[SourceFile, str]):
@@ -74,7 +72,7 @@ def run_job(step: PipelineStep[SourceFile, str]) -> tuple[FakeFileStore, FakeJob
     files, queue = FakeFileStore(), FakeJobQueue()
     job = Job(uuid.uuid4(), "application/pdf")
     files.save(str(job.job_id), b"form")
-    use_case = ProcessJob(files, lambda: Pipeline([step], NullObserver()), queue)
+    use_case = ProcessJob(files, lambda progress: Pipeline([step], progress), queue)
 
     asyncio.run(use_case.execute(job))
     return files, queue, job
@@ -84,7 +82,11 @@ def test_success_publishes_pipeline_output_and_deletes_file() -> None:
     files, queue, job = run_job(Describe())
 
     assert queue.results == [JobResult(job.job_id, result="application/pdf:form")]
-    assert [(e.step, e.status) for e in queue.events] == [("job", "done")]
+    assert [(e.job_id, e.step, e.status) for e in queue.events] == [
+        (job.job_id, "describe", "started"),
+        (job.job_id, "describe", "done"),
+        (job.job_id, "job", "done"),
+    ]
     assert files.files == {}
 
 
@@ -92,8 +94,29 @@ def test_failing_step_publishes_error_without_its_message_and_deletes_file() -> 
     files, queue, job = run_job(Boom())
 
     assert queue.results == [JobResult(job.job_id, error="ValueError")]
-    assert [(e.step, e.status) for e in queue.events] == [("job", "failed")]
+    assert [(e.step, e.status, e.message) for e in queue.events] == [
+        ("boom", "started", ""),
+        ("boom", "failed", ""),
+        ("job", "failed", ""),
+    ]
     assert files.files == {}
+
+
+class UnreachableQueue(FakeJobQueue):
+    async def publish_progress(self, event: ProgressEvent) -> None:
+        raise ConnectionError
+
+
+def test_lost_progress_event_does_not_fail_the_job() -> None:
+    files, queue = FakeFileStore(), UnreachableQueue()
+    job = Job(uuid.uuid4(), "application/pdf")
+    files.save(str(job.job_id), b"form")
+    use_case = ProcessJob(files, lambda progress: Pipeline([Describe()], progress), queue)
+
+    with pytest.raises(ConnectionError):  # only the final event, published outside the pipeline
+        asyncio.run(use_case.execute(job))
+
+    assert queue.results == [JobResult(job.job_id, result="application/pdf:form")]
 
 
 def test_missing_file_publishes_error() -> None:
@@ -101,7 +124,7 @@ def test_missing_file_publishes_error() -> None:
     job = Job(uuid.uuid4(), "application/pdf")
 
     asyncio.run(
-        ProcessJob(files, lambda: Pipeline([Describe()], NullObserver()), queue).execute(job)
+        ProcessJob(files, lambda progress: Pipeline([Describe()], progress), queue).execute(job)
     )
 
     assert queue.results == [JobResult(job.job_id, error="KeyError")]

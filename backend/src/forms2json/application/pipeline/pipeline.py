@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from contextlib import ExitStack
 from typing import Any
 
 from forms2json.application.pipeline.step import PipelineStep
@@ -9,12 +10,16 @@ class Pipeline:
     """Runs steps in order, feeding each step's output to the next (ADR-0006)."""
 
     # Steps have different input/output types, so the chain is only typed per step.
-    def __init__(self, steps: Sequence[PipelineStep[Any, Any]], observer: PipelineObserver) -> None:
+    def __init__(
+        self, steps: Sequence[PipelineStep[Any, Any]], *observers: PipelineObserver
+    ) -> None:
         self._steps = steps
-        self._observer = observer
+        self._observers = observers
 
     def run(self, data: object) -> object:
         for step in self._steps:
-            with self._observer.step(step.name):
+            with ExitStack() as stack:
+                for observer in self._observers:
+                    stack.enter_context(observer.step(step.name))
                 data = step.run(data)
         return data
