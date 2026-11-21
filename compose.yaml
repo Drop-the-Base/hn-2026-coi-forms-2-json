@@ -117,6 +117,9 @@ services:
     <<: *hardening
     profiles: [llm]
     image: ollama/ollama:0.40.17
+    environment:
+      # Prompt (do ok. 10k tokenów) + LLM_MAX_OUTPUT_TOKENS musi się zmieścić w oknie (#103, ADR-0007).
+      OLLAMA_CONTEXT_LENGTH: "16384"
     volumes:
       # Modelu nie pobieramy automatycznie: docker compose exec llm-runtime ollama pull <LLM_MODEL>
       - ollama:/root/.ollama
