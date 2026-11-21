@@ -41,6 +41,8 @@ EXPECTED_TYPES = [
     ),
 ]
 INFO_TYPES = {"TEXT_BLOCK", "INFO_SECTION", "CONSENT_SECTION"}
+# A label holding a value from the document: postal code, street, blank to fill in.
+VALUE_LIKE = re.compile(r"\b\d{2}-\d{3}\b|\b(ul|al)\.\s|…|\.{3}|_{3}", re.IGNORECASE)
 
 
 def check_standards(form: FormDefinition) -> list[Issue]:
@@ -50,6 +52,7 @@ def check_standards(form: FormDefinition) -> list[Issue]:
         *_check_predefined_sections(form),
         *_check_consents(form),
         *_check_field_types(form),
+        *_check_field_labels(form),
     ]
 
 
@@ -163,6 +166,29 @@ def _check_field_types(form: FormDefinition) -> Iterator[Issue]:
             yield _warn(
                 "S-FIELD-TYPE",
                 f"Lista „{name}” ma {len(field.options)} opcji i nie ma wyszukiwarki.",
+                p.path,
+            )
+
+
+def _check_field_labels(form: FormDefinition) -> Iterator[Issue]:
+    # Suspicious LLM fields lower the confidence (FR-T1) instead of passing at 0.9+.
+    for p in _walk(form):
+        title = p.field.title.strip()
+        if not title or _is_section(p.field) or p.field.type in INFO_TYPES:
+            continue
+        if not any(ch.isalpha() for ch in title):
+            yield _warn("S-FIELD-LABEL", f"Pole „{title}” nie ma etykiety.", p.path)
+        elif title[0].islower():
+            yield _warn(
+                "S-FIELD-LABEL",
+                f"Etykieta pola „{title}” zaczyna się małą literą: wygląda na tekst "
+                "skopiowany z dokumentu, a nie na pytanie.",
+                p.path,
+            )
+        if VALUE_LIKE.search(title):
+            yield _warn(
+                "S-FIELD-LABEL",
+                f"Etykieta pola „{title}” wygląda na wartość z dokumentu, a nie na pytanie.",
                 p.path,
             )
 

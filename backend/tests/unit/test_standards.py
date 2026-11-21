@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from forms2json.domain.confidence import score
 from forms2json.domain.form_definition import (
     Field,
     FlowLink,
@@ -32,7 +33,7 @@ def _q(type_: str, tech_name: str, *children: Question, title: str = "") -> Ques
         id=tech_name,
         type=type_,
         tech_name=tech_name,
-        title=title or tech_name,
+        title=title or tech_name.capitalize(),
         question_order=0,
         repeating_section_grid=list(children),
         states=[],
@@ -176,6 +177,27 @@ def test_many_options_need_select_with_search() -> None:
     assert _codes(form) == ["S-FIELD-TYPE"]
     field.search_enabled = True
     assert _codes(form) == []
+
+
+@pytest.mark.parametrize(
+    ("title", "count"),
+    [
+        ("Numer działki", 0),
+        ("KRS", 0),
+        ("ulica", 1),
+        ("Kod 00-950 Miasto", 1),
+        ("ul. Długa 5", 2),
+        ("Nazwa ………", 1),
+        ("………", 2),
+    ],
+)
+def test_suspicious_label_warns_and_lowers_confidence(title: str, count: int) -> None:
+    form = _valid_form()
+    _case_field(form).title = title
+    issues = check_standards(form)
+    assert [i.code for i in issues] == ["S-FIELD-LABEL"] * count
+    path = "tabs[1].questions[0].field.repeatingSectionGrid[0].field"
+    assert score({path: 0.9}, issues, 0.85).elements[path] == pytest.approx(0.9 - 0.1 * count)
 
 
 def test_schema_uses_only_supported_keywords() -> None:
