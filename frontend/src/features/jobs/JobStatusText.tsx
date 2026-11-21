@@ -1,5 +1,6 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { JobStatus } from "../../shared/api/client";
+import { jobErrorMessage } from "./jobError";
 
 /** One line of job state with icon and word, never colour alone (NFR-15). */
 export function JobStatusText({
@@ -27,7 +28,7 @@ export function JobStatusText({
     return (
       <span className="status status--failed">
         <span className="i i-x-circle" aria-hidden="true"></span>Błąd:{" "}
-        {status.data.error}
+        {jobErrorMessage(status.data.error)}
       </span>
     );
   return status.data ? (

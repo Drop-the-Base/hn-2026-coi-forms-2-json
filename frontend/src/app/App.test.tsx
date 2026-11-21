@@ -5,6 +5,7 @@ import { expect, test } from "vitest";
 import { fakeToken, server, sseStream } from "../test/server";
 import { setToken } from "../shared/api/token";
 import { App } from "./App";
+import wynik from "../features/review/fixtures/wynik-wzorzec-1.json";
 import { routes } from "./routes";
 
 const JOB_ID = "b6af199b-0000-4000-8000-000000000001";
@@ -107,7 +108,7 @@ function mockJob(stream?: ReturnType<typeof sseStream>) {
       stream ? stream.response() : HttpResponse.error(),
     ),
   );
-  return (result: object = { status: "done", result: { title: "Wniosek" } }) =>
+  return (result: object = { status: "done", result: wynik }) =>
     void (final = result);
 }
 
@@ -149,9 +150,25 @@ test("upload tworzy zadanie, lista pokazuje krok z SSE, potem gotowe", async () 
   fireEvent.click(
     list.getByRole("link", { name: "Zobacz wynik: Wniosek.pdf" }),
   );
-  expect((await screen.findByLabelText("Wynik JSON")).textContent).toContain(
-    '"title": "Wniosek"',
+  expect(
+    await screen.findByRole("heading", { level: 1, name: wynik.form.title }),
+  ).toBeDefined();
+  expect(screen.getByRole("button", { name: "Pobierz JSON" })).toBeDefined();
+});
+
+test("nieznany typ błędu zadania pokazuje polski komunikat", async () => {
+  setToken(fakeToken());
+  server.use(
+    http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
+      HttpResponse.json({ status: "failed", error: "NowyBladWorkera" }),
+    ),
   );
+  renderApp(`/zadania/${JOB_ID}`);
+  expect(
+    await screen.findByText(
+      /Nie udało się przetworzyć pliku \(kod: NowyBladWorkera\)\. Wgraj plik ponownie\./,
+    ),
+  ).toBeDefined();
 });
 
 test("błąd serwera przy uploadzie pokazuje detail", async () => {
@@ -201,9 +218,9 @@ test("postęp na żywo: kolejne zdarzenia aktualizują kroki, koniec pokazuje wy
   stream.send(event("understand", "done", 1763700100));
   stream.send(event("job", "done"));
   stream.close();
-  expect((await screen.findByLabelText("Wynik JSON")).textContent).toContain(
-    '"title": "Wniosek"',
-  );
+  expect(
+    await screen.findByRole("heading", { level: 1, name: wynik.form.title }),
+  ).toBeDefined();
 });
 
 test("błąd przetwarzania: krok z błędem i komunikat z przyczyną", async () => {
@@ -241,9 +258,12 @@ test("zerwanie SSE: komunikat o utracie połączenia i polling do wyniku", async
 
   finish(); // the next poll (2 s) sees the result
   expect(
-    (await screen.findByLabelText("Wynik JSON", {}, { timeout: 4000 }))
-      .textContent,
-  ).toContain('"title": "Wniosek"');
+    await screen.findByRole(
+      "heading",
+      { level: 1, name: wynik.form.title },
+      { timeout: 4000 },
+    ),
+  ).toBeDefined();
 });
 
 test("401 ze strumienia SSE wraca do logowania", async () => {

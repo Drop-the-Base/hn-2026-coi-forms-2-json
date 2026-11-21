@@ -50,6 +50,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0024](0024-tracing-otel-pakiety.md) | Tracing OTel w `api` i `worker`: pakiety i propagacja przez RabbitMQ | Proponowana |
 | [0025](0025-warunki-podgladu-jsonata.md) | Warunki `states` w podglądzie formularza: `jsonata` w przeglądarce | Proponowana |
 | [0026](0026-frontend-typy-api-msw-css.md) | Frontend: typy z `openapi-typescript`, MSW w testach, CSS z design systemu zamiast Tailwind | Proponowana |
+| [0027](0027-edytor-json-codemirror.md) | Edytor JSON na ekranie przeglądu: pakiety CodeMirror 6 | Proponowana |
 
 ## Szablon
 
