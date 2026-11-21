@@ -2,7 +2,7 @@
   "title": "Deklaracja o wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi",
   "tabs": [
     {
-      "id": "8ec2e323-c6fc-485c-9a47-42c44e7422bc",
+      "id": "0ec519ec-96c8-48b1-9ec1-37d4ef002b48",
       "title": "Dane",
       "type": "MAIN",
       "questions": [
@@ -12,7 +12,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "30a362be-dccd-433d-9bb4-c173a88b2650",
+            "id": "3a980034-9192-4038-ac63-6e5e1e6f11d9",
             "type": "SECTION",
             "techName": "organ_do_ktorego_jest_skladany_wniosek",
             "title": "Organ, do którego jest składany wniosek",
@@ -27,7 +27,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "33e300e5-ed8d-406d-8675-84f4b64c50a1",
+                  "id": "ed6cb051-c996-4dc9-9752-369828e4fcf7",
                   "type": "TEXT_FIELD",
                   "techName": "nazwa_organu",
                   "title": "Nazwa organu",
@@ -54,7 +54,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "d176aeb3-02d2-4100-95e4-99738c28a3e1",
+            "id": "82a0c58c-41c5-4f82-9560-4a19f8fe7e66",
             "type": "SECTION",
             "techName": "podmiot_wniosku",
             "title": "Podmiot wniosku",
@@ -69,7 +69,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a7bb7bfb-802f-42f4-a362-e40df8776992",
+                  "id": "f9e49af3-eee9-456d-a113-3c4ed5d4195e",
                   "type": "RADIO",
                   "techName": "wybierz_w_czyim_imieniu_wnioskujesz",
                   "title": "Wybierz, w czyim imieniu wnioskujesz",
@@ -107,7 +107,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e7d4d992-5c10-477f-94ad-e48e9093ca73",
+                  "id": "63b5423f-2759-4f34-9011-b4c423e574cb",
                   "type": "RADIO",
                   "techName": "wybierz_jako_kto_wnioskujesz",
                   "title": "Wybierz, jako kto wnioskujesz",
@@ -151,7 +151,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "acadd6d3-0d53-412a-bc88-abdce31962a8",
+            "id": "3736d283-1278-4a70-b8f0-e441f2887a40",
             "type": "SECTION",
             "techName": "twoje_dane",
             "title": "Twoje dane",
@@ -166,7 +166,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4e4df3b7-81fb-4e7f-81cb-373fa2a08859",
+                  "id": "e3df2567-9848-4cd0-b950-ae1e7267e508",
                   "type": "TEXT_FIELD",
                   "techName": "imie",
                   "title": "Imię",
@@ -190,7 +190,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7dea91f4-6c6c-4aa5-9700-ea82ce95504d",
+                  "id": "3b71ceb0-0c6d-4e27-97a9-d468af5bcdac",
                   "type": "TEXT_FIELD",
                   "techName": "nazwisko",
                   "title": "Nazwisko",
@@ -214,7 +214,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "cef01483-9d12-4e90-a3fb-eb0549709982",
+                  "id": "8a156f7e-bd2e-4414-b012-2e20c797c6b3",
                   "type": "TEXT_FIELD",
                   "techName": "numer_pesel",
                   "title": "Numer PESEL",
@@ -245,7 +245,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "23dff120-f660-4fb4-b428-5bd270040be6",
+            "id": "3912c140-30e7-4dab-bccf-a3145e351e29",
             "type": "SECTION",
             "techName": "adres_zamieszkania",
             "title": "Adres zamieszkania",
@@ -260,7 +260,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e62314fa-a9c1-4fae-bc0c-84d55e2fc5dc",
+                  "id": "37a97a91-8f04-4070-bedc-2d20a4ddce16",
                   "type": "SELECT",
                   "techName": "kraj",
                   "title": "Kraj",
@@ -288,7 +288,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "6d9db716-6fb4-496d-a4e5-a15f690f0785",
+                  "id": "6a6ac020-a082-4b1f-bad7-b85a02d17bbe",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_zagranica",
                   "title": "Miejscowość",
@@ -315,7 +315,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "02422032-a6db-44e4-9ad4-970ae6762955",
+                  "id": "4450c9cf-229f-4a8b-915f-172c24d6ba14",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_zagranica",
                   "title": "Kod pocztowy",
@@ -340,7 +340,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "063114d5-64b8-4cce-ac47-b49f37b91dec",
+                  "id": "10e794ba-922e-4fe2-9c90-36004f177270",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_zagranica",
                   "title": "Ulica",
@@ -365,7 +365,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8cf94c16-4281-481c-a7c3-d0f44a427b8b",
+                  "id": "91728605-b160-4090-ae43-a6dfaca9394d",
                   "type": "SELECT",
                   "techName": "wojewodztwo",
                   "title": "TERYT_4G_DOWODOWY",
@@ -396,7 +396,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f4ac3c38-63ea-4455-9199-730336602d6c",
+                  "id": "856e0431-c0e0-42bc-be9b-e8f5053e63f1",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy",
                   "title": "Kod pocztowy",
@@ -426,7 +426,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f19dcf7a-2575-441d-9352-62d8caf29640",
+                  "id": "a73a06b3-60a4-4ff7-a00e-c3fc1521295b",
                   "type": "TEXT_FIELD",
                   "techName": "ulica",
                   "title": "Ulica",
@@ -453,7 +453,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "1dbbb429-2096-47c4-821d-fd400eff4175",
+                  "id": "13715aa2-97d1-4adc-b27c-3fea05e84007",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku",
                   "title": "Numer budynku",
@@ -477,7 +477,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7798e419-849c-4956-a8ce-92a657d48bbd",
+                  "id": "fa7466ca-d08b-4a96-a2b0-16610a7925a3",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu",
                   "title": "Numer lokalu",
@@ -505,7 +505,7 @@
           "rows": 5,
           "cols": 3,
           "field": {
-            "id": "8c9e5229-7fee-4945-ad83-1d6a77f0ba57",
+            "id": "374c52be-450b-42f8-99e9-a4875ed40fae",
             "type": "SECTION",
             "techName": "dane_podmiotu",
             "title": "Dane podmiotu",
@@ -520,7 +520,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "faaf6a54-db16-4668-90e5-228dfc320327",
+                  "id": "9c33f022-7ca3-4004-be67-f36d9411d4f3",
                   "type": "TEXT_FIELD",
                   "techName": "nazwa",
                   "title": "Nazwa",
@@ -542,7 +542,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "24838c44-7c34-4bac-81a6-6bce7092f828",
+                  "id": "1d403d8b-2c4c-4764-9138-85a1ffb7fe23",
                   "type": "TEXT_FIELD",
                   "techName": "nip",
                   "title": "NIP",
@@ -565,7 +565,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "59b0825c-b41b-4771-a2f5-045aadfe076d",
+                  "id": "e4717668-b281-4568-8192-d465227b9edc",
                   "type": "TEXT_FIELD",
                   "techName": "regon",
                   "title": "REGON",
@@ -588,7 +588,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "755330fc-c2fa-4b4e-84b7-ba1178a4d9c5",
+                  "id": "37b18734-8cc4-40fd-975b-7e55dd80566a",
                   "type": "TEXT_FIELD",
                   "techName": "numer_krs",
                   "title": "Numer KRS",
@@ -619,7 +619,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "4247414e-73c9-41e4-a77e-59280480e314",
+            "id": "96d1831b-2250-49bb-84db-fdff91492191",
             "type": "SECTION",
             "techName": "adres_siedziby",
             "title": "Adres siedziby",
@@ -634,7 +634,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "dcf0e2d7-bfd4-47cd-8565-fcccaeb3b81e",
+                  "id": "88398856-8726-4ffd-b2b0-df21300da15f",
                   "type": "SELECT",
                   "techName": "kraj_siedziba",
                   "title": "Kraj",
@@ -662,7 +662,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "835371e4-da58-4675-a6d0-a8f25e874d7c",
+                  "id": "62441af7-f28e-465c-8958-976d386cc7df",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_siedziba_zagranica",
                   "title": "Miejscowość",
@@ -689,7 +689,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "34d4512d-6975-4b7e-8c5a-9fe0fff3550d",
+                  "id": "5a996671-ad70-4031-a858-870ad6dfc3b5",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_siedziba_zagranica",
                   "title": "Kod pocztowy",
@@ -714,7 +714,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7e6dc265-221a-488f-8ab8-18ef78af36bd",
+                  "id": "de5ab3c4-476d-493c-ab8e-5600d3042cf4",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_siedziba_zagranica",
                   "title": "Ulica",
@@ -739,7 +739,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "73534f63-7e0f-4aad-9a5f-0bc7a304d79d",
+                  "id": "02e359c1-da23-4453-b82f-894f8c9eb07a",
                   "type": "SELECT",
                   "techName": "wojewodztwo_siedziba",
                   "title": "TERYT_4G_DOWODOWY",
@@ -770,7 +770,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e56371bf-3e4e-42c1-be0d-773644904379",
+                  "id": "f9e958f6-2990-43d6-9fee-c8a321b8da17",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_siedziba",
                   "title": "Kod pocztowy",
@@ -798,7 +798,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "56f99a0f-1d97-4082-a62e-fc3842851143",
+                  "id": "e908c069-8055-4887-abab-83d39c683c8d",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_siedziba",
                   "title": "Ulica",
@@ -824,7 +824,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "99cf9569-44fa-492a-82ad-2fad0049a194",
+                  "id": "11310784-e6c5-4890-8853-bc1bbc411427",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_siedziba",
                   "title": "Numer budynku",
@@ -846,7 +846,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e2f4f357-a5db-4f5b-8256-0fb59c919755",
+                  "id": "0bd446b2-7faf-4fbb-9089-86dec6707cce",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_siedziba",
                   "title": "Numer lokalu",
@@ -877,7 +877,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "3f8f686e-4b70-4363-bc9f-1c7ad933d2fe",
+            "id": "a85698dd-c47b-4f72-b137-75edbfdff1e0",
             "type": "SECTION",
             "techName": "potwierdzenie_ze_jestes_reprezentantem",
             "title": "Potwierdzenie, że jesteś reprezentantem",
@@ -892,7 +892,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8fba4ebd-653a-4f50-a2af-c93b9e30b770",
+                  "id": "a044c6b7-1976-4ef5-9b20-2a6242c4ed56",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_z_odpisem_danych",
                   "title": "Plik z odpisem danych",
@@ -925,7 +925,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "b9daee9a-0f5f-4f98-9db1-af487cf06c7b",
+            "id": "32be5444-dc61-4367-8278-e7cf58e953ae",
             "type": "SECTION",
             "techName": "dane_innej_osoby",
             "title": "Dane innej osoby",
@@ -940,7 +940,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9b91bf92-2799-403e-923b-d51fb94e7c23",
+                  "id": "bf655f3e-3bd4-41a3-b1f5-52d4c3661f45",
                   "type": "TEXT_FIELD",
                   "techName": "imie_inna_osoba",
                   "title": "Imię",
@@ -962,7 +962,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "1e3dd713-e749-4ca5-84c2-f8f4e3ea506e",
+                  "id": "41b4ceaf-65ac-47b1-9688-99beb1071bb0",
                   "type": "TEXT_FIELD",
                   "techName": "nazwisko_inna_osoba",
                   "title": "Nazwisko",
@@ -984,7 +984,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "6f38aade-e722-4a3e-8046-b2dfb245b66c",
+                  "id": "56db8361-a229-4464-bb4e-5226002a53a7",
                   "type": "TEXT_FIELD",
                   "techName": "numer_pesel_inna_osoba",
                   "title": "Numer PESEL",
@@ -1018,7 +1018,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "8ed7a742-1193-4f59-8e5a-32a57ee03e19",
+            "id": "f07a99c6-49ac-4377-94c9-6b1dfb8ae01a",
             "type": "SECTION",
             "techName": "adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem",
             "title": "Adres zamieszkania innej osoby",
@@ -1033,7 +1033,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e7d5fe79-f0ec-4742-801e-7da4205b5c06",
+                  "id": "43a5deb8-3412-4321-b285-844e76b91068",
                   "type": "SELECT",
                   "techName": "kraj_inna_osoba",
                   "title": "Kraj",
@@ -1061,7 +1061,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4b36cccb-5029-4fbd-8457-a818d9b99117",
+                  "id": "39b5e793-4006-4fb8-9e14-ee7db397f65f",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_inna_osoba_zagranica",
                   "title": "Miejscowość",
@@ -1088,7 +1088,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "2bd4f1fe-5ed8-491b-bda3-98eb895ebc77",
+                  "id": "7b7a0dc7-416c-41f1-a658-6d982d13cece",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_inna_osoba_zagranica",
                   "title": "Kod pocztowy",
@@ -1113,7 +1113,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "6955351b-c16d-4052-a6ed-efeb0619919a",
+                  "id": "16d6fc9f-29a4-4e5b-a6ca-e1d730bbe7fd",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_inna_osoba_zagranica",
                   "title": "Ulica",
@@ -1138,7 +1138,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b272418f-e1de-424b-8c8e-2fea0ae7d14e",
+                  "id": "bf70e407-a182-4f89-94df-9dd5afd61be1",
                   "type": "SELECT",
                   "techName": "wojewodztwo_inna_osoba",
                   "title": "TERYT_4G_DOWODOWY",
@@ -1169,7 +1169,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9597bff8-13af-41cb-818e-dbef7f8ab620",
+                  "id": "6e4c2033-832a-4fd5-8239-6f2ee0a8c8ce",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_inna_osoba",
                   "title": "Kod pocztowy",
@@ -1197,7 +1197,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8b1569d9-ff39-467d-8d63-3b2b8214add0",
+                  "id": "9f7d0e24-d33b-4544-8f6b-0493f10db0b8",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_inna_osoba",
                   "title": "Ulica",
@@ -1222,7 +1222,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9fcda370-fa4c-41ef-9ae9-de9312c47dde",
+                  "id": "db30982b-450f-4261-9980-32257d08e9f4",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_inna_osoba",
                   "title": "Numer budynku",
@@ -1244,7 +1244,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "dbafbef9-6ffa-45aa-a35d-f712ee2b8eb9",
+                  "id": "0156be01-3b3d-4355-8a73-aaaf510a2c18",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_inna_osoba",
                   "title": "Numer lokalu",
@@ -1275,7 +1275,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "b0c9ce26-8ebe-451b-93a9-eb1f2d5bda26",
+            "id": "ed0eadfb-f6b1-4677-8f10-4d2bf0da15ae",
             "type": "SECTION",
             "techName": "pelnomocnictwo",
             "title": "Pełnomocnictwo",
@@ -1290,7 +1290,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "787e42f8-adc9-4600-840b-f9b8b1a1edc2",
+                  "id": "f7744961-5c1d-43c5-9523-b3c6ef508e62",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_dokumentu_z_pelnomocnictwem",
                   "title": "Plik dokumentu z pełnomocnictwem",
@@ -1323,7 +1323,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "a6dd2680-4bdd-4eb5-8052-725fec95ca90",
+            "id": "240c8208-7bf7-41ac-ae2e-1c48fa65bd22",
             "type": "SECTION",
             "techName": "oplata_skarbowa_pelnomocnictwo_1",
             "title": "Opłata skarbowa",
@@ -1338,7 +1338,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e22fcf9a-c815-44aa-83d4-703411560a33",
+                  "id": "54aeeac4-74e9-4abb-86bd-f0fc8ed06558",
                   "type": "RADIO",
                   "techName": "czy_zlozenie_pelnomocnictwa_wymaga_oplaty_skarbowej",
                   "title": "Czy złożenie pełnomocnictwa wymaga opłaty skarbowej?",
@@ -1371,7 +1371,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "73f00afb-0fe9-45a6-9944-1006b0545966",
+                  "id": "01e6bc2c-8ee9-45f0-9a45-35b763497277",
                   "type": "TEXT_BLOCK",
                   "techName": "oplata_info_1",
                   "title": "",
@@ -1396,7 +1396,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "65f74bb8-9901-451f-b3fc-37d8ff9b6352",
+                  "id": "b977660c-c7c3-460e-b0cf-96ec466a1db5",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_z_potwierdzeniem_przelewu",
                   "title": "Plik z potwierdzeniem przelewu",
@@ -1434,7 +1434,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "851bd83e-9f55-4b09-8257-6aeade76cca2",
+            "id": "89b31058-180f-474a-aeb5-28920ae6e29e",
             "type": "SECTION",
             "techName": "oplata_skarbowa_pelnomocnictwo_2",
             "title": "Opłata skarbowa za pełnomonictwo",
@@ -1449,7 +1449,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "635722f6-a866-40bd-a547-ab4fc6a54e85",
+                  "id": "268164cf-50d9-4685-b35e-8a0761c17c7f",
                   "type": "TEXT_BLOCK",
                   "techName": "oplata_info",
                   "title": "",
@@ -1469,7 +1469,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "62452ffc-789f-4da3-a781-6346949af20b",
+                  "id": "d693bd5e-0da1-443a-9a00-b05273b282aa",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_z_potwierdzeniem_przelewu_2",
                   "title": "Plik z potwierdzeniem przelewu",
@@ -1499,7 +1499,7 @@
       ]
     },
     {
-      "id": "1634e555-7f35-4137-a0a8-4fed9983d9f0",
+      "id": "dc4419e3-f4f4-4113-bfb9-c03d519d3012",
       "title": "Składający deklarację",
       "type": "MAIN",
       "questions": [
@@ -1509,7 +1509,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "9a34d4a2-fd19-46c8-9ca0-d65a941ef119",
+            "id": "c3cca17f-423e-4d47-aef1-dbb77ba62c80",
             "type": "SECTION",
             "techName": "skladajacy_deklaracje",
             "title": "Składający deklarację",
@@ -1524,7 +1524,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "205ef5a9-353f-4a80-a956-c31e16313dff",
+                  "id": "fa44604b-b169-4ec4-8381-df3c7bc8a878",
                   "type": "SELECT",
                   "techName": "rodzaj_skladajacego",
                   "title": "Wybierz, kim jesteś jako składający deklarację",
@@ -1577,7 +1577,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c5dd1d24-865c-470d-afdd-3d8587d8636c",
+                  "id": "e5ed20bd-7abd-4c5f-8d76-259dff513bb8",
                   "type": "TEXTAREA",
                   "techName": "rodzaj_i_dane_innego_podmiotu",
                   "title": "Rodzaj i dane podmiotu",
@@ -1610,7 +1610,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "93338a5a-cb25-4388-8f18-f146f8d5ec4c",
+            "id": "276f83dd-c83c-42de-aecb-5eae2f5f0bea",
             "type": "SECTION",
             "techName": "dane_wspolmalzonka",
             "title": "Dane współmałżonka",
@@ -1625,7 +1625,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3ceeb64a-1923-4a87-a0d7-b7ef669e1534",
+                  "id": "423b6939-1bad-4ff3-b47b-40ffde54a306",
                   "type": "TEXT_FIELD",
                   "techName": "imie_wspolmalzonka",
                   "title": "Imię",
@@ -1647,7 +1647,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b5c954a5-a344-4919-9e12-fdf248e56eac",
+                  "id": "7e5b0813-ba65-475b-bb5d-2e967a061a33",
                   "type": "TEXT_FIELD",
                   "techName": "nazwisko_wspolmalzonka",
                   "title": "Nazwisko",
@@ -1669,7 +1669,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "dbf86095-0f35-48c7-bb8f-92edff6ac28c",
+                  "id": "76c07b06-3be4-405e-b237-ae0d90f650f8",
                   "type": "TEXT_FIELD",
                   "techName": "numer_pesel_wspolmalzonka",
                   "title": "Numer PESEL",
@@ -1703,7 +1703,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "bdf19c6e-1e02-4f97-a277-3377ccbcd8ec",
+            "id": "e2dcb9ab-1264-46ad-81bb-bb2729fb6583",
             "type": "SECTION",
             "techName": "adres_zamieszkania_wspolmalzonka",
             "title": "Adres zamieszkania współmałżonka",
@@ -1718,7 +1718,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "48780b61-357b-41da-b68d-079888d69498",
+                  "id": "ad1b388c-9541-4909-87d3-ae508e6a17bd",
                   "type": "SELECT",
                   "techName": "kraj_wspolmalzonek",
                   "title": "Kraj",
@@ -1746,7 +1746,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e9bd2bc0-ba72-43cc-aedd-a26ada69a4ac",
+                  "id": "9df8ed8b-27e1-4556-9de7-c7430529bd48",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_wspolmalzonek_zagranica",
                   "title": "Miejscowość",
@@ -1773,7 +1773,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d498f26e-c503-4625-abc4-7713179e4c73",
+                  "id": "a4f18422-e999-4e5f-80c1-54ea6d7a31e7",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_wspolmalzonek_zagranica",
                   "title": "Kod pocztowy",
@@ -1798,7 +1798,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "46a22fa0-2ad4-4dc8-ac0d-c47a26f308b9",
+                  "id": "e2561c41-b61b-4cbe-855a-f7ded4d5b96e",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_wspolmalzonek_zagranica",
                   "title": "Ulica",
@@ -1823,7 +1823,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5fa221d4-ed78-4120-86a4-e0bf9711564c",
+                  "id": "a463085a-db69-4e3f-b294-041d8c3e4f36",
                   "type": "SELECT",
                   "techName": "wojewodztwo_wspolmalzonek",
                   "title": "TERYT_4G_DOWODOWY",
@@ -1854,7 +1854,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7b9df776-1c8f-4ebe-9c35-81a5907ba4dc",
+                  "id": "1d15896b-feba-4a34-9f8e-56fc6f93fc59",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_wspolmalzonek",
                   "title": "Kod pocztowy",
@@ -1866,8 +1866,6 @@
                   ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.postCode",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [
                     {
                       "type": "SHOW",
@@ -1884,7 +1882,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9482d65e-e883-4d33-aef2-747725a20efa",
+                  "id": "904eec13-0ae4-4174-8031-52ae308d51d1",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_wspolmalzonek",
                   "title": "Ulica",
@@ -1893,8 +1891,6 @@
                   "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.street",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [
                     {
                       "type": "SHOW",
@@ -1911,7 +1907,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "93fafc8e-fa9b-4eb5-bb36-75f3bda27627",
+                  "id": "f98ee814-c238-4cf9-8082-8618b5939392",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_wspolmalzonek",
                   "title": "Numer budynku",
@@ -1922,8 +1918,6 @@
                   ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.building",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [],
                   "questionOrder": 7,
                   "tooltipMessage": ""
@@ -1935,7 +1929,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b5561d20-4f8e-4cb3-93d5-27d84d0b958a",
+                  "id": "694c8956-48d6-448c-9597-fce989871268",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_wspolmalzonek",
                   "title": "Numer lokalu",
@@ -1944,8 +1938,6 @@
                   "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.apartment",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [],
                   "questionOrder": 8,
                   "tooltipMessage": ""
@@ -1968,7 +1960,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "7f4fdf34-6a4e-40a1-8a1b-8e8ef9104dd4",
+            "id": "150d85dd-6ef0-4f45-ab19-0b2c19ab27db",
             "type": "SECTION",
             "techName": "korespondencja",
             "title": "Korespondencja",
@@ -1983,7 +1975,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "04504273-46bf-443c-bbcd-6159b79bed4a",
+                  "id": "1ee3b616-e31c-40f0-a7e6-4ed87afcf6f2",
                   "type": "RADIO",
                   "techName": "czy_inny_adres_do_korespondencji",
                   "title": "Czy adres do korespondencji jest inny niż adres zamieszkania lub siedziby?",
@@ -2022,7 +2014,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "86db9dd1-43f6-4716-8799-57e51c62b409",
+            "id": "abedba86-cab8-4990-8a91-0cd38bc635bc",
             "type": "SECTION",
             "techName": "adres_do_korespondencji",
             "title": "Adres do korespondencji",
@@ -2037,7 +2029,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "31c3a498-63b5-4b7d-a126-fd336f8b5cdd",
+                  "id": "a2fb7204-61a0-4e07-8049-d7d6444cea61",
                   "type": "SELECT",
                   "techName": "kraj_korespondencja",
                   "title": "Kraj",
@@ -2065,7 +2057,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "186ea653-11ea-48e5-9989-34507f993a81",
+                  "id": "b0f466f9-90c9-457c-8087-a8a46f797669",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_korespondencja_zagranica",
                   "title": "Miejscowość",
@@ -2092,7 +2084,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "081272e6-189d-4a4f-a520-69afd6d3dd10",
+                  "id": "cd5ca15a-0e4d-4d31-b7ab-0d6f76488afe",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_korespondencja_zagranica",
                   "title": "Kod pocztowy",
@@ -2117,7 +2109,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3dc57e79-267f-43e9-be7c-10447018f9ed",
+                  "id": "50d3f667-e12a-4c4b-b294-8465a61ede5b",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_korespondencja_zagranica",
                   "title": "Ulica",
@@ -2142,7 +2134,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f01ecdc3-7798-40f4-8467-3e2e9ee36e23",
+                  "id": "659b584d-c156-4d64-89e4-a60d5f394e69",
                   "type": "SELECT",
                   "techName": "wojewodztwo_korespondencja",
                   "title": "TERYT_4G_DOWODOWY",
@@ -2173,7 +2165,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3a3526eb-b795-41b3-9b72-b487417f8591",
+                  "id": "d516df43-6dcc-4040-8e16-f8b680b0fbec",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_korespondencja",
                   "title": "Kod pocztowy",
@@ -2185,8 +2177,6 @@
                   ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.postCode",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [
                     {
                       "type": "SHOW",
@@ -2203,7 +2193,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "1fc36fb8-87cc-40cd-8a52-c49bc938cd15",
+                  "id": "76ae323c-a2b0-469c-b2df-dd72112b9e3f",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_korespondencja",
                   "title": "Ulica",
@@ -2212,8 +2202,6 @@
                   "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.street",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [
                     {
                       "type": "SHOW",
@@ -2230,7 +2218,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4b24ef67-aa67-49d1-be52-545f7be3af64",
+                  "id": "ab9baeb4-75c7-4895-bbcc-1b0cb8045eb9",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_korespondencja",
                   "title": "Numer budynku",
@@ -2241,8 +2229,6 @@
                   ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.building",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [],
                   "questionOrder": 7,
                   "tooltipMessage": ""
@@ -2254,7 +2240,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "216e5fe1-6662-4cbc-9253-fa2fd954eff6",
+                  "id": "dcfc7073-e0a3-4089-beaa-36ae6944dbf0",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_korespondencja",
                   "title": "Numer lokalu",
@@ -2263,8 +2249,6 @@
                   "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.apartment",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
                   "states": [],
                   "questionOrder": 8,
                   "tooltipMessage": ""
@@ -2284,7 +2268,7 @@
       ]
     },
     {
-      "id": "3f441865-7235-4929-b357-3df43f1227aa",
+      "id": "bdec3b4a-db7b-4466-835e-ac686156761f",
       "title": "Okoliczności i nieruchomość",
       "type": "MAIN",
       "questions": [
@@ -2294,7 +2278,7 @@
           "rows": 5,
           "cols": 3,
           "field": {
-            "id": "ab0f8976-5649-4478-999b-2a3e309f08c0",
+            "id": "fa0634a9-6fc4-4088-b03e-b44b25161f03",
             "type": "SECTION",
             "techName": "okolicznosci_zlozenia_deklaracji",
             "title": "Okoliczności złożenia deklaracji",
@@ -2309,7 +2293,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d8643c2b-ffea-4a9b-b44c-46cb7a225df2",
+                  "id": "10e5eb7e-a884-4053-878c-bf1b27225bf0",
                   "type": "RADIO",
                   "techName": "okolicznosci",
                   "title": "Wybierz, dlaczego składasz deklarację",
@@ -2352,7 +2336,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ac59f7cd-7d80-4b86-9570-cc47d365f556",
+                  "id": "4762dd07-dffb-429f-acef-648c3cf62f02",
                   "type": "DATEPICKER",
                   "techName": "data_powstania_obowiazku_oplaty",
                   "title": "Data powstania obowiązku opłaty",
@@ -2379,7 +2363,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a63f2083-98c3-4613-991b-194695db732f",
+                  "id": "3036b99b-7026-4400-8515-40bab2199aaf",
                   "type": "DATEPICKER",
                   "techName": "data_wystapienia_zmiany_danych",
                   "title": "Data wystąpienia zmiany danych",
@@ -2406,7 +2390,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5472d51a-ce11-41bb-b1d5-5b6e16ca8e7c",
+                  "id": "8f27852a-493b-45a2-bca6-d5142ecff61a",
                   "type": "DATEPICKER",
                   "techName": "data_ustania_obowiazku_oplaty",
                   "title": "Data ustania obowiązku opłaty",
@@ -2439,7 +2423,7 @@
           "rows": 6,
           "cols": 3,
           "field": {
-            "id": "60967c36-ed5c-4a8e-8720-550f150c4ab7",
+            "id": "f95049d9-d584-4790-90f1-354227e64dba",
             "type": "SECTION",
             "techName": "adres_nieruchomosci",
             "title": "Adres nieruchomości",
@@ -2454,7 +2438,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e293775c-b875-45fe-8957-383ba7af07e7",
+                  "id": "5c4e2998-6ac5-4f0c-8219-a0711a66e941",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_nieruchomosci",
                   "title": "Miejscowość",
@@ -2477,7 +2461,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "18206a6c-d931-4548-b362-dceb12d50656",
+                  "id": "83d96669-5167-4c54-b736-468e768db6c3",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_nieruchomosci",
                   "title": "Kod pocztowy",
@@ -2500,7 +2484,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "77c1c635-379d-4dc2-8e05-0d072d94f892",
+                  "id": "aa3b7b47-343c-4d08-a59e-c10cd84f851b",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_nieruchomosci",
                   "title": "Ulica",
@@ -2520,7 +2504,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d5dba7bc-ca0d-4b79-84b8-5805b4791df4",
+                  "id": "fd5d408b-680a-4228-9aea-00c3cbeea9c0",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_nieruchomosci",
                   "title": "Numer budynku",
@@ -2542,7 +2526,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c4d2f300-eca6-450b-835a-169f6b750027",
+                  "id": "ca1e6a92-5606-4b87-8326-b917ef0d8283",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_nieruchomosci",
                   "title": "Numer lokalu",
@@ -2568,7 +2552,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "8973a0d9-a350-40d9-aa61-174e216e0622",
+            "id": "8ef6c542-009a-43a4-8a46-76c46a60a525",
             "type": "SECTION",
             "techName": "miejsce_gromadzenia_odpadow",
             "title": "Miejsce gromadzenia odpadów",
@@ -2583,7 +2567,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d9ee4c6b-cd4c-4076-9fea-1ffb20b17185",
+                  "id": "f8359725-a03b-408b-a3b6-d7e1955c1fb7",
                   "type": "TEXTAREA",
                   "techName": "adres_lub_opis_miejsca_pojemnikow",
                   "title": "Adres lub opis miejsca lokalizacji pojemników",
@@ -2603,7 +2587,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "438dfdfc-2d9f-47df-8f85-51b567e571f7",
+                  "id": "60f748f1-c563-43ac-8aec-eefb87b17365",
                   "type": "TEXT_FIELD",
                   "techName": "numery_dzialek_geodezyjnych",
                   "title": "Numery działek geodezyjnych",
@@ -2634,7 +2618,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "1dbac44a-2e43-4ada-bcdc-1726e0a577bb",
+            "id": "d0b4beba-72d0-4370-98c3-9cccc79ee1ce",
             "type": "SECTION",
             "techName": "dane_nieruchomosci",
             "title": "Dane nieruchomości",
@@ -2649,7 +2633,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5569f02d-d976-42db-83fd-fb66df0cba6a",
+                  "id": "4d1c9779-060c-40b8-a3f8-6920e9e3c669",
                   "type": "RADIO",
                   "techName": "rodzaj_nieruchomosci",
                   "title": "Rodzaj nieruchomości",
@@ -2682,7 +2666,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d1f90f86-1038-4648-9271-b67324717cbf",
+                  "id": "a077136b-7d43-48f2-b557-2c0ad0c11554",
                   "type": "RADIO",
                   "techName": "czesc_niezamieszkala",
                   "title": "Czy na części nieruchomości nie mieszkają mieszkańcy, a powstają na niej odpady komunalne?",
@@ -2721,7 +2705,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "2b78c92c-d67d-4bbe-ab22-ba8292236af7",
+            "id": "51134f2d-688a-4c11-91e8-b27d239ec735",
             "type": "SECTION",
             "techName": "kompostownik",
             "title": "Kompostownik",
@@ -2736,7 +2720,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d2411501-b875-45ec-a0e6-560c21a56a57",
+                  "id": "b9d86c46-e2ff-4ff6-a627-22d459c2c9d9",
                   "type": "RADIO",
                   "techName": "czy_nieruchomosc_ma_kompostownik",
                   "title": "Czy nieruchomość jest wyposażona w przydomowy kompostownik, w którym są kompostowane bioodpady?",
@@ -2777,7 +2761,7 @@
       ]
     },
     {
-      "id": "0e27ddb9-296b-4499-84f1-482d12113e52",
+      "id": "af2d172f-f2f3-4591-b07d-30a0c05c58c0",
       "title": "Wysokość opłaty",
       "type": "MAIN",
       "questions": [
@@ -2787,7 +2771,7 @@
           "rows": 12,
           "cols": 3,
           "field": {
-            "id": "98f9a069-79dd-44e1-8791-af1799bb5b5c",
+            "id": "e1b37bbc-7275-4efc-bf78-471cd6739642",
             "type": "SECTION",
             "techName": "oplata_dla_nieruchomosci",
             "title": "Obliczenie wysokości opłaty",
@@ -2802,7 +2786,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "70769c75-7aae-4d8e-95e4-294e995ed28f",
+                  "id": "78dc22c6-e606-4515-8d2d-75e35e1e2b8e",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_do_45_m2",
                   "title": "Liczba gospodarstw domowych w lokalach do 45 m²",
@@ -2822,7 +2806,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "db0d7029-14f1-482a-b0ba-b15ae3508941",
+                  "id": "7b2d35ec-710d-49ab-b176-c2e814cebcb2",
                   "type": "NUMBER",
                   "techName": "oplata_do_45_m2",
                   "title": "Wysokość miesięcznej opłaty za lokale do 45 m²",
@@ -2842,7 +2826,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c5ac1bf0-16f3-46c7-8fdd-2b86bf43d9b3",
+                  "id": "9d6e44cd-a483-47d9-a55d-b46cb0b7a052",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_od_45_do_60_m2",
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 45 m² do 60 m²",
@@ -2862,7 +2846,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bf8175cf-508a-4831-b593-f6413d5d3099",
+                  "id": "cfb63af5-1b1e-4370-ba11-9c85ff313484",
                   "type": "NUMBER",
                   "techName": "oplata_od_45_do_60_m2",
                   "title": "Wysokość miesięcznej opłaty za lokale powyżej 45 m² do 60 m²",
@@ -2882,7 +2866,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "df9f890c-812b-4012-8760-f42a195d1b75",
+                  "id": "b4bd82e3-caef-4633-8296-a0ac4546480c",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_od_60_do_80_m2",
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 60 m² do 80 m²",
@@ -2902,7 +2886,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "de738383-79c8-424f-8f3b-d94e059f73d2",
+                  "id": "c145705b-7ba9-4c92-a176-ccbab3600632",
                   "type": "NUMBER",
                   "techName": "oplata_od_60_do_80_m2",
                   "title": "Wysokość miesięcznej opłaty za lokale powyżej 60 m² do 80 m²",
@@ -2922,7 +2906,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "475dd234-1191-476e-96de-0c6e8db41fa7",
+                  "id": "0e85f3c8-170d-466f-a068-5ff6774686c7",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_powyzej_80_m2",
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 80 m²",
@@ -2942,7 +2926,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4a2793b1-0df6-4889-be80-372770f1a604",
+                  "id": "bf03832f-a5be-4ed1-876f-c81f106fda10",
                   "type": "NUMBER",
                   "techName": "oplata_powyzej_80_m2",
                   "title": "Wysokość miesięcznej opłaty za lokale powyżej 80 m²",
@@ -2962,7 +2946,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c539d310-6fa2-42f3-ac93-232260c808d9",
+                  "id": "77fa9afc-6c5c-4e15-9aa6-7d16556fee30",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_ze_zwolnieniem",
                   "title": "Liczba gospodarstw domowych objętych zwolnieniem dochodowym",
@@ -2982,7 +2966,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ed278529-6d6b-4d4b-8fb5-dfe29f8891ba",
+                  "id": "17f0f755-a516-4557-9cd8-be8de69b17ce",
                   "type": "NUMBER",
                   "techName": "kwota_zwolnienia",
                   "title": "Kwota miesięcznego zwolnienia",
@@ -3002,7 +2986,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4489dffc-0af0-4038-ad6a-86ff0c0eb553",
+                  "id": "c7240fd3-8cc2-4f9c-b701-a64c92ef7b22",
                   "type": "NUMBER",
                   "techName": "suma_oplaty",
                   "title": "Suma miesięcznej opłaty",
@@ -3035,7 +3019,7 @@
           "rows": 12,
           "cols": 3,
           "field": {
-            "id": "3d52dd31-7366-47f0-9f2a-f6d8fdc2b919",
+            "id": "4d8484fb-6ecf-499d-9b8f-6d0fd30e4bdd",
             "type": "SECTION",
             "techName": "oplata_z_kompostownikiem",
             "title": "Obliczenie wysokości opłaty z kompostownikiem",
@@ -3050,7 +3034,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "deb563f9-8b2c-4328-b8e8-4878bb85139e",
+                  "id": "f8008a37-bf29-4848-a396-2dd8c9d6704c",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_do_45_m2_kompostownik",
                   "title": "Liczba gospodarstw domowych w lokalach do 45 m²",
@@ -3070,7 +3054,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "64f2fa14-7bbb-48ac-bbdc-12dcfafc3c3f",
+                  "id": "c2ee7973-77da-4271-ac2b-1b1d180f6a41",
                   "type": "NUMBER",
                   "techName": "oplata_do_45_m2_kompostownik",
                   "title": "Wysokość miesięcznej opłaty za lokale do 45 m²",
@@ -3090,7 +3074,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e9f3df91-abaf-4f85-b384-13b9ac8ff24b",
+                  "id": "e529a711-64b3-4296-aa47-e2b1d5f3b5f6",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_od_45_do_60_m2_kompostownik",
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 45 m² do 60 m²",
@@ -3110,7 +3094,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f82f2d2a-ccb6-4878-8d41-695edb4e2f7c",
+                  "id": "9f851d0e-7ff7-4e0f-9690-20dec7000e1a",
                   "type": "NUMBER",
                   "techName": "oplata_od_45_do_60_m2_kompostownik",
                   "title": "Wysokość miesięcznej opłaty za lokale powyżej 45 m² do 60 m²",
@@ -3130,7 +3114,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bc3ae06d-29ca-4676-b298-29b3118962ac",
+                  "id": "06d0de57-7cd3-4416-a9f9-bca88615d2d1",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_od_60_do_80_m2_kompostownik",
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 60 m² do 80 m²",
@@ -3150,7 +3134,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "acbd1d5d-fbb0-4f6f-a4af-fabec87b70bb",
+                  "id": "8cea6f7a-c654-4b79-8ab6-cea70fd1465a",
                   "type": "NUMBER",
                   "techName": "oplata_od_60_do_80_m2_kompostownik",
                   "title": "Wysokość miesięcznej opłaty za lokale powyżej 60 m² do 80 m²",
@@ -3170,7 +3154,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "277df2b4-e659-4d9d-b62b-3cd8d0ee08ed",
+                  "id": "7351bb12-d3b5-4eb2-aa44-99d9cfebcd2c",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_powyzej_80_m2_kompostownik",
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 80 m²",
@@ -3190,7 +3174,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7e5d44d9-a361-43f6-bc5c-8479056de1b3",
+                  "id": "c6748a9d-1e61-4841-bd7e-8912e040edda",
                   "type": "NUMBER",
                   "techName": "oplata_powyzej_80_m2_kompostownik",
                   "title": "Wysokość miesięcznej opłaty za lokale powyżej 80 m²",
@@ -3210,7 +3194,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "556c749d-c571-436f-9952-9740fe46accd",
+                  "id": "082c8896-37bd-4206-9248-5f7e0137fe84",
                   "type": "NUMBER",
                   "techName": "liczba_gospodarstw_ze_zwolnieniem_kompostownik",
                   "title": "Liczba gospodarstw domowych objętych zwolnieniem dochodowym",
@@ -3230,7 +3214,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c9652754-4af0-4a90-b4b8-f78c4335bada",
+                  "id": "68f3116a-e78c-4726-85e2-df6b93f6b40c",
                   "type": "NUMBER",
                   "techName": "kwota_zwolnienia_kompostownik",
                   "title": "Kwota miesięcznego zwolnienia",
@@ -3250,7 +3234,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "1a3c8350-ddd0-43d1-8371-d3cbea49e1e4",
+                  "id": "81443f12-6fa1-4c26-9536-30f957102aba",
                   "type": "NUMBER",
                   "techName": "suma_oplaty_kompostownik",
                   "title": "Suma miesięcznej opłaty",
@@ -3283,7 +3267,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "91e72154-9631-473e-9e17-26613390bfd8",
+            "id": "bcd97443-8f0d-406f-b1ed-5e201a82e579",
             "type": "SECTION",
             "techName": "oplata_za_czesc_niezamieszkala",
             "title": "Opłata za część nieruchomości, na której nie mieszkają mieszkańcy",
@@ -3298,7 +3282,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "cf3966bf-a88f-48c4-be26-c13621c9490a",
+                  "id": "7b14eb96-7527-4f6a-8408-8b1edf229622",
                   "type": "NUMBER",
                   "techName": "kwota_z_zalacznika",
                   "title": "Kwota opłaty z załącznika A lub B",
@@ -3331,7 +3315,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "6e9b5c92-bfc0-483e-b81d-f794c85cdedd",
+            "id": "ca20b9b1-c53f-49f0-acb8-f895b6278194",
             "type": "SECTION",
             "techName": "razem_oplata",
             "title": "Razem wysokość miesięcznej opłaty",
@@ -3346,7 +3330,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3cc30e0f-0ed5-4bfb-b039-fd234291d5ad",
+                  "id": "f6a8574c-b701-44f2-b1c5-4f375c352633",
                   "type": "NUMBER",
                   "techName": "razem_wysokosc_miesiecznej_oplaty",
                   "title": "Razem wysokość miesięcznej opłaty",
@@ -3374,7 +3358,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "24dd65f7-7cf8-4a4f-ac31-193fb10145b3",
+            "id": "77286615-690e-4a71-93f2-996a94e527bc",
             "type": "SECTION",
             "techName": "zalaczniki",
             "title": "Załączniki",
@@ -3389,7 +3373,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "82fe7962-8f77-48c3-95c3-a82c9c6b061b",
+                  "id": "451712f6-242c-4563-8b45-d1cd185e4039",
                   "type": "FILE_UPLOADER",
                   "techName": "zalacznik_a",
                   "title": "Załącznik A do deklaracji",
@@ -3416,7 +3400,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ad86af7a-5d0e-4935-a5b4-95319e66bc82",
+                  "id": "cc9a3e14-658b-40b7-9368-b6c052298077",
                   "type": "FILE_UPLOADER",
                   "techName": "zalacznik_b",
                   "title": "Załącznik B do deklaracji",
@@ -3443,7 +3427,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7583d7be-3edd-4d4d-97b9-3205d17d330f",
+                  "id": "731ee706-6f21-402b-a200-858950f03c86",
                   "type": "FILE_UPLOADER",
                   "techName": "inne_zalaczniki",
                   "title": "Inne załączniki",
@@ -3466,7 +3450,7 @@
       ]
     },
     {
-      "id": "b838f3b8-19cd-4586-ad77-a9e58601aa76",
+      "id": "e8ef48a7-9f88-4bdd-ab66-d8569f69b4e3",
       "title": "Kontakt i zgody",
       "type": "MAIN",
       "questions": [
@@ -3476,7 +3460,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "8b83dc55-5ae8-467a-b93e-2329c691b46c",
+            "id": "d12996da-c485-4623-85ce-bc2e5051f3bc",
             "type": "SECTION",
             "techName": "dane_do_kontaktu",
             "title": "Dane do kontaktu",
@@ -3491,7 +3475,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9cf7bb1d-b685-4661-9b0e-066fd058e5c8",
+                  "id": "1091eba5-b00f-4efa-a435-f07aa9e973fc",
                   "type": "TEXT_FIELD",
                   "techName": "numer_telefonu",
                   "title": "Numer telefonu",
@@ -3513,7 +3497,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ec6bb69d-f5df-474e-b702-09b7164396cf",
+                  "id": "e5247d2e-c88f-4cbb-8500-934814b0d2b2",
                   "type": "TEXT_FIELD",
                   "techName": "adres_e_mail",
                   "title": "Adres e-mail",
@@ -3543,7 +3527,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "e453b2cd-c7c0-4497-b9e9-4741e8ff8401",
+            "id": "2dcb91b8-1e86-4afe-b101-1151eb79f5c5",
             "type": "SECTION",
             "techName": "zgoda_wyrazenie",
             "title": "Zgody i oświadczenia",
@@ -3558,7 +3542,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "65963173-7157-46a6-a147-f88a14db4c39",
+                  "id": "d63eda6d-905a-42c9-81bb-eb810920ab72",
                   "type": "CONSENT_SECTION",
                   "techName": "zgoda",
                   "title": "",
@@ -3606,7 +3590,7 @@
       ]
     },
     {
-      "id": "01f09b1e-4022-48f4-986c-de10d2285e7a",
+      "id": "c1d3234c-77f7-4c2b-9bd5-e7a25ab65bae",
       "title": "Strona końcowa",
       "type": "FINISH",
       "questions": [
@@ -3616,7 +3600,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "1938970b-c4bf-4e33-8b82-c87517ce6fff",
+            "id": "21ac0de0-06bd-49e8-b3ba-713a9834b84c",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
             "title": "Podgląd uzupełnionego wniosku",
@@ -3631,7 +3615,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "dbd17218-4cd8-42a4-94aa-a78428c704bc",
+                  "id": "ef04c389-54c9-471c-b7aa-38aeb145e637",
                   "type": "TEXT_BLOCK",
                   "techName": "podglad_1",
                   "title": "",
@@ -3657,29 +3641,29 @@
   "flow": {
     "links": [
       {
-        "id": "9ee18da8-f081-47e8-85a7-b92f2699fcb4",
-        "source": "8ec2e323-c6fc-485c-9a47-42c44e7422bc",
-        "target": "1634e555-7f35-4137-a0a8-4fed9983d9f0"
+        "id": "e58c09cc-6f31-41d1-9496-07a4e55ab6ef",
+        "source": "0ec519ec-96c8-48b1-9ec1-37d4ef002b48",
+        "target": "dc4419e3-f4f4-4113-bfb9-c03d519d3012"
       },
       {
-        "id": "2e0f16f0-22e4-41d7-8d62-5ff8ac5b5d11",
-        "source": "1634e555-7f35-4137-a0a8-4fed9983d9f0",
-        "target": "3f441865-7235-4929-b357-3df43f1227aa"
+        "id": "46f9adcf-e7dd-4fcb-b0c0-0a6a3354ff87",
+        "source": "dc4419e3-f4f4-4113-bfb9-c03d519d3012",
+        "target": "bdec3b4a-db7b-4466-835e-ac686156761f"
       },
       {
-        "id": "a8d6e293-12a4-46f3-8a14-0a5e9b4079cb",
-        "source": "3f441865-7235-4929-b357-3df43f1227aa",
-        "target": "0e27ddb9-296b-4499-84f1-482d12113e52"
+        "id": "320fe81f-c2a0-4e32-ba3f-27e811a21978",
+        "source": "bdec3b4a-db7b-4466-835e-ac686156761f",
+        "target": "af2d172f-f2f3-4591-b07d-30a0c05c58c0"
       },
       {
-        "id": "a5e00f98-981e-4009-9cc8-b2349067068d",
-        "source": "0e27ddb9-296b-4499-84f1-482d12113e52",
-        "target": "b838f3b8-19cd-4586-ad77-a9e58601aa76"
+        "id": "7f71c450-d7f2-4229-862e-7d0c0eb80a46",
+        "source": "af2d172f-f2f3-4591-b07d-30a0c05c58c0",
+        "target": "e8ef48a7-9f88-4bdd-ab66-d8569f69b4e3"
       },
       {
-        "id": "933bbe35-0ead-4344-88d1-e734b6fdce76",
-        "source": "b838f3b8-19cd-4586-ad77-a9e58601aa76",
-        "target": "01f09b1e-4022-48f4-986c-de10d2285e7a"
+        "id": "d9ed3345-2e33-4b26-b14f-eece7e9b8419",
+        "source": "e8ef48a7-9f88-4bdd-ab66-d8569f69b4e3",
+        "target": "c1d3234c-77f7-4c2b-9bd5-e7a25ab65bae"
       }
     ]
   }

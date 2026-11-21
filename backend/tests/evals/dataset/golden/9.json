@@ -1395,7 +1395,7 @@
                 "field": {
                   "id": "b85296aa-1ae3-440c-a256-fd7f92580968",
                   "type": "TEXT_FIELD",
-                  "techName": "imie_2",
+                  "techName": "imie_kandydata",
                   "title": "Imię",
                   "description": "",
                   "options": [],
@@ -1417,7 +1417,7 @@
                 "field": {
                   "id": "d6f3fd81-3e9c-4227-ac14-e244954cb92d",
                   "type": "TEXT_FIELD",
-                  "techName": "nazwisko_2",
+                  "techName": "nazwisko_kandydata",
                   "title": "Nazwisko",
                   "description": "",
                   "options": [],

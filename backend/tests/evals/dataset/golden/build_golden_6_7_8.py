@@ -83,6 +83,9 @@ def address(tech_name: str, title: str, tab: str, suffix: str, when: str | None 
         base = child.field.tech_name.removesuffix("_zagranica")
         tail = "_zagranica" if base != child.field.tech_name else ""
         child.field.tech_name = f"{base}_{suffix}{tail}"
+        # Registry data (MLPZ) belongs to the applicant, not to this other address (as in refs).
+        if child.field.default_value_type == "EXTERNAL_SYSTEM":
+            child.field.default_value = child.field.default_value_type = None
         for state in child.field.states or []:
             state.query = (
                 state.query.replace("'Dane' in title", f"'{tab}' in title")
