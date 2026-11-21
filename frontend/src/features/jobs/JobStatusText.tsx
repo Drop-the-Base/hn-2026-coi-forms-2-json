@@ -1,11 +1,15 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { JobStatus } from "../../shared/api/client";
+import { jobErrorMessage } from "./jobError";
 
 /** One line of job state with icon and word, never colour alone (NFR-15). */
 export function JobStatusText({
   status,
+  step,
 }: {
   status: UseQueryResult<JobStatus>;
+  /** Label of the current pipeline step, shown while the job runs. */
+  step?: string;
 }) {
   if (status.isError)
     return (
@@ -24,12 +28,13 @@ export function JobStatusText({
     return (
       <span className="status status--failed">
         <span className="i i-x-circle" aria-hidden="true"></span>Błąd:{" "}
-        {status.data.error}
+        {jobErrorMessage(status.data.error)}
       </span>
     );
   return status.data ? (
     <span className="status status--running">
       <span className="i i-loader" aria-hidden="true"></span>W toku
+      {step && `: ${step}`}
     </span>
   ) : (
     <span className="status status--queued">

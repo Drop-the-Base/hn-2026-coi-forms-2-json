@@ -69,6 +69,10 @@ export function allFields(questions: Question[]): FormField[] {
   ]);
 }
 
+// "tabs[1].questions[0].field.validation" → "tabs[1].questions[0].field": the deepest field the path points into.
+export const elementPath = (path: string) =>
+  path.match(/^.*\.field(?=\.|$)/)?.[0] ?? path;
+
 export function isRequired(field: FormField): boolean {
   return (
     Array.isArray(field.validation) && field.validation.includes("REQUIRED")

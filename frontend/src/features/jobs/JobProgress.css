@@ -1,0 +1,83 @@
+/* Z prototypu design/postep.html (rejestr kroków). Ostrzeżeń i paska postępu nie ma: SSE ich nie wysyła. */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.steps__wait {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-sm);
+}
+.step {
+  display: grid;
+  grid-template-columns: 4.5rem 1.5rem minmax(0, 1fr);
+  gap: 0 var(--space-3);
+}
+.step__time {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  text-align: right;
+  padding-top: 0.1rem;
+  font-variant-numeric: tabular-nums;
+}
+.step__rail {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  justify-items: center;
+}
+.step__dot {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-field-border);
+  background: var(--color-sheet);
+  color: var(--color-muted);
+}
+.step__line {
+  width: 1.5px;
+  background: var(--color-rule);
+  margin: var(--space-1) 0;
+}
+.step:last-child .step__line {
+  display: none;
+}
+.step__body {
+  padding-bottom: var(--space-6);
+}
+.step__title {
+  font-weight: var(--weight-strong);
+}
+.step__msg {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin-top: var(--space-1);
+}
+.step[data-state="done"] .step__dot {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-on-accent);
+}
+.step[data-state="done"] .step__line {
+  background: var(--color-success-mark);
+}
+.step[data-state="running"] .step__dot {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.step[data-state="failed"] .step__dot {
+  background: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-on-accent);
+}
+.step[data-state="pending"] .step__title {
+  color: var(--color-muted);
+  font-weight: var(--weight-regular);
+}
+@media (max-width: 60rem) {
+  .step {
+    grid-template-columns: 3.5rem 1.5rem minmax(0, 1fr);
+  }
+}

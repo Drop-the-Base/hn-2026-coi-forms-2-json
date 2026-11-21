@@ -144,6 +144,8 @@ def new_llm_client(settings: Settings) -> LlmClient:
         settings.llm_model,
         settings.llm_timeout_seconds,
         settings.llm_max_output_tokens,
+        api_key=settings.llm_api_key.get_secret_value(),
+        response_format=settings.llm_response_format,
     )
 
 

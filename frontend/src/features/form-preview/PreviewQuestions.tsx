@@ -1,3 +1,9 @@
+import type { ReactNode } from "react";
+import {
+  confidenceLevel,
+  ConfidenceBadge,
+  REVIEW_THRESHOLD,
+} from "../../shared/confidence";
 import {
   htmlToText,
   isRequired,
@@ -10,6 +16,10 @@ import {
 } from "./form";
 
 interface Props {
+  /** JSON path of `questions`, e.g. "tabs[1].questions"; confidence and selection use these paths. */
+  path: string;
+  confidence: Record<string, number>;
+  current?: string;
   questions: Question[];
   answers: Answers;
   statuses: Record<string, FieldStatus> | null;
@@ -28,14 +38,27 @@ export function PreviewQuestions(props: Props) {
           ? status.show
           : !q.field.states?.some((s) => s.type === "SHOW");
         if (!shown) return null;
+        const path = `${props.path}[${props.questions.indexOf(q)}].field`;
+        const value = props.confidence[path];
+        const flagged = value !== undefined && value < REVIEW_THRESHOLD;
         return (
           <div
             key={q.field.id}
-            className="eu-cell"
+            className={
+              path === props.current ? "eu-cell is-current" : "eu-cell"
+            }
             style={{ gridColumn: `${q.x + 1} / span ${q.cols}` }}
           >
+            {flagged && (
+              <span
+                className={`mark mark--${confidenceLevel(value)} eu-mark`}
+                aria-hidden="true"
+              ></span>
+            )}
             <PreviewField
               {...props}
+              path={path}
+              badge={flagged && <ConfidenceBadge value={value} />}
               field={q.field}
               readOnly={Boolean(q.field.readOnly || status?.readOnly)}
               failedQuery={status?.failedQuery}
@@ -48,13 +71,22 @@ export function PreviewQuestions(props: Props) {
 }
 
 function PreviewField({
+  path,
+  confidence,
+  current,
+  badge,
   field,
   readOnly,
   failedQuery,
   answers,
   statuses,
   onAnswer,
-}: Props & { field: FormField; readOnly: boolean; failedQuery?: string }) {
+}: Props & {
+  badge: ReactNode;
+  field: FormField;
+  readOnly: boolean;
+  failedQuery?: string;
+}) {
   const id = `eu-${field.id}`;
   const hintId = `${id}-hint`;
   const hint = htmlToText(field.description);
@@ -76,7 +108,7 @@ function PreviewField({
   const label = (
     <label className="eu-label" htmlFor={id}>
       {field.title}
-      {required && " (wymagane)"}
+      {required && " (wymagane)"} {badge}
     </label>
   );
   const hintText = hint && (
@@ -95,10 +127,15 @@ function PreviewField({
     case "REPEATING_SECTION":
       return (
         <section className="eu-card" aria-labelledby={`${id}-h`}>
-          <h4 id={`${id}-h`}>{field.title}</h4>
+          <h4 id={`${id}-h`}>
+            {field.title} {badge}
+          </h4>
           {hint && <p className="eu-hint">{hint}</p>}
           {warning}
           <PreviewQuestions
+            path={`${path}.repeatingSectionGrid`}
+            confidence={confidence}
+            current={current}
             questions={field.repeatingSectionGrid ?? []}
             answers={answers}
             statuses={statuses}
@@ -195,7 +232,7 @@ function PreviewField({
                 }
               />
               {field.title}
-              {required && " (wymagane)"}
+              {required && " (wymagane)"} {badge}
             </label>
             {hintText}
             {warning}
@@ -208,7 +245,7 @@ function PreviewField({
         >
           <legend className="eu-label">
             {field.title}
-            {required && " (wymagane)"}
+            {required && " (wymagane)"} {badge}
           </legend>
           {hintText}
           {field.options?.map((o) => (
@@ -253,7 +290,11 @@ function PreviewField({
     case "INFO_SECTION":
       return (
         <div className={field.type === "INFO_SECTION" ? "eu-info" : undefined}>
-          {field.title && <p className="eu-label">{field.title}</p>}
+          {(field.title || badge) && (
+            <p className="eu-label">
+              {field.title} {badge}
+            </p>
+          )}
           <p className="eu-text">{hint}</p>
           {warning}
         </div>
@@ -261,6 +302,7 @@ function PreviewField({
     case "CONSENT_SECTION":
       return (
         <div className="eu-q">
+          {badge}
           {field.consentSectionConfig?.consents?.map((c, i) => (
             <label key={i} className="eu-choice">
               <input type="checkbox" required={c.required} />
@@ -275,7 +317,9 @@ function PreviewField({
       );
     default:
       return (
-        <p className="eu-unknown">Nieobsługiwany typ pola: {field.type}</p>
+        <p className="eu-unknown">
+          Nieobsługiwany typ pola: {field.type} {badge}
+        </p>
       );
   }
 }

@@ -259,29 +259,23 @@ select.eu-input:disabled {
   }
 }
 
-/* tymczasowa trasa /podglad-demo (#54 ją zastąpi) */
-.eu-demo {
-  font-family: var(--font-body);
-  max-width: 44rem;
-  display: grid;
-  gap: var(--space-3);
-}
-.eu-demo [role="group"] {
-  display: flex;
-  gap: var(--space-2);
-}
-.eu-demo [role="group"] button {
-  min-height: var(--control-h);
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-field-border);
+/* margines pewności (sygnatura, DESIGN.md §6) i element wskazany z listy problemów */
+.eu-cell {
+  position: relative;
   border-radius: var(--radius-control);
-  background: var(--color-sheet);
-  color: var(--color-accent);
-  font: inherit;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-strong);
-  cursor: pointer;
 }
-.eu-demo [aria-pressed="true"] {
+.eu-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--space-4));
+}
+.eu-cell.is-current {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
   background: var(--color-accent-subtle);
+  box-shadow: 0 0 0 4px var(--color-accent-subtle);
+}
+.eu .badge {
+  vertical-align: middle;
 }

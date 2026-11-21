@@ -10,9 +10,19 @@ Główny ekran pracy urzędnika (issue #48): widzi, co sprawdzić, poprawia JSON
 | wyjście z niepobranymi poprawkami | [przeglad-wyjscie.png](zrzuty/przeglad-wyjscie.png) |
 | wąski ekran (zakładki) | [przeglad-390.png](zrzuty/przeglad-390.png) |
 
-Założenia robocze (do potwierdzenia z backendem):
-- API zwraca obok `form` osobno: `confidence.overall`, `confidence.elements` (mapa `id` strony/sekcji/pola → 0–1) i `issues[]` (`ruleId`, `message`, `elementId`, `severity`: `error` = naruszona reguła lub schemat, `check` = niepewny element). Confidence **nie trafia** do pobieranego JSON-a, bo plik musi przejść schemat eUsługi.
-- Próg podświetlenia `CONFIDENCE_REVIEW_THRESHOLD` = 0,85 (poziom średni i niski z DESIGN.md).
+Dane z backendu (kontrakt z #97 / PR #100, opisany w komentarzu do #54; źródło prawdy to backend):
+
+```
+{form, confidence: {overall, elements: {<ścieżka JSON>: 0..1}, to_review: [<ścieżka>]},
+ issues: [{code, message, path, severity: "ERROR"|"WARNING"}],
+ usage: {prompt_tokens, completion_tokens, seconds}}
+```
+
+- Elementy wskazuje **ścieżka JSON**, np. `tabs[1].questions[0].field.repeatingSectionGrid[2].field` (to samo w `confidence.elements`, `to_review` i `issues[].path`). Edytor znajduje element po ścieżce w tekście, podgląd po ścieżce pola na stronie; ścieżka do właściwości pola (`…field.options`) wskazuje to pole.
+- `severity`: `ERROR` = „Błąd”, `WARNING` = „Do sprawdzenia”. Elementy z `to_review` (poniżej progu) dochodzą do listy jako „Do sprawdzenia” z badge pewności.
+- Confidence **nie trafia** do pobieranego JSON-a: pobieramy samo `form` po poprawkach, bo plik musi przejść schemat eUsługi.
+- Nieudane zadanie: `error` to sam typ błędu (np. `UnsupportedFormat`); polski komunikat dobiera frontend (`features/jobs/jobError.ts`), nieznany typ dostaje komunikat ogólny z kodem.
+- Próg podświetlenia `REVIEW_THRESHOLD` = 0,85 (poziom średni i niski z DESIGN.md), niska pewność poniżej 0,60.
 
 ## 1. Układ (≥ 64rem)
 
