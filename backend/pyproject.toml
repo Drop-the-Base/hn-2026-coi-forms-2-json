@@ -3,7 +3,9 @@ name = "forms2json"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    "fastapi>=0.165.0",
     "pydantic-settings>=2.16.3",
+    "pyjwt>=2.15.1",
 ]
 
 [build-system]
@@ -32,6 +34,7 @@ markers = [
 
 [dependency-groups]
 dev = [
+    "httpx2>=2.16.2",
     "mypy>=2.4.1",
     "pytest>=9.2.0",
     "ruff>=0.17.6",
