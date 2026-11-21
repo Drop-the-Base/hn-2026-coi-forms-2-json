@@ -7,6 +7,12 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+  # RAM i CPU kontenerów do dashboardu Perses (ADR-0030); socket tylko do odczytu.
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 15s
+    container_labels_to_metric_labels:
+      com.docker.compose.service: compose_service
 
 processors:
   batch:
@@ -19,6 +25,9 @@ exporters:
       insecure: true
   prometheus:
     endpoint: 0.0.0.0:8889
+    # Nazwa kontenera i usługi to atrybuty zasobu docker_stats; bez tego zostają tylko w target_info.
+    resource_constant_labels:
+      included: [container.name, compose_service]
 
 service:
   pipelines:
@@ -30,6 +39,10 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [debug, prometheus]
+    metrics/docker:
+      receivers: [docker_stats]
+      processors: [batch]
+      exporters: [prometheus]
     logs:
       receivers: [otlp]
       processors: [batch]

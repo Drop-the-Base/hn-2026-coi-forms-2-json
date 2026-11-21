@@ -29,3 +29,10 @@
 - Jedna usługa więcej w profilu `observability`; bez profilu aplikacja działa jak dotąd.
 - Zapytania używają wartości skumulowanych od startu workera, nie `rate()`: dashboard pokazuje dane już po jednym zadaniu, ale restart workera zeruje sumy.
 - Stawki dostawcy trzeba sprawdzić w jego cenniku; repo ma domyślnie 0.
+
+## Dopisek: zasoby kontenerów (#148)
+
+- Sekcja „Zasoby” (RAM i CPU per usługa compose, RAM łącznie) z receivera `docker_stats`. Wymaga dystrybucji `otel/opentelemetry-collector-contrib` (Apache-2.0, ta sama wersja co core).
+- **Kompromis bezpieczeństwa**: otel-collector dostaje `/var/run/docker.sock` tylko do odczytu. `:ro` blokuje zapis do pliku, nie do API: kto przejmie Collector, może sterować Dockerem, czyli w praktyce ma roota na hoście. Socket Docker Desktop jest `root:root 0660`, więc Collector dostaje `group_add: ["0"]` (grupa root), a nie `user: "0"`; zostaje użytkownik 10001, `read_only`, `cap_drop: [ALL]`, `no-new-privileges`. Akceptowalne lokalnie i na demo; w produkcji zamiast socketu metryki z kubeleta (`kubeletstats`) albo cAdvisora.
+- Collector nie wystawia portów na zewnątrz, a jedyne wejście to OTLP z sieci compose.
+

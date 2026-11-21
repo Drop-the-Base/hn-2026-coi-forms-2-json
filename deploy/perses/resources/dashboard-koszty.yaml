@@ -1,6 +1,7 @@
 # Dashboard kosztu i jakości (NFR-13, NFR-14), metryki z README › Metryki.
 # Wartości są skumulowane od startu workera, bez rate(): po jednym zadaniu dashboard już coś pokazuje.
 # shortcut: restart workera zeruje sumy; gdy będzie ruch ciągły, przejść na increase()/rate().
+# shortcut: Zasoby grupują po usłudze compose, więc kilka projektów compose na hoście się sumuje; wtedy dodać etykietę projektu.
 kind: Dashboard
 metadata:
   name: koszty
@@ -256,6 +257,69 @@ spec:
                 spec:
                   query: histogram_quantile(0.95, sum by (le, step) (forms2json_pipeline_step_duration_seconds_bucket))
                   seriesNameFormat: "{{step}} p95"
+    ramLacznie:
+      kind: Panel
+      spec:
+        display:
+          name: RAM łącznie
+          description: Suma pamięci wszystkich kontenerów compose (docker_stats)
+        plugin:
+          kind: StatChart
+          spec:
+            calculation: last-number
+            format:
+              unit: bytes
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum(container_memory_usage_total_bytes{compose_service!=""})
+    ramKontenery:
+      kind: Panel
+      spec:
+        display:
+          name: RAM per kontener
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: bytes
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  query: sum by (compose_service) (container_memory_usage_total_bytes{compose_service!=""})
+                  seriesNameFormat: "{{compose_service}}"
+    cpuKontenery:
+      kind: Panel
+      spec:
+        display:
+          name: CPU % per kontener
+          description: 100% = jeden rdzeń
+        plugin:
+          kind: TimeSeriesChart
+          spec:
+            legend:
+              position: bottom
+            yAxis:
+              format:
+                unit: percent
+        queries:
+          - kind: TimeSeriesQuery
+            spec:
+              plugin:
+                kind: PrometheusTimeSeriesQuery
+                spec:
+                  # Mimo sufiksu _ratio docker_stats podaje tu procenty.
+                  query: sum by (compose_service) (container_cpu_utilization_ratio{compose_service!=""})
+                  seriesNameFormat: "{{compose_service}}"
   layouts:
     - kind: Grid
       spec:
@@ -284,3 +348,11 @@ spec:
         items:
           - {x: 0, y: 0, width: 12, height: 8, content: {$ref: "#/spec/panels/czasZadania"}}
           - {x: 12, y: 0, width: 12, height: 8, content: {$ref: "#/spec/panels/czasKrokow"}}
+    - kind: Grid
+      spec:
+        display:
+          title: Zasoby
+        items:
+          - {x: 0, y: 0, width: 6, height: 4, content: {$ref: "#/spec/panels/ramLacznie"}}
+          - {x: 0, y: 4, width: 12, height: 8, content: {$ref: "#/spec/panels/ramKontenery"}}
+          - {x: 12, y: 4, width: 12, height: 8, content: {$ref: "#/spec/panels/cpuKontenery"}}
