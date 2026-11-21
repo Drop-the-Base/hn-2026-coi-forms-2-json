@@ -11,13 +11,13 @@ from itertools import pairwise
 
 from forms2json.domain import rules
 from forms2json.domain.blocks.pages import applicant_page, contact_page, finish_page
+from forms2json.domain.draft_cleanup import SUBJECT_FALLBACK, clean_draft
 from forms2json.domain.form_definition import Field, FlowLink, FormDefinition, Option, Question, Tab
 from forms2json.domain.form_draft import DraftField, FieldType, FormDraft
 from forms2json.domain.jsonata import answer_is, any_of, show
 from forms2json.domain.layout import TechNames, layout_page, new_id, slugify
 from forms2json.domain.validators import validation_for
 
-SUBJECT_TAB_FALLBACK = "Informacje o wniosku"
 ATTACHMENTS_SECTION = "Załączniki"
 FEES_SECTION = "Opłaty"
 PAYMENT_PROOF = "Potwierdzenie przelewu"
@@ -32,6 +32,7 @@ def compose(draft: FormDraft) -> tuple[FormDefinition, Confidence]:
 
     Elements of predefined blocks get 1.0 (FR-T1); the rest carry the draft's confidence.
     """
+    draft = clean_draft(draft)
     applicant = applicant_page(draft.addressee.value, [a.kind for a in draft.applicants])
     contact = contact_page(draft.consents)
     finish = finish_page()
@@ -52,7 +53,7 @@ def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confid
     grouped: dict[str, list[DraftField]] = {}
     for draft_field in draft.fields:
         grouped.setdefault(draft_field.section, []).append(draft_field)
-    title = next(iter(grouped), SUBJECT_TAB_FALLBACK)
+    title = next(iter(grouped), SUBJECT_FALLBACK)
 
     confidence: Confidence = {}
     by_key: dict[str, tuple[str, Field]] = {}  # draft key -> (section techName, field)

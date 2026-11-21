@@ -5,7 +5,7 @@ from forms2json.application.ports.llm_client import LlmClient, LlmUsage
 from forms2json.domain.document import Checkbox, NormalizedDocument, Table, TextBlock
 from forms2json.domain.form_draft import FORM_DRAFT_SCHEMA, FormDraft, InvalidFormDraft
 
-SYSTEM_PROMPT = (Path(__file__).parent / "prompts" / "understand_v1.md").read_text(encoding="utf-8")
+SYSTEM_PROMPT = (Path(__file__).parent / "prompts" / "understand_v2.md").read_text(encoding="utf-8")
 
 
 class DocumentTooLong(ValueError):
