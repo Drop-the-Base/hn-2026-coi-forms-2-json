@@ -17,3 +17,23 @@ export function fakeToken(expiresInSeconds = 3600) {
   );
   return `eyJhbGciOiJIUzI1NiJ9.${payload}.signature`;
 }
+
+/** SSE response the test feeds event by event, like GET /jobs/{id}/events (PR #101). */
+export function sseStream() {
+  const encoder = new TextEncoder();
+  let controller!: ReadableStreamDefaultController<Uint8Array>;
+  const body = new ReadableStream<Uint8Array>({
+    start: (c) => void (controller = c),
+  });
+  return {
+    response: () =>
+      new HttpResponse(body, {
+        headers: { "Content-Type": "text/event-stream" },
+      }),
+    send: (data: object) =>
+      controller.enqueue(
+        encoder.encode(`event: progress\ndata: ${JSON.stringify(data)}\n\n`),
+      ),
+    close: () => controller.close(),
+  };
+}
