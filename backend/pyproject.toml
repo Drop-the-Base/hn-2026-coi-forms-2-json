@@ -7,6 +7,7 @@ dependencies = [
     "fastapi>=0.165.0",
     "openai>=3.57.0",
     "openpyxl>=3.1.5",
+    "pdfplumber>=0.11.11",
     "pydantic>=2.14.4",
     "pydantic-settings>=2.16.3",
     "pyjwt>=2.15.1",

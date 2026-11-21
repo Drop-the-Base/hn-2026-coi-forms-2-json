@@ -92,4 +92,4 @@ def test_token_without_exp_is_401(client: TestClient, settings: Settings) -> Non
 
 
 def test_unsigned_token_is_401(client: TestClient, settings: Settings) -> None:
-    assert _status(client, jwt.encode(_claims(settings), None, algorithm="none")) == 401
+    assert _status(client, jwt.encode(_claims(settings), "", algorithm="none")) == 401
