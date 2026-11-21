@@ -26,7 +26,11 @@ class ApplicantKind(StrEnum):
 
 
 class FieldType(StrEnum):
-    """Output field types (FormDefinition) a subject-matter field can map to."""
+    """Output field types (FormDefinition) a subject-matter field can map to.
+
+    ADDRESS and PERSON are Standardy blocks, not output types: Compose expands them into an address
+    section or Imię + Nazwisko, with the field's `key` as the techName suffix (whose data).
+    """
 
     TEXT_FIELD = "TEXT_FIELD"
     TEXTAREA = "TEXTAREA"
@@ -37,6 +41,8 @@ class FieldType(StrEnum):
     CHECKBOX = "CHECKBOX"
     FILE_UPLOADER = "FILE_UPLOADER"
     TEXT_BLOCK = "TEXT_BLOCK"
+    ADDRESS = "ADDRESS"
+    PERSON = "PERSON"
 
 
 Confidence = Annotated[float, Field(ge=0, le=1)]

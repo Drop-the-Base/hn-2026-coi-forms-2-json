@@ -171,3 +171,48 @@ def test_draft_without_subject_fields_skips_the_subject_page() -> None:
     form = ComposeStep().run(_draft("Wniosek", "Urząd", []))
 
     assert [t.title for t in form.tabs] == ["Dane", "Kontakt i zgody", "Strona końcowa"]
+
+
+JOINT = "Wspólność majątkowa"
+SPOUSE = "Dane współmałżonka"
+# Generic draft: someone else's name and address, both shown only for one answer.
+DRAFT_SPOUSE = _draft(
+    "Deklaracja",
+    "Urząd",
+    [
+        _field("rodzaj", "Wybierz rodzaj własności", SPOUSE, "RADIO", options=[JOINT, "Inna"]),
+        _field("wspolmalzonek", "Imię i nazwisko współmałżonka", SPOUSE, "PERSON"),
+        _field(
+            "malzonek_adres", "Adres zamieszkania współmałżonka", SPOUSE, "ADDRESS", confidence=0.7
+        ),
+    ],
+    conditions=[
+        {"target": key, "source": "rodzaj", "value": JOINT, "confidence": 0.8}
+        for key in ("wspolmalzonek", "malzonek_adres")
+    ],
+)
+
+
+def test_person_and_address_expand_into_standard_blocks_with_suffix() -> None:
+    step = ComposeStep()
+    form = step.run(DRAFT_SPOUSE)
+
+    sections = sorted(form.tabs[1].questions, key=lambda q: q.y)
+    assert [s.field.title for s in sections] == [SPOUSE, "Adres zamieszkania współmałżonka"]
+    person = [c.field for c in sections[0].field.repeating_section_grid][1:]
+    assert [(f.tech_name, f.title) for f in person] == [
+        ("imie_wspolmalzonek", "Imię"),
+        ("nazwisko_wspolmalzonek", "Nazwisko"),
+    ]
+    address = {c.field.tech_name: c.field for c in sections[1].field.repeating_section_grid}
+    assert address["kraj_malzonek"].dictionary_name == "Kraje"
+    assert address["wojewodztwo_malzonek"].dictionary_name == "TERYT_4G_DOWODOWY"
+    assert all(f.default_value_type is None for f in address.values())  # no registry data
+    # Country conditions follow the new names and page.
+    query = (address["ulica_malzonek"].states or [])[0].query
+    assert "'Dane współmałżonka' in title" in query and "'kraj_malzonek' in" in query
+    for shown in (*person, sections[1].field):
+        assert [s.type for s in shown.states or []] == ["SHOW"]
+    paths = {f.tech_name: path for path, f in _paths(form)}
+    assert step.confidence[paths["ulica_malzonek"]] == 0.7
+    assert [i for i in check_rules(form) if i.severity is Severity.ERROR] == []
