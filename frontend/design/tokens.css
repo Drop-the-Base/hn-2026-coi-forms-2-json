@@ -1,0 +1,112 @@
+/* Tokeny systemu wizualnego. Źródło prawdy: frontend/DESIGN.md (ta sama lista).
+ * Po zmianie dowolnego koloru: python3 frontend/design/kontrast.py */
+:root {
+  /* papier i arkusze */
+  --color-paper: #F4F3EF;
+  --color-paper-2: #EBEAE4;
+  --color-sheet: #FFFFFF;
+  --color-ink: #1A1D24;
+  --color-muted: #565B66;
+  --color-rule: #D9D7CF;
+  --color-field-border: #767A84;
+
+  /* grzbiet teczki: pasek aplikacji */
+  --color-shell: #15213D;
+  --color-on-shell: #FFFFFF;
+  --color-on-shell-muted: #BCC5D8;
+  --color-backdrop: rgb(21 33 61 / 0.4);
+
+  /* atrament: jedyny akcent */
+  --color-accent: #22408C;
+  --color-accent-hover: #1A3170;
+  --color-accent-subtle: #E6EBF6;
+  --color-on-accent: #FFFFFF;
+  --color-focus: #22408C;
+  --color-focus-on-shell: #FFFFFF;
+
+  /* stany */
+  --color-error: #B42318;
+  --color-error-bg: #FDEDEB;
+  --color-warning: #8A4B00;
+  --color-warning-bg: #FFF3DC;
+  --color-warning-mark: #B26A00;
+  --color-success: #1E6B3A;
+  --color-success-bg: #E7F3EB;
+  --color-success-mark: #2F7D4A;
+
+  /* confidence = aliasy stanów */
+  --color-conf-low: var(--color-error);
+  --color-conf-low-bg: var(--color-error-bg);
+  --color-conf-medium: var(--color-warning);
+  --color-conf-medium-bg: var(--color-warning-bg);
+  --color-conf-medium-mark: var(--color-warning-mark);
+  --color-conf-high: var(--color-success);
+  --color-conf-high-bg: var(--color-success-bg);
+  --color-conf-high-mark: var(--color-success-mark);
+
+  /* edytor JSON */
+  --color-code-bg: #FFFFFF;
+  --color-code-gutter: #F7F6F2;
+  --color-code-line-no: #6A6F79;
+  --color-code-key: #22408C;
+  --color-code-string: #17663A;
+  --color-code-number: #9A4100;
+  --color-code-punct: #565B66;
+  --color-code-current: #EEF1F8;
+
+  /* podgląd eUsługi: odwzorowanie wizualizacji COI, tylko wewnątrz ramki podglądu */
+  --color-eu-ground: #EEF2F7;
+  --color-eu-card: #FFFFFF;
+  --color-eu-ink: #1B1B1F;
+  --color-eu-label: #33363D;
+  --color-eu-readonly: #F3F5F8;
+  --color-eu-border: #51596A;
+  --color-eu-primary: #1A3E7A;
+
+  /* typografia: Atkinson Hyperlegible (OFL 1.1); w kodzie dopiero po ADR, do tego czasu działa fallback systemowy */
+  --font-body: "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+  --text-xs: 0.8125rem;  /* 13px: badge, metadane */
+  --text-sm: 0.875rem;   /* 14px: tabela, etykiety, edytor */
+  --text-md: 1rem;       /* 16px: tekst, pola */
+  --text-lg: 1.125rem;   /* 18px: nagłówek arkusza */
+  --text-xl: 1.3125rem;  /* 21px: tytuł formularza w podglądzie */
+  --text-2xl: 1.5rem;    /* 24px: tytuł strony */
+  --leading-tight: 1.3;
+  --leading-body: 1.5;
+  --weight-regular: 400;
+  --weight-strong: 600;
+
+  /* odstępy: krok 4px */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* kształt */
+  --radius-mark: 2px;    /* badge, znacznik marginesu */
+  --radius-control: 4px; /* przycisk, pole */
+  --radius-sheet: 6px;   /* arkusz */
+  --radius-eu: 8px;      /* karta w podglądzie eUsługi */
+  --control-h: 2.5rem;   /* 40px; obszar kliknięcia 44px przez ::before */
+  --shell-h: 3.5rem;
+  --container: 90rem;
+  --gutter: 2rem;
+
+  /* głębia: tylko elementy nad treścią */
+  --shadow-raised: 0 1px 2px rgb(21 33 61 / 0.08), 0 8px 24px -8px rgb(21 33 61 / 0.22);
+  --shadow-band: 0 1px 0 var(--color-rule), 0 4px 12px -6px rgb(21 33 61 / 0.18);
+
+  /* ruch: tylko stan */
+  --dur-micro: 120ms;
+  --dur-short: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* wzory poziomów pewności: kształt niezależny od koloru */
+  --pattern-low: var(--color-conf-low);
+  --pattern-medium: repeating-linear-gradient(135deg, var(--color-conf-medium-mark) 0 2px, transparent 2px 5px);
+}

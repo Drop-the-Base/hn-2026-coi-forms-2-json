@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zadania: forms2json</title>
+<meta name="description" content="Makieta listy zadań z wgrywaniem pojedynczym i wsadowym oraz walidacją plików.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600&display=swap">
+<link rel="stylesheet" href="ui.css">
+<style>
+  .drop { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4) var(--space-6); padding: var(--space-6); border: 1px dashed var(--color-field-border); border-radius: var(--radius-control); background: var(--color-paper); }
+  .drop__text { flex: 1 1 20rem; }
+  .drop__text strong { display: block; }
+  .drop__text p { font-size: var(--text-sm); color: var(--color-muted); margin-top: var(--space-1); }
+  .queue { margin-top: var(--space-6); }
+  .queue h3 { margin-bottom: var(--space-2); }
+  .queue .table td:first-child { width: 45%; }
+  .queue__foot { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: center; margin-top: var(--space-4); }
+  .file-name { display: flex; gap: var(--space-2); align-items: start; overflow-wrap: anywhere; }
+  .file-name .i { margin-top: 0.2em; color: var(--color-muted); }
+  .file-error { color: var(--color-error); display: flex; gap: var(--space-2); align-items: start; }
+  .file-error .i { margin-top: 0.2em; }
+  .file-ok { color: var(--color-success); display: inline-flex; gap: var(--space-2); align-items: center; }
+  .row-actions { text-align: right; white-space: nowrap; }
+  .expires { color: var(--color-muted); font-size: var(--text-xs); display: block; }
+  .empty { padding: var(--space-12) var(--space-6); text-align: left; max-width: 38rem; }
+  .empty h3 { font-size: var(--text-lg); }
+  .empty p { color: var(--color-muted); margin-top: var(--space-2); }
+  /* stany makiety: element bez swojego stanu znika, reszta zachowuje własny display */
+  body:not(:has(#s-wsad:target)) .only-wsad, body:has(#s-wsad:target) .not-wsad, body:not(:has(#s-pusto:target)) .only-pusto, body:has(#s-pusto:target) .not-pusto { display: none; }
+  @media (max-width: 48rem) {
+    .jobs thead { display: none; }
+    .jobs tr { display: grid; grid-template-columns: 1.25rem 1fr auto; gap: var(--space-1) var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-rule); }
+    .jobs td { border: 0; padding: 0; }
+    .jobs td.col-mark { grid-row: span 4; }
+    .jobs td.col-mark .mark { height: 100%; }
+    .jobs td:not(.col-mark) { grid-column: 2 / -1; }
+    .jobs .row-actions { text-align: left; padding-top: var(--space-2); }
+    .jobs td[data-label]::before { content: attr(data-label) ": "; color: var(--color-muted); }
+    .jobs td.num { text-align: left; }
+    .queue thead { display: none; }
+    .queue tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-rule); }
+    .queue td { border: 0; padding: 0; }
+    .queue .table td:first-child { width: auto; grid-column: 1 / -1; }
+    .queue td.num { text-align: left; color: var(--color-muted); }
+    .queue td:nth-child(3) { grid-column: 1 / -1; }
+    .queue .row-actions { grid-column: 1 / -1; grid-row: 2; justify-self: end; }
+  }
+</style>
+</head>
+<body>
+<span class="anchor" id="s-wsad"></span><span class="anchor" id="s-pusto"></span>
+<a class="skip" href="#lista">Przejdź do listy zadań</a>
+<header class="shell">
+  <div class="shell__in">
+    <a class="wordmark" href="#" aria-label="forms2json, strona główna">forms2json <span>blankiet do eUsługi</span></a>
+    <nav aria-label="Główna"><a href="zadania.html" aria-current="page">Zadania</a></nav>
+    <div class="shell__end"><span class="who">Sesja do 17:40</span><button type="button"><span class="i i-log-out" aria-hidden="true"></span>Wyloguj</button></div>
+  </div>
+</header>
+
+<main class="page stack">
+  <div class="page-head">
+    <div>
+      <h1>Zadania</h1>
+      <p class="page-head__meta">Wyniki są dostępne przez 60 minut od zakończenia, potem znikają z serwera.</p>
+    </div>
+  </div>
+
+  <section class="sheet" aria-labelledby="wgraj-h">
+    <div class="sheet__head"><h2 id="wgraj-h">Wgraj formularze</h2></div>
+    <div class="sheet__body">
+      <div class="drop">
+        <span class="i i-upload i-lg" aria-hidden="true"></span>
+        <div class="drop__text">
+          <strong>Przeciągnij pliki tutaj albo wybierz je z dysku</strong>
+          <p>Formaty: PDF, DOC, DOCX, ODS, XLSX, JPG, PNG. Maksymalnie 20 MB na plik. Możesz wybrać kilka plików naraz.</p>
+        </div>
+        <label class="btn btn--secondary" for="pliki"><span class="i i-file" aria-hidden="true"></span>Wybierz pliki</label>
+        <input class="visually-hidden" id="pliki" type="file" multiple accept=".pdf,.doc,.docx,.ods,.xlsx,.jpg,.jpeg,.png">
+      </div>
+
+      <div class="queue only-wsad">
+        <h3 id="kolejka-h">Wybrane pliki (5)</h3>
+        <div class="table-wrap">
+          <table class="table" aria-labelledby="kolejka-h">
+            <thead><tr><th scope="col">Plik</th><th scope="col">Rozmiar</th><th scope="col">Sprawdzenie</th><th scope="col"><span class="visually-hidden">Akcje</span></th></tr></thead>
+            <tbody>
+              <tr><td><span class="file-name"><span class="i i-file" aria-hidden="true"></span>Wniosek o zwrot opłaty skarbowej.pdf</span></td><td class="num">412 kB</td><td><span class="file-ok"><span class="i i-check" aria-hidden="true"></span>Gotowy do wysłania</span></td><td class="row-actions"><button class="btn btn--ghost btn--sm" type="button">Usuń z listy</button></td></tr>
+              <tr><td><span class="file-name"><span class="i i-file" aria-hidden="true"></span>Wniosek o wydanie zaświadczenia.DOC</span></td><td class="num">88 kB</td><td><span class="file-ok"><span class="i i-check" aria-hidden="true"></span>Gotowy do wysłania</span></td><td class="row-actions"><button class="btn btn--ghost btn--sm" type="button">Usuń z listy</button></td></tr>
+              <tr><td><span class="file-name"><span class="i i-file" aria-hidden="true"></span>Deklaracja odpady 2026.JPG</span></td><td class="num">3,1 MB</td><td><span class="file-ok"><span class="i i-check" aria-hidden="true"></span>Gotowy do wysłania</span></td><td class="row-actions"><button class="btn btn--ghost btn--sm" type="button">Usuń z listy</button></td></tr>
+              <tr><td><span class="file-name"><span class="i i-file" aria-hidden="true"></span>Zajęcie pasa: skan 1.pdf</span></td><td class="num">34,2 MB</td><td><span class="file-error"><span class="i i-x-circle" aria-hidden="true"></span><span>Plik ma 34,2 MB, limit to 20 MB. Zmniejsz rozdzielczość skanu. Nazwa zawiera niedozwolony znak „:”.</span></span></td><td class="row-actions"><button class="btn btn--ghost btn--sm" type="button">Usuń z listy</button></td></tr>
+              <tr><td><span class="file-name"><span class="i i-file" aria-hidden="true"></span>notatka.txt</span></td><td class="num">2 kB</td><td><span class="file-error"><span class="i i-x-circle" aria-hidden="true"></span><span>Format TXT nie jest obsługiwany. Zapisz plik jako PDF lub DOCX.</span></span></td><td class="row-actions"><button class="btn btn--ghost btn--sm" type="button">Usuń z listy</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="queue__foot">
+          <button class="btn btn--primary" type="button"><span class="i i-upload" aria-hidden="true"></span>Wyślij 3 pliki</button>
+          <span class="btn-note" id="pomijane">2 pliki z błędami zostaną pominięte. Popraw je i dodaj ponownie.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="lista-h" id="lista">
+    <div class="sheet__head">
+      <h2 id="lista-h">Twoje zadania</h2>
+    </div>
+    <div class="not-pusto">
+      <div class="tabs" role="tablist" aria-label="Filtr zadań" style="padding-inline: var(--space-6)">
+        <button class="tab" role="tab" aria-selected="true" type="button">Wszystkie <span class="count">6</span></button>
+        <button class="tab" role="tab" aria-selected="false" type="button">W toku <span class="count">2</span></button>
+        <button class="tab" role="tab" aria-selected="false" type="button">Do przeglądu <span class="count">3</span></button>
+        <button class="tab" role="tab" aria-selected="false" type="button">Błędy <span class="count">1</span></button>
+      </div>
+      <div class="table-wrap" style="padding: 0 var(--space-6) var(--space-2)">
+        <table class="table jobs" aria-labelledby="lista-h">
+          <thead><tr><th class="col-mark" scope="col"><span class="visually-hidden">Znacznik pewności</span></th><th scope="col">Plik</th><th scope="col" class="num">Wgrano</th><th scope="col">Stan</th><th scope="col">Ocena ogólna</th><th scope="col" class="num">Problemy</th><th scope="col"><span class="visually-hidden">Akcje</span></th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="col-mark"><span class="mark" aria-hidden="true"></span></td>
+              <td><span class="cell-file"><a href="postep.html">Wniosek o wynajęcie świetlicy.docx</a><span class="mono">a3f9c2e1</span></span></td>
+              <td class="num" data-label="Wgrano">10:42</td>
+              <td><span class="status status--running"><span class="i i-loader" aria-hidden="true"></span>Analiza treści, krok 2 z 4</span></td>
+              <td data-label="Ocena ogólna" class="muted">po zakończeniu</td>
+              <td class="num muted" data-label="Problemy"><span class="visually-hidden">brak</span></td>
+              <td class="row-actions"><a class="btn btn--secondary btn--sm" href="postep.html">Pokaż postęp</a></td>
+            </tr>
+            <tr>
+              <td class="col-mark"><span class="mark" aria-hidden="true"></span></td>
+              <td><span class="cell-file"><a href="postep.html">Stypendium sportowe 3w1.pdf</a><span class="mono">7c01d9b4</span></span></td>
+              <td class="num" data-label="Wgrano">10:41</td>
+              <td><span class="status status--queued"><span class="i i-clock" aria-hidden="true"></span>W kolejce</span></td>
+              <td data-label="Ocena ogólna" class="muted">po zakończeniu</td>
+              <td class="num muted" data-label="Problemy"><span class="visually-hidden">brak</span></td>
+              <td class="row-actions"><a class="btn btn--secondary btn--sm" href="postep.html">Pokaż postęp</a></td>
+            </tr>
+            <tr>
+              <td class="col-mark"><span class="mark mark--medium" aria-hidden="true"></span></td>
+              <td><span class="cell-file"><a href="przeglad.html">Wniosek o ustalenie numeru porządkowego.pdf</a><span class="mono">e52b8a07</span></span></td>
+              <td class="num" data-label="Wgrano">10:31</td>
+              <td><span class="status status--done"><span class="i i-check-circle" aria-hidden="true"></span>Gotowe</span><span class="expires">wynik dostępny do 11:34</span></td>
+              <td data-label="Ocena ogólna"><span class="badge badge--medium"><span class="visually-hidden">Pewność: </span>Średnia <span class="num">0,78</span></span></td>
+              <td class="num" data-label="Problemy">7</td>
+              <td class="row-actions"><a class="btn btn--primary btn--sm" href="przeglad.html">Przejrzyj wynik</a></td>
+            </tr>
+            <tr>
+              <td class="col-mark"><span class="mark mark--low" aria-hidden="true"></span></td>
+              <td><span class="cell-file"><a href="przeglad.html">Zezwolenie psy agresywne.jpg</a><span class="mono">0d4e61fa</span></span></td>
+              <td class="num" data-label="Wgrano">10:12</td>
+              <td><span class="status status--done"><span class="i i-check-circle" aria-hidden="true"></span>Gotowe</span><span class="expires">wynik dostępny do 11:19</span></td>
+              <td data-label="Ocena ogólna"><span class="badge badge--low"><span class="visually-hidden">Pewność: </span>Niska <span class="num">0,54</span></span></td>
+              <td class="num" data-label="Problemy">12</td>
+              <td class="row-actions"><a class="btn btn--secondary btn--sm" href="przeglad.html">Przejrzyj wynik</a></td>
+            </tr>
+            <tr>
+              <td class="col-mark"><span class="mark mark--high" aria-hidden="true"></span></td>
+              <td><span class="cell-file"><a href="przeglad.html">Wniosek o zwrot opłaty skarbowej.docx</a><span class="mono">91aa3c5e</span></span></td>
+              <td class="num" data-label="Wgrano">09:58</td>
+              <td><span class="status status--done"><span class="i i-check-circle" aria-hidden="true"></span>Gotowe</span><span class="expires">wynik dostępny do 11:02</span></td>
+              <td data-label="Ocena ogólna"><span class="badge badge--high"><span class="visually-hidden">Pewność: </span>Wysoka <span class="num">0,93</span></span></td>
+              <td class="num" data-label="Problemy">1</td>
+              <td class="row-actions"><a class="btn btn--secondary btn--sm" href="przeglad.html">Przejrzyj wynik</a></td>
+            </tr>
+            <tr>
+              <td class="col-mark"><span class="mark" aria-hidden="true"></span></td>
+              <td><span class="cell-file"><a href="postep.html#s-blad">Pas drogowy roboty.pdf</a><span class="mono">5be27d30</span></span></td>
+              <td class="num" data-label="Wgrano">09:47</td>
+              <td><span class="status status--failed"><span class="i i-x-circle" aria-hidden="true"></span>Błąd: plik zaszyfrowany hasłem</span></td>
+              <td data-label="Ocena ogólna" class="muted">brak wyniku</td>
+              <td class="num muted" data-label="Problemy"><span class="visually-hidden">brak</span></td>
+              <td class="row-actions"><a class="btn btn--secondary btn--sm" href="postep.html#s-blad">Szczegóły błędu</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="empty only-pusto">
+      <h3>Nie masz jeszcze zadań</h3>
+      <p>Wgraj blankiet formularza w sekcji powyżej. Zadanie pojawi się tutaj od razu, a wynik za kilkadziesiąt sekund do kilku minut, zależnie od liczby stron.</p>
+    </div>
+  </section>
+</main>
+<nav class="proto-bar" aria-label="Stany makiety">Makieta, stan: <a href="#">lista</a> <a href="#s-wsad">wsad z błędami</a> <a href="#s-pusto">pusto</a></nav>
+</body>
+</html>

@@ -1,168 +1,117 @@
-# Ekran przeglądu wyniku
+# Ekran przeglądu wyniku: [przeglad.html](przeglad.html)
 
-Główny ekran pracy urzędnika: poprawia JSON wygenerowany przez AI, widzi, jak formularz wygląda w eUsłudze, i pobiera poprawioną wersję. Wymagania: [FR-T1](../../docs/requirements.md) (confidence, ocena ogólna, lista problemów), [FR-T2](../../docs/requirements.md) (edycja i pobieranie), [FR-E5](../../docs/requirements.md) (podgląd formularza), [NFR-15](../../docs/requirements.md) (WCAG 2.1 AA). Wygląd: wyłącznie tokeny i komponenty z [DESIGN.md](../DESIGN.md).
+Główny ekran pracy urzędnika (issue #48): widzi, co sprawdzić, poprawia JSON, ogląda formularz tak, jak zobaczy go wnioskodawca, i pobiera poprawioną wersję. Wymagania: [FR-T1](../../docs/requirements.md) (confidence, ocena ogólna, lista problemów), [FR-T2](../../docs/requirements.md) (edycja i pobieranie), [FR-E5](../../docs/requirements.md) (podgląd formularza), [FR-06](../../docs/requirements.md) (schemat), [NFR-06](../../docs/requirements.md), [NFR-15](../../docs/requirements.md). Wygląd: [DESIGN.md](../DESIGN.md).
+
+| Stan | Zrzut |
+|---|---|
+| problemy, bieżący 3 z 7 | [przeglad.png](zrzuty/przeglad.png) |
+| JSON niezgodny ze schematem | [przeglad-blad-schematu.png](zrzuty/przeglad-blad-schematu.png) |
+| brak problemów | [przeglad-bez-problemow.png](zrzuty/przeglad-bez-problemow.png) |
+| wyjście z niepobranymi poprawkami | [przeglad-wyjscie.png](zrzuty/przeglad-wyjscie.png) |
+| wąski ekran (zakładki) | [przeglad-390.png](zrzuty/przeglad-390.png) |
 
 Założenia robocze (do potwierdzenia z backendem):
-- API zwraca obok `form` osobno: `confidence.overall`, `confidence.elements` (mapa `id` strony/pola → 0–1) i `issues[]` (`ruleId`, `message`, `elementId`, `severity`). Confidence **nie trafia** do pobieranego JSON-a, bo plik musi przejść schemat eUsługi.
-- Próg podświetlenia `CONFIDENCE_REVIEW_THRESHOLD` = 0,85, czyli podświetlamy poziom średni i niski z DESIGN.md §1.
+- API zwraca obok `form` osobno: `confidence.overall`, `confidence.elements` (mapa `id` strony/sekcji/pola → 0–1) i `issues[]` (`ruleId`, `message`, `elementId`, `severity`: `error` = naruszona reguła lub schemat, `check` = niepewny element). Confidence **nie trafia** do pobieranego JSON-a, bo plik musi przejść schemat eUsługi.
+- Próg podświetlenia `CONFIDENCE_REVIEW_THRESHOLD` = 0,85 (poziom średni i niski z DESIGN.md).
 
-## 1. Układ na szerokim ekranie (≥ 1024px)
+## 1. Układ (≥ 64rem)
 
-```
-┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│ ← Zadania   Wniosek o ustalenie numeru porządkowego nieruchomości                        │  tytuł --text-2xl
-│ Ocena ogólna: [! Średnia 0,78]  Problemy: 2 błędy, 5 do sprawdzenia   [Problemy (7) ▾]  [⤓ Pobierz JSON] │  pasek wyniku
-├──────────────────────────────────────────┬───────────────────────────────────────────────┤
-│ Edytor JSON                     [Formatuj]│ Podgląd formularza                            │
-│ ┌──────────────────────────────────────┐ │ ┌──────────────────────────────────────────┐  │
-│ │ 1  {                                 │ │ │ (1) Dane › (2) Informacje o budynku ›     │  │  nawigacja wg flow
-│ │ 2    "title": "Wniosek o ustalenie…",│ │ │ (3) Kontakt z urzędem › (4) Strona końc.  │  │
-│ │ 3    "tabs": [                       │ │ ├──────────────────────────────────────────┤  │
-│ │ 4      {                             │ │ │ Organ, do którego jest składany wniosek  │  │  sekcja
-│ │ 5        "title": "Dane",            │ │ │  Wybierz urząd (wymagane)                │  │
-│ │ …                                    │ │ │  [ Urząd Miasta …                   ▾ ]  │  │
-│▌│41        "label": "Numer działki",   │ │ │                                          │  │
-│▌│42        "type": "TEXT_FIELD",  ✕    │ │ │ Podmiot wniosku                          │  │
-│ │ …                                    │ │ │  Składam wniosek w imieniu: (wymagane)   │  │
-│ └──────────────────────────────────────┘ │ │  ( ) Swoim  ( ) Innej osoby  ( ) Osoby…  │  │
-│ ✓ Zgodny ze schematem                    │ │                                          │  │
-│                                          │ │▌Twoje dane          [! Średnia 0,71]     │  │  pole/sekcja < progu
-│                                          │ │▌ Imię (wymagane)                          │  │
-│                                          │ │▌ [ Jan                               ]   │  │
-│                                          │ │                                          │  │
-│                                          │ │        [Poprzednia strona] [Następna strona]│ │
-│                                          │ └──────────────────────────────────────────┘  │
-└──────────────────────────────────────────┴───────────────────────────────────────────────┘
-```
-
-- Kolumny 50/50, każda przewija się sama; pasek wyniku zostaje przyklejony u góry (`position: sticky`).
-- `▌` = lewa krawędź 4px `confidence-<poziom>-border` (DESIGN.md §5, pole z niskim confidence). Tak samo w edytorze: znacznik na marginesie przy liniach elementu.
-
-### Pasek wyniku
-
-| Element | Komponent | Zachowanie |
-|---|---|---|
-| „Ocena ogólna” | badge confidence z wartością | `confidence.overall` |
-| licznik problemów | tekst `--text-sm` | „2 błędy, 5 do sprawdzenia”; przy zerze: „Brak problemów” |
-| „Problemy (7)” | przycisk `secondary`, `aria-expanded` | otwiera/zamyka listę problemów (§2) |
-| „Pobierz JSON” | przycisk `primary` (jedyny na ekranie) | pobiera aktualną treść edytora jako `<techName-formularza>.json`; wyłączony, gdy JSON nie parsuje się lub nie przechodzi schematu (§4) |
-
-Pobranie przy błędach reguł R/S (nie schematu) jest dozwolone: urzędnik decyduje. Przed pobraniem nie ma dialogu, żeby nie spowalniać pracy.
-
-## 2. Lista problemów
-
-Panel rozwijany pod paskiem wyniku, nad kolumnami (nie zasłania edytora, spycha go w dół). Domyślnie otwarty, jeśli są błędy.
+Ekran nie przewija się jako całość: stałe nagłówki, a pod nimi trzy obszary, każdy z własnym przewijaniem.
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│ Problemy (7)                                                Pokaż: [Wszystkie ▾]  [Zwiń] │
-├──────────┬──────────────────────────────────────────────────┬─────────────────┬──────────┤
-│ Rodzaj   │ Opis                                             │ Element         │ Pewność  │
-├──────────┼──────────────────────────────────────────────────┼─────────────────┼──────────┤
-│ ✕ Błąd   │ Strona końcowa zawiera pole do wypełnienia (R-…) │ Strona końcowa  │          │
-│ ✕ Błąd   │ techName „imie” występuje dwa razy               │ Dane › Imię     │          │
-│ ! Do spr.│ Niska pewność typu pola                          │ Numer działki   │ ✕ Niska 0,34 │
-│ ! Do spr.│ Niepewna etykieta                                │ Twoje dane      │ ! Średnia 0,71│
-│ …        │                                                  │                 │          │
-└──────────┴──────────────────────────────────────────────────┴─────────────────┴──────────┘
+┌ pasek aplikacji ─────────────────────────────────────────────────────────────────────────────┐
+│ ← Zadania                                                                                    │
+│ Wniosek o ustalenie numeru porządkowego nieruchomości    Ocena ogólna [▨ Średnia 0,78]       │
+│ plik.pdf, e52b8a07, wynik dostępny do 11:34              2 błędy, 5 do sprawdzenia [Pobierz JSON] │
+├ Problem 3 z 7 ⚠ Do sprawdzenia  Niepewny typ pola… (ścieżka)  [█ Niska 0,41]  [‹ Poprzedni] [Następny ›] ┤  przyklejony
+├──────────────┬──────────────────────────────┬──────────────────────────────────────────────┤
+│ Problemy (7) │ JSON              [Formatuj] │ Podgląd formularza                           │
+│ [Wszystkie▾] │ 129 █ { "x": 0, …            │ (1) Dane ⚠1 (2) Informacje o budynku ⚠3 …    │
+│ ✕ Błąd …     │ 130 █   "field": {           │ Informacje o budynku                          │
+│ ✕ Błąd …     │ 131 █     "id": "ef58…",     │ ┌ Lokalizacja budynku ────────────────────┐  │
+│▐⚠ Do spr. …  │ 132 █     "type": "TEXT_FIELD"│ █│ Miejscowość [█ Niska 0,41]  ← bieżący   │  │
+│ ⚠ Do spr. …  │ …                            │  │ Ulica                                    │  │
+│ F8 następny  │ ✓ Zgodny ze schematem eUsługi│ █│ Numer ewidencyjny działki [█ Niska 0,52] │  │
+└──────────────┴──────────────────────────────┴──────────────────────────────────────────────┘
+  19rem            1fr                            1.1fr        █ = znacznik marginesu (sygnatura)
 ```
 
-- Tabela z DESIGN.md §5. Kolejność: najpierw błędy (naruszone reguły i schemat), potem elementy poniżej progu od najniższej pewności.
-- Kolumna „Rodzaj”: ikona + tekst (`error` „Błąd”, `warning` „Do sprawdzenia”), nigdy sam kolor.
+- Kolejność obszarów = kolejność pracy: co sprawdzić → gdzie poprawić → jak to wygląda.
+- Między 64rem a 80rem lista problemów zwęża się, ale zostaje (pasek „Problem N z M” i tak prowadzi).
+
+## 2. Nagłówek wyniku
+
+| Element | Zachowanie |
+|---|---|
+| „← Zadania” | powrót do listy; przy niepobranych poprawkach najpierw dialog (§6) |
+| tytuł | `title` z bieżącego JSON-a (zmienia się po edycji) |
+| metadane | nazwa pliku, `job_id`, czas wygaśnięcia wyniku (TTL, NFR-06) |
+| ocena ogólna | badge z `confidence.overall` |
+| licznik | „2 błędy, 5 do sprawdzenia”; przy zerze „Brak problemów” |
+| „Pobierz JSON” | jedyny główny przycisk; pobiera aktualną treść edytora jako `<techName-formularza>.json`. Wyłączony tylko, gdy JSON się nie parsuje albo nie przechodzi schematu, z powodem obok („Popraw 1 błąd schematu, aby pobrać.”). Błędy reguł R/S nie blokują: decyduje urzędnik. Bez dialogu przed pobraniem. |
+
+## 3. Pasek „Problem N z M” (przyklejony)
+
+Pokazuje tylko następną decyzję: pozycję, rodzaj (ikona + słowo), opis z `message`, ścieżkę elementu (strona, sekcja, pole), badge pewności, „Poprzedni” / „Następny” (`F8` / `Shift+F8`, `aria-keyshortcuts`). Kolejność: najpierw błędy (reguły, schemat), potem elementy poniżej progu od najniższej pewności. Po ostatnim „Następny” wraca do pierwszego z komunikatem „To był ostatni problem. Wracam do pierwszego.” Przy braku problemów pasek mówi „Brak problemów do sprawdzenia” i zachęca do przejrzenia podglądu.
+
+## 4. Lista problemów i przejście do elementu
+
+- `<ol>` przycisków, jeden wiersz = jeden problem: rodzaj, opis, ścieżka, badge (dla `check`). Bieżący wiersz: tło `accent-subtle`, wewnętrzny pasek 3 px `accent`, `aria-current="true"`.
 - Filtr „Pokaż”: Wszystkie / Błędy / Niska pewność.
-- W komórce „Element” jest przycisk `ghost` z nazwą elementu (nazwa dostępna: „Przejdź do: Numer działki”); kliknięcie w dowolne miejsce wiersza robi to samo, ale klawiaturą fokus dostaje tylko ten przycisk. Strzałki góra/dół przechodzą między wierszami.
+- Kliknięcie lub Enter na wierszu (to samo robi pasek i `F8`):
+  1. podgląd przełącza stronę na tę z elementem, przewija do niego i zaznacza go (obrys `accent`, tło `accent-subtle`);
+  2. edytor przewija do obiektu elementu, podświetla jego linie (`code-current`) i stawia kursor na pierwszej linii;
+  3. **fokus trafia do edytora**, bo tam się poprawia; `aria-live`: „Problem 3 z 7: Miejscowość, strona Informacje o budynku, pewność niska 0,41.”;
+  4. `Esc` w edytorze albo `Alt+P` wraca fokusem do wiersza listy.
+- Element usunięty w edytorze: wiersz z tekstem `muted` „Element usunięty z JSON-a”, przycisk nieaktywny.
+- Po edycji: błędy schematu i parsowania liczymy lokalnie od razu. Reguły R/S i confidence liczy backend, więc zmienione elementy dostają dopisek „zmienione, nieprzeliczone”. Ponownej walidacji przez backend nie projektujemy (brak endpointu, YAGNI).
 
-### Przejście do elementu
+## 5. Edytor JSON
 
-Kliknięcie lub Enter na wierszu:
-1. Podgląd przełącza się na stronę z elementem, przewija do niego i zaznacza go (tło `primary-subtle`, lewa krawędź 3px `primary`, jak zaznaczony wiersz tabeli).
-2. Edytor przewija do linii elementu (`"id"` lub `"techName"`), zaznacza cały obiekt elementu i stawia w nim kursor.
-3. **Fokus trafia do edytora** na początek obiektu, bo tam urzędnik poprawia. Komunikat w regionie `aria-live="polite"`: „Przeniesiono do: Numer działki, strona Dane. Niska pewność 0,34.”
-4. `Esc` w edytorze lub skrót `Alt+P` wraca fokusem do tego samego wiersza listy problemów.
+- CodeMirror 6 (ADR-0011), `--font-mono` 14 px, numery linii, zwijanie bloków (zwinięty obiekt pokazuje etykietę pola: „Ulica, 14 linii”), kolory składni z tokenów `code-*`.
+- Rynna: numer linii, **znacznik marginesu** (pełny / kreskowany przy liniach elementu poniżej progu), kolumna ikon błędu schematu.
+- Pasek stanu pod edytorem (`aria-live="polite"`, podpięty `aria-describedby`):
 
-Element bez dopasowania (usunięty w edytorze): wiersz wyszarzony (`disabled-text`), opis „Element usunięty z JSON-a”.
-
-Lista odświeża się lokalnie po każdej poprawnej zmianie w edytorze tylko dla błędów schematu i parsowania. Reguły R/S i confidence liczy backend; po edycji wiersze, których element zmieniono, dostają dopisek „zmienione, nieprzeliczone” (`text-muted`). Ponownej walidacji przez backend nie projektujemy tutaj (YAGNI do czasu endpointu).
-
-## 3. Podgląd formularza (FR-E5)
-
-Render tylko do odczytu, ale wyglądem bliski eUsłudze z wizualizacji w `data/…/wizualizacja formularza po cyfryzacji.docx`: strony tematyczne, sekcje z nagłówkiem, pola z etykietą nad polem, przyciski „Poprzednia strona” / „Następna strona”.
-
-- Nawigacja po stronach wg `flow.links` (źródło → cel), nie wg kolejności w `tabs[]`. Pasek kroków: numer + tytuł strony; bieżąca ma `aria-current="step"`. Strona z problemem ma przy numerze ikonę ✕ lub ! i licznik w nazwie dostępnej: „Strona 1, Dane, 2 problemy”.
-- `flow` niespójny (strona poza łańcuchem, cykl): kroki w kolejności `tabs[]`, nad podglądem karta stanu `warning` „Przepływ stron jest niespójny. Strony pokazano w kolejności z pliku.”
-- Pola wg typu: TEXT_FIELD/NUMBER/DATEPICKER → pole formularza, TEXTAREA → pole wieloliniowe, SELECT → lista, RADIO/CHECKBOX → grupy, FILE_UPLOADER → przycisk „Dodaj plik” (nieaktywny), TEXT_BLOCK/INFO_SECTION → tekst, CONSENT_SECTION → checkbox ze zgodą. Nieznany typ: ramka `border`, tekst „Nieobsługiwany typ pola: X”.
-- Kontrolki są interaktywne tylko po to, żeby sprawdzić stany `SHOW` (np. „Innej osoby” odsłania sekcje „Dane innej osoby”, „Pełnomocnictwo”). Wartości nie trafiają do JSON-a.
-- Pole lub sekcja poniżej progu: lewa krawędź 4px + badge confidence obok etykiety (DESIGN.md §5). Obok badge przycisk `ghost` „Dlaczego?”, który otwiera wiersz problemu na liście (to samo przejście co w §2, ale w drugą stronę: zaznacza wiersz i element w edytorze, fokus zostaje w podglądzie).
-- Kliknięcie dowolnego pola w podglądzie zaznacza jego obiekt w edytorze (bez przenoszenia fokusu).
-- Podgląd odświeża się po każdej zmianie, która daje poprawny JSON (z opóźnieniem ok. 300 ms od ostatniego klawisza). Przy błędzie składni zostaje ostatni poprawny render z paskiem `info` „Podgląd sprzed ostatniej zmiany: JSON zawiera błąd.”
-
-## 4. Edytor JSON i błąd walidacji schematu
-
-Edytor z `--font-mono`, numeracją linii, zwijaniem bloków. Pod nim pasek stanu:
-
-| Stan | Pasek pod edytorem | „Pobierz JSON” |
+| Stan | Pasek | „Pobierz JSON” |
 |---|---|---|
-| poprawny | `success`: „✓ Zgodny ze schematem” | aktywny |
-| błąd składni | `error`: „✕ Błąd składni w linii 42: brak przecinka.” | wyłączony |
-| niezgodny ze schematem | `error`: „✕ 2 niezgodności ze schematem” + lista | wyłączony |
+| poprawny | „Zgodny ze schematem eUsługi” (`success`) | aktywny |
+| błąd składni | „Błąd składni w linii 42: brak przecinka.” (`error`) | wyłączony + powód |
+| niezgodny ze schematem | „1 niezgodność ze schematem” + lista „Linia 132: „type” ma niedozwoloną wartość „TEXT_FELD”. Czy chodziło o „TEXT_FIELD”?” | wyłączony + powód |
 
-```
-│ │40      {                                     │
-│ │41        "label": "Numer działki",           │
-│▌│42        "type": "TEXT_FELD",           ✕    │  linia z błędem: krawędź error + ikona na marginesie
-│ │43        "techName": "numer_dzialki"         │
-│ └──────────────────────────────────────────────┘
-│ ┌ ✕ 2 niezgodności ze schematem ───────────────┐
-│ │ Linia 42: „type” ma niedozwoloną wartość     │  przycisk: przejdź do linii
-│ │   „TEXT_FELD”. Dozwolone: TEXT_FIELD, NUMBER…│
-│ │ Linia 88: brak wymaganego pola „techName”.   │
-│ └──────────────────────────────────────────────┘
-```
+  Linia błędu: ikona ✕ w rynnie i falista linia `error` pod tekstem. „Linia 132” w komunikacie to link, który stawia tam kursor.
+- Walidacja lokalnie względem `importowanyPlikJsonSchemat` z poprawką literówki `repeatingSectionGrid` (K-09), ok. 300 ms po ostatnim klawiszu.
+- Edytor nie więzi fokusu: `Esc`, potem `Tab` wychodzi (opis w nazwie dostępnej regionu).
+- „Formatuj” formatuje cały dokument; jest w historii cofania edytora.
 
-- Walidacja lokalna względem `importowanyPlikJsonSchemat`, po każdej zmianie (to samo opóźnienie co podgląd).
-- Komunikat mówi, co poprawić, nie tylko co jest źle. Lista podpięta do edytora przez `aria-describedby`; zmiana liczby błędów ogłaszana w `aria-live="polite"`.
-- Przycisk „Pobierz JSON” wyłączony ma obok tekst `text-muted` „Popraw błędy w edytorze, aby pobrać”, żeby powód był widoczny, nie tylko w podpowiedzi.
-- Opuszczenie ekranu z niezapisanymi zmianami (zmiany po ostatnim pobraniu): dialog „Masz niepobrane poprawki. Wyjść bez pobierania?” [Zostań] (primary) [Wyjdź] (secondary). Bez tego urzędnik traci pracę.
+## 6. Podgląd formularza (FR-E5)
 
-## 5. Wąski ekran (< 1024px)
+- Render tylko do odczytu, w chłodnej palecie `eu-*` odwzorowanej z wizualizacji COI: niebiesko-szare tło, białe karty sekcji, etykieta nad polem, granatowy przycisk „Dalej”. Podpis „tak zobaczy go wnioskodawca w eUsłudze”.
+- Kroki stron według `flow.links`, nie kolejności w `tabs[]`; bieżąca `aria-current="step"`; przy stronie z problemami ikona i liczba, w nazwie dostępnej „Strona 2, Informacje o budynku, 3 problemy”. `flow` niespójny: kroki w kolejności `tabs[]` i komunikat `warning` „Przepływ stron jest niespójny. Strony pokazano w kolejności z pliku.”
+- Każda karta ma po lewej **margines pewności** (28 px): znacznik przy polu albo sekcji poniżej progu, długi jak element. Obok etykiety badge. Kliknięcie pola zaznacza jego obiekt w edytorze (bez przenoszenia fokusu).
+- Typy pól: TEXT_FIELD, NUMBER, DATEPICKER → pole; TEXTAREA → pole wieloliniowe; SELECT → lista; RADIO, CHECKBOX → grupy; FILE_UPLOADER → „Dodaj lub przeciągnij plik” (nieaktywny) z limitami jak w eUsłudze; TEXT_BLOCK, INFO_SECTION → tekst; CONSENT_SECTION → checkbox zgody. Nieznany typ: ramka `rule` i „Nieobsługiwany typ pola: X”.
+- Kontrolki RADIO i CHECKBOX działają, żeby sprawdzić stany `SHOW` (FR-E3), np. „Innej osoby” odsłania „Dane innej osoby”. Wartości nie trafiają do JSON-a. „Wróć” / „Dalej” przełączają strony podglądu.
+- Odświeżenie po każdej zmianie dającej poprawny JSON. Przy błędzie składni lub schematu zostaje ostatni poprawny render z komunikatem `info` „Podgląd sprzed ostatniej zmiany: JSON nie przechodzi schematu.”
+- Wydajność: render tylko bieżącej strony formularza.
 
-Kolumny zamieniają się w zakładki (`role="tablist"`). Pasek wyniku zostaje u góry, przycisk „Pobierz JSON” na pełną szerokość pod oceną.
+## 7. Wyjście z niepobranymi poprawkami
 
-```
-┌──────────────────────────────────┐
-│ ← Zadania                        │
-│ Wniosek o ustalenie numeru…      │
-│ Ocena: [! Średnia 0,78]          │
-│ [Problemy (7) ▾]                 │
-│ [⤓        Pobierz JSON         ] │
-├──────────────────────────────────┤
-│ [ Podgląd ✕2 ] [ Edytor ] [ Problemy 7 ] │
-├──────────────────────────────────┤
-│ (1) Dane ▾   strona 1 z 4        │  kroki zwinięte do listy
-│                                  │
-│ Organ, do którego jest składany… │
-│  [ Urząd Miasta …           ▾ ]  │
-│ ▌Twoje dane   [! Średnia 0,71]   │
-│ …                                │
-│ [Poprzednia]      [Następna]     │
-└──────────────────────────────────┘
-```
+Zmiany po ostatnim pobraniu + próba wyjścia („Zadania”, „Wyloguj”, zamknięcie karty przez `beforeunload`): `<dialog>` „Masz niepobrane poprawki. Zmieniłeś JSON po ostatnim pobraniu. Po wyjściu poprawki przepadną, bo serwer ich nie przechowuje.” Akcje: „Zostań” (główna, domyślny fokus) i „Wyjdź bez pobierania” (wariant niszczący, obrys `error`). To jedyny dialog na ekranie.
 
-- Zakładki: „Podgląd” (domyślna, bo urzędnik najpierw ogląda formularz), „Edytor”, „Problemy”. Licznik problemów w nazwie zakładki („Problemy, 7”).
-- Przejście do problemu otwiera zakładkę „Edytor” z zaznaczonym elementem i fokusem w nim; z badge „Dlaczego?” w podglądzie otwiera zakładkę „Problemy” na danym wierszu.
-- Błąd schematu przy aktywnym „Podglądzie”: ikona ✕ na zakładce „Edytor” i ten sam pasek `info` nad podglądem.
-- Strona nie przewija się poziomo; długie linie w edytorze zawijają się albo przewijają w jego kontenerze.
+## 8. Wąski ekran (< 64rem)
 
-## 6. Dostępność (NFR-15)
+- Nagłówek się układa w kolumnę, „Pobierz JSON” na pełną szerokość.
+- Pasek problemu zostaje przyklejony, opis przechodzi do drugiej linii.
+- Obszary stają się zakładkami (`role="tablist"`, przyklejone pod paskiem problemu): **Podgląd** (domyślna), **JSON**, **Problemy N**. Przejście do problemu otwiera zakładkę JSON z zaznaczonym elementem. Błąd schematu przy otwartym podglądzie: ikona ✕ na zakładce JSON i komunikat nad podglądem.
+- Bez JavaScriptu obszary stoją jeden pod drugim. Strona nie przewija się poziomo; długie linie edytora przewijają się w jego kontenerze.
 
-- Kolejność tabulacji: pasek wyniku → lista problemów (gdy otwarta) → edytor → podgląd. Link „Przejdź do edytora” jako pierwszy element strony (skip link).
-- Edytor nie więzi fokusu: `Tab` wstawia wcięcie tylko po włączeniu trybu wcięć; domyślnie `Esc`, potem `Tab` wychodzi z edytora. Informacja o tym w opisie edytora (`aria-describedby`).
-- Skróty: `Alt+P` lista problemów, `Alt+E` edytor, `Alt+F` podgląd, `F8` / `Shift+F8` następny / poprzedni problem (przejście jak w §2). Lista skrótów pod przyciskiem `ghost` „Skróty klawiszowe”.
-- Fokus po przejściu do problemu: zawsze w miejscu edycji (edytor), z komunikatem `aria-live`; nigdy nie ginie na `body`.
-- Stan nigdy nie jest tylko kolorem: badge ma słowo poziomu, linie z błędem mają ikonę, zakładki i kroki mają licznik w nazwie dostępnej.
-- Podgląd ma nagłówki stron (`h2`) i sekcji (`h3`), żeby czytnik pozwalał po nich skakać.
-- Przewijanie do elementu bez animacji przy `prefers-reduced-motion: reduce`.
+## 9. Dostępność (NFR-15)
+
+- Skip link „Przejdź do edytora”. Tabulacja: nagłówek → pasek problemu → lista → edytor → podgląd.
+- Skróty: `F8` / `Shift+F8` następny / poprzedni problem, `Alt+P` lista, `Alt+E` edytor, `Alt+F` podgląd; opis w stopce listy.
+- Fokus po przejściu do problemu zawsze w edytorze, z komunikatem `aria-live`; nigdy nie ginie na `body`.
+- Stan nigdy tylko kolorem: badge ma wzór i słowo, linie błędu ikonę, kroki i zakładki licznik w nazwie dostępnej. Znaczniki marginesu są `aria-hidden`, bo tę samą informację niesie badge i lista.
+- Podgląd: strona `h3`, sekcja `h4`. Przewijanie do elementu bez animacji przy `prefers-reduced-motion`.
 
 ## Poza zakresem
 
-Edycja formularza przez podgląd (przeciągnij-upuść, formularz właściwości pola), zapis poprawek na serwerze, ponowna walidacja przez backend, historia zmian i cofanie poza tym, co daje edytor. Do osobnych issue, gdy będą potrzebne.
+Edycja przez podgląd (przeciąganie, panel właściwości pola), zapis poprawek na serwerze, ponowna walidacja przez backend, historia zmian poza cofaniem edytora, porównanie z oryginalnym plikiem obok. Do osobnych issue.
