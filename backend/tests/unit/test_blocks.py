@@ -106,7 +106,12 @@ def test_each_build_gets_fresh_ids() -> None:
 
 
 def test_draft_consents_keep_required_and_escape_text() -> None:
-    tab = contact_page([Consent("Oświadczam <to>", True, 0.9), Consent("Zgoda", False, 0.8)])
+    tab = contact_page(
+        [
+            Consent(text="Oświadczam <to>", required=True, confidence=0.9),
+            Consent(text="Zgoda", required=False, confidence=0.8),
+        ]
+    )
 
     consent_section = tab.questions[1].field
     config = consent_section.repeating_section_grid[0].field.consent_section_config
