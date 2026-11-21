@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 
+from forms2json.adapters.outbound.observability.log_observer import LogObserver
 from forms2json.application.pipeline.ingest_step import UnsupportedFormat
 from forms2json.application.ports.job_queue import Job
 from forms2json.application.ports.llm_client import LlmClient, LlmResult, LlmUsage
@@ -33,7 +34,9 @@ class FakeLlm(LlmClient):
 
 
 def _run(llm: LlmClient, mime_type: str = DOCX) -> object:
-    return pipeline_factory(Settings(), llm)().run(SourceFile(DOCX_5.read_bytes(), mime_type))
+    return pipeline_factory(Settings(), llm)(LogObserver()).run(
+        SourceFile(DOCX_5.read_bytes(), mime_type)
+    )
 
 
 def test_docx_becomes_form_with_confidence_issues_and_usage() -> None:

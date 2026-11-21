@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class LogObserver(PipelineObserver):
-    """Logs step boundaries and timings; OTel spans and SSE progress come with ADR-0014."""
+    """Logs step boundaries and timings; SSE progress has its own observer in ProcessJob."""
 
     @contextmanager
     def step(self, name: str) -> Iterator[None]:

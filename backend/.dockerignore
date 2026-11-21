@@ -1,0 +1,6 @@
+# Allowlist: only what the image build needs (no .venv, tests, caches or local .env).
+*
+!pyproject.toml
+!uv.lock
+!.python-version
+!src
