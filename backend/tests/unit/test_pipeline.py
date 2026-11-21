@@ -41,7 +41,7 @@ class Boom(PipelineStep[str, str]):
 def test_steps_run_in_order_and_observer_sees_each_boundary() -> None:
     observer = FakeObserver()
 
-    result = Pipeline([Append("a"), Append("b")], observer).run("")
+    result = Pipeline([Append("a"), Append("b")]).run("", observer)
 
     assert result == "ab"
     assert observer.events == ["started a", "done a", "started b", "done b"]
@@ -51,6 +51,6 @@ def test_failing_step_stops_pipeline_and_is_reported() -> None:
     observer = FakeObserver()
 
     with pytest.raises(ValueError):
-        Pipeline([Append("a"), Boom(), Append("c")], observer).run("")
+        Pipeline([Append("a"), Boom(), Append("c")]).run("", observer)
 
     assert observer.events == ["started a", "done a", "started boom", "failed boom"]

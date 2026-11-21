@@ -1,7 +1,6 @@
 import asyncio
 import json
 import uuid
-from contextlib import AbstractContextManager, nullcontext
 from pathlib import Path
 
 import aio_pika
@@ -17,15 +16,9 @@ from forms2json.adapters.outbound.storage.tmpfs_file_store import TmpfsFileStore
 from forms2json.application.pipeline.pipeline import Pipeline
 from forms2json.application.pipeline.step import PipelineStep
 from forms2json.application.ports.job_queue import Job
-from forms2json.application.ports.pipeline_observer import PipelineObserver
 from forms2json.application.use_cases.process_job import ProcessJob
 from forms2json.config import Settings
 from forms2json.domain.document import SourceFile
-
-
-class NullObserver(PipelineObserver):
-    def step(self, name: str) -> AbstractContextManager[None]:
-        return nullcontext()
 
 
 class Size(PipelineStep[SourceFile, dict[str, int]]):
@@ -57,9 +50,7 @@ async def round_trip(tmp_path: Path) -> None:
     results_queue = await channel.get_queue(RESULTS)
 
     try:
-        await queue.consume_jobs(
-            ProcessJob(files, Pipeline([Size()], NullObserver()), queue).execute
-        )
+        await queue.consume_jobs(ProcessJob(files, Pipeline([Size()]), queue).execute)
         await queue.publish_job(job)
 
         result_message = await asyncio.wait_for(first_message(results_queue), timeout=10)
@@ -74,7 +65,8 @@ async def round_trip(tmp_path: Path) -> None:
         "error": None,
     }
     assert result_message.delivery_mode == aio_pika.DeliveryMode.NOT_PERSISTENT
-    assert json.loads(progress_message.body)["status"] == "done"
+    first_event = json.loads(progress_message.body)
+    assert (first_event["step"], first_event["status"]) == ("size", "started")
     assert list(tmp_path.iterdir()) == []
 
 

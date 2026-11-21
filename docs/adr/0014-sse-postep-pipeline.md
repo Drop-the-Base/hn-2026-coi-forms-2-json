@@ -12,7 +12,7 @@ Przetwarzanie trwa od kilku sekund do minut. Urzędnik powinien widzieć, co si�
 
 - Worker publikuje zdarzenia postępu do exchange `progress` w RabbitMQ (topic, klucz = `job_id`), nietrwałe.
 - Zdarzenie: `{job_id, step, status: started|progress|done|failed, message, progress?: 0..1, ts}`. Bez treści pliku i danych osobowych.
-- API wystawia `GET /api/v1/jobs/{id}/events` jako **Server-Sent Events**. Używamy natywnego wsparcia FastAPI albo `sse-starlette` (BSD-3), co wybierzemy przy implementacji.
+- API wystawia `GET /api/v1/jobs/{id}/events` jako **Server-Sent Events**. Używamy natywnego wsparcia FastAPI (`fastapi.sse.EventSourceResponse`, od 0.135), bez `sse-starlette`: FastAPI sam wysyła ping co 15 s i ustawia `Cache-Control: no-cache` oraz `X-Accel-Buffering: no`.
 - Po zdarzeniu końcowym (`done`/`failed` całego zadania) strumień się zamyka. `GET /api/v1/jobs/{id}` zostaje jako zapasowy polling.
 - Frontend: przeglądarkowy `EventSource` **nie wysyła nagłówka `Authorization`**, więc nie przekaże JWT. Używamy SSE przez `fetch` ze strumieniowaniem (`@microsoft/fetch-event-source`, MIT) i normalnym nagłówkiem `Authorization: Bearer`. Nie dajemy tokena w query stringu, bo trafia do logów.
 - Hook `useJobEvents(jobId)` w `features/jobs` łączy zdarzenia SSE z cache TanStack Query.
