@@ -13,7 +13,7 @@ from forms2json.application.ports.llm_client import LlmCallFailed
 SCHEMA = {"type": "object", "properties": {"title": {"type": "string"}}}
 
 
-def completion(content: str) -> httpx2.Response:
+def completion(content: str, finish_reason: str = "stop") -> httpx2.Response:
     return httpx2.Response(
         200,
         json={
@@ -24,7 +24,7 @@ def completion(content: str) -> httpx2.Response:
             "choices": [
                 {
                     "index": 0,
-                    "finish_reason": "stop",
+                    "finish_reason": finish_reason,
                     "message": {"role": "assistant", "content": content},
                 }
             ],
@@ -43,7 +43,7 @@ def client_with(
         return handler(request)
 
     http_client = httpx2.Client(transport=httpx2.MockTransport(recording))
-    return OpenAiCompatibleLlmClient("http://llm/v1", "m", 5.0, http_client), requests
+    return OpenAiCompatibleLlmClient("http://llm/v1", "m", 5.0, 100, http_client), requests
 
 
 def test_returns_parsed_json_with_usage_and_sends_the_schema() -> None:
@@ -56,6 +56,16 @@ def test_returns_parsed_json_with_usage_and_sends_the_schema() -> None:
     body = json.loads(requests[0].content)
     assert requests[0].url.path == "/v1/chat/completions"
     assert body["response_format"]["json_schema"]["schema"] == SCHEMA
+    assert body["max_tokens"] == 100
+
+
+def test_answer_cut_off_at_max_tokens_fails_without_retry() -> None:
+    # A model that lost the document to a context shift loops until the token limit (#103).
+    client, requests = client_with(lambda _: completion('{"title": "Wnio', "length"))
+
+    with pytest.raises(LlmCallFailed, match="cut off at 100 tokens"):
+        client.generate_json("system", "user", SCHEMA)
+    assert len(requests) == 1
 
 
 def test_invalid_json_is_retried_and_usage_summed() -> None:

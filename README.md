@@ -22,7 +22,7 @@ Szczegóły: [docs/architecture.md](docs/architecture.md).
 | Co | Wersja / uwagi |
 | --- | --- |
 | Docker z Compose v2 | sprawdzone na Docker 28.0, Compose 2.34 (macOS arm64) |
-| [Ollama](https://ollama.com) na hoście | działa w tle (`ollama serve` albo aplikacja), port 11434 |
+| [Ollama](https://ollama.com) na hoście | działa w tle na porcie 11434 **z oknem kontekstu 16384**: `OLLAMA_CONTEXT_LENGTH=16384 ollama serve` (w aplikacji: Settings → Context length). Przy domyślnych 4096 dłuższe formularze (np. 7) kończą się błędem `answer cut off` |
 | Model | `ollama pull qwen2.5:7b-instruct` (ok. 4,7 GB, raz) |
 | RAM | ok. 8 GB wolne dla modelu; GPU niewymagane (na CPU wolniej) |
 | `openssl` | do wygenerowania sekretów |
@@ -73,6 +73,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_MODEL` | `qwen2.5:7b-instruct` | `qwen3:1.7b` | model, musi być pobrany |
 | `LLM_TIMEOUT_SECONDS` | `120` | `120` | timeout jednego wywołania LLM |
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
+| `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
 
 Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/jobs`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`.
