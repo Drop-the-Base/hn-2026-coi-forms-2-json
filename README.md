@@ -221,6 +221,18 @@ Przykłady: `sum by (outcome) (forms2json_job_duration_seconds_count)`, `histogr
 
 `usage.cost` w wyniku zadania = tokeny wejścia × `COST_PER_1M_INPUT_TOKENS` / 1M + tokeny wyjścia × `COST_PER_1M_OUTPUT_TOKENS` / 1M + czas LLM × `COST_PER_GPU_SECOND`, w walucie `usage.currency` (`COST_CURRENCY`). Ponowienia też kosztują, więc są wliczone. Stawki ustaw w `.env` z cennika dostawcy (np. Groq gpt-oss-120b ok. 0.15 / 0.60 USD za 1M, do potwierdzenia), domyślnie 0. Dashboard: Perses (wyżej).
 
+### Droga do produkcji
+
+Obserwowalność wystarcza na demo i pilotaż. Przed produkcją brakuje:
+
+| Brak | Skutek | Rozwiązanie |
+| --- | --- | --- |
+| Dashboard liczy sumy od startu workera | restart workera zeruje panele | `rate()`/`increase()` w panelach ([#145](../../issues/145)) |
+| Prometheus i Jaeger bez trwałego zapisu | restart kontenera kasuje historię metryk i trace'ów | wolumeny z retencją; Jaeger na trwałym storage (np. OpenSearch, Apache-2.0) |
+| Logi tylko w `docker logs` | brak wyszukiwania po logach wielu replik | logi przez OTLP do otel-collectora i dalej do magazynu logów zgodnego z ADR-0013 (np. OpenSearch, VictoriaLogs); Loki odpada, AGPL |
+| Brak alertów | nikt nie wie, że LLM zwraca 429 albo zadania padają | Alertmanager (Apache-2.0) z regułami na `forms2json_llm_errors_total` i `outcome="failed"` |
+| Perses bez logowania | dostęp tylko z localhosta | reverse proxy z SSO albo natywne uwierzytelnianie Perses |
+
 ## Rozwój lokalny
 
 Wymaga [uv](https://docs.astral.sh/uv/) i Node.js 24.
@@ -291,9 +303,8 @@ Złote JSON-y formularzy 2, 3, 4, 6, 7, 8, 9 i decyzje przy ich tworzeniu: [back
 
 | Co | Stan |
 | --- | --- |
-| DOC w formacie binarnym (OLE2) | API przyjmuje, worker kończy `UnsupportedFormat` ([#24](../../issues/24)); `.doc`, który w środku jest DOCX, działa |
-| JPG, PNG i skany PDF (OCR) | obrazy: worker kończy `UnsupportedFormat`, skan PDF: `ScannedPdf` ([#25](../../issues/25)) |
 | Formularz 7 (ODS) | model nie zawsze zwraca poprawny JSON, zadanie może skończyć się błędem ([#103](../../issues/103)); złoty JSON jest w `backend/tests/evals/dataset/golden/7.json` |
+| OCR (JPG, PNG, skany PDF) | Tesseract `pol`; kratki w skanie wychodzą jako śmieci, confidence elementów ograniczony średnią pewnością OCR dokumentu |
 | Jedna replika API | wyniki zadań w pamięci procesu api, giną przy restarcie |
 
 Niespójności danych wejściowych ([docs/analiza-i-charakterystyka-danych.md](docs/analiza-i-charakterystyka-danych.md)):
