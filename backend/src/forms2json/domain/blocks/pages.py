@@ -5,6 +5,7 @@ applied. Dictionaries and initial data (K-06, K-10, K-11) come from domain.dicti
 the sections the applicant kinds need, sets their visibility and gives every element a fresh id.
 """
 
+import copy
 import html
 import json
 from collections.abc import Collection, Sequence
@@ -113,7 +114,8 @@ def _subject(options: set[str], entity: bool) -> Question:
 
 
 def _section(name: str, visible_when: str | None = None) -> Question:
-    section = Question.from_dict(_TEMPLATES[name])
+    # Deep copy: from_dict keeps nested dicts (consentSectionConfig), callers mutate them.
+    section = Question.from_dict(copy.deepcopy(_TEMPLATES[name]))
     section.field.id = new_id()
     for child in section.field.repeating_section_grid:
         child.field.id = new_id()

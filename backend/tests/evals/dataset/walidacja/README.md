@@ -14,14 +14,17 @@ Wspólne decyzje są takie jak w `golden/` (README tam, sekcje 6–8): strony Da
 
 Liczby z blokami predefiniowanymi.
 
+Poza walidatorami ze Standardów (`validation_for`) nie ma walidatora numeru rachunku: reguły techniczne go nie znają.
+
 ## 10. Azbest (Dłutów)
 
 - **Tytuł**: papier ma „WNIOSEK – AZBEST”, więc tytuł opisowy z treści („proszę o zakwalifikowanie … wyrobów zawierających azbest”).
 - **Kto składa**: imię i nazwisko albo nazwa, NIP, osoba reprezentująca → Swoim, Innej osoby, Osoby prawnej.
+- **Strony** w kolejności papieru (K-14): „Nieruchomość i wyroby z azbestem” (adres, działka, zakres, obiekt, wyroby), „Właściciel i załączniki” (tytuł prawny, dane do umowy, załączniki).
 - **Nieruchomość**: blok adresu (`*_nieruchomosc`), działka, obręb, księga wieczysta (opcjonalna: nie każda nieruchomość ją ma). Tytuł prawny RADIO z „Inny” → pole tekstowe.
-- **Dane do umowy**: imię, nazwisko, PESEL, adres i dane firmy dają bloki. Zostaje seria i numer dowodu, widoczne, gdy wnioskodawca nie jest osobą prawną.
+- **Dane do umowy**: imię, nazwisko, PESEL, adres i dane firmy dają bloki. Zostaje seria i numer dowodu (walidator `SERIAL_NUMBER_ID_CARD`, jak w nr 9), widoczne, gdy wnioskodawca nie jest osobą prawną.
 - **Zakres zadania**: RADIO z dwiema kratkami papieru. „Demontaż z budynku ……” i „Rodzaj obiektu” pytają o to samo, więc jest jedno pole „Rodzaj obiektu” (TEXT_FIELD, przykłady w opisie, bo lista kończy się na „itp.”).
-- **Załączniki**: kopia pozwolenia na wymianę pokrycia widoczna przy demontażu, oświadczenie de minimis przy obiekcie związanym z działalnością. Klauzula informacyjna nie jest plikiem.
+- **Załączniki**: załącznik nr 2 to oświadczenie, że wnioskodawca dostarczy zgłoszenie robót lub pozwolenie na budowę (osobny druk gminy). Kopia pozwolenia na wymianę pokrycia widoczna przy demontażu, oświadczenie de minimis przy obiekcie związanym z działalnością. Klauzula informacyjna nie jest plikiem.
 - **Oświadczenia**: 4 wymagane, w czasie teraźniejszym lub przyszłym, bez form rodzajowych.
 
 ## 11. Zwrot kosztów przewozu (Gózd)

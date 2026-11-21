@@ -28,11 +28,11 @@ OUT = Path(__file__).parent
 
 
 def form_10() -> FormDefinition:
-    t2, t3 = "Nieruchomość", "Wyroby zawierające azbest"
+    t2, t3 = "Nieruchomość i wyroby z azbestem", "Właściciel i załączniki"
     demolition = "Demontaż, zbieranie, transport i unieszkodliwienie wyrobów"
     business = "Związany z działalnością gospodarczą, w tym rolniczą"
     other_title = "Inny"
-    estate = page(
+    asbestos = page(
         t2,
         [
             address("adres_nieruchomosci", "Adres nieruchomości", t2, "nieruchomosc"),
@@ -50,63 +50,6 @@ def form_10() -> FormDefinition:
                     field("TEXT_FIELD", "numer_ksiegi_wieczystej", "Numer księgi wieczystej"),
                 ],
             ),
-            section(
-                "prawo_do_nieruchomosci",
-                "Prawo do dysponowania nieruchomością",
-                [
-                    field(
-                        "RADIO",
-                        "forma_prawna_wlasciciela",
-                        "Forma prawna właściciela obiektu",
-                        True,
-                        [
-                            "Osoba fizyczna",
-                            "Osoba prawna",
-                            "Jednostka organizacyjna nieposiadająca osobowości prawnej",
-                        ],
-                    ),
-                    field(
-                        "RADIO",
-                        "tytul_prawny_do_nieruchomosci",
-                        "Na jakiej podstawie dysponujesz nieruchomością?",
-                        True,
-                        ["Własność", "Współwłasność", "Użytkowanie wieczyste", other_title],
-                    ),
-                    field(
-                        "TEXT_FIELD",
-                        "inny_tytul_prawny",
-                        "Opisz inny tytuł prawny",
-                        True,
-                        when=answer_is(
-                            other_title,
-                            t2,
-                            "prawo_do_nieruchomosci",
-                            "tytul_prawny_do_nieruchomosci",
-                        ),
-                    ),
-                ],
-            ),
-            section(
-                "dane_do_umowy",
-                "Dane do umowy",
-                [
-                    field(
-                        "TEXT_FIELD",
-                        "seria_i_numer_dowodu_osobistego",
-                        "Seria i numer dowodu osobistego",
-                        True,
-                    )
-                ],
-                "Podaj dane osoby, z którą gmina zawrze umowę.",
-                when=answer_is_not(LEGAL_ENTITY, APPLICANT_TAB, "podmiot_wniosku", FOR_WHOM),
-            ),
-        ],
-    )
-    scope = answer_is(demolition, t3, "zakres_zadania", "zakres_zadania_azbest")
-    for_business = answer_is(business, t3, "obiekt_z_azbestem", "przeznaczenie_obiektu")
-    asbestos = page(
-        t3,
-        [
             section(
                 "zakres_zadania",
                 "Zakres zadania",
@@ -175,6 +118,64 @@ def form_10() -> FormDefinition:
                     ),
                 ],
             ),
+        ],
+    )
+    scope = answer_is(demolition, t2, "zakres_zadania", "zakres_zadania_azbest")
+    for_business = answer_is(business, t2, "obiekt_z_azbestem", "przeznaczenie_obiektu")
+    # K-14: paper order is property, task, asbestos, ownership, contract data, attachments.
+    owner = page(
+        t3,
+        [
+            section(
+                "prawo_do_nieruchomosci",
+                "Prawo do dysponowania nieruchomością",
+                [
+                    field(
+                        "RADIO",
+                        "forma_prawna_wlasciciela",
+                        "Forma prawna właściciela obiektu",
+                        True,
+                        [
+                            "Osoba fizyczna",
+                            "Osoba prawna",
+                            "Jednostka organizacyjna nieposiadająca osobowości prawnej",
+                        ],
+                    ),
+                    field(
+                        "RADIO",
+                        "tytul_prawny_do_nieruchomosci",
+                        "Na jakiej podstawie dysponujesz nieruchomością?",
+                        True,
+                        ["Własność", "Współwłasność", "Użytkowanie wieczyste", other_title],
+                    ),
+                    field(
+                        "TEXT_FIELD",
+                        "inny_tytul_prawny",
+                        "Opisz inny tytuł prawny",
+                        True,
+                        when=answer_is(
+                            other_title,
+                            t3,
+                            "prawo_do_nieruchomosci",
+                            "tytul_prawny_do_nieruchomosci",
+                        ),
+                    ),
+                ],
+            ),
+            section(
+                "dane_do_umowy",
+                "Dane do umowy",
+                [
+                    field(
+                        "TEXT_FIELD",
+                        "seria_i_numer_dowodu_osobistego",
+                        "Seria i numer dowodu osobistego",
+                        True,
+                    )
+                ],
+                "Podaj dane osoby, z którą gmina zawrze umowę.",
+                when=answer_is_not(LEGAL_ENTITY, APPLICANT_TAB, "podmiot_wniosku", FOR_WHOM),
+            ),
             section(
                 "zalaczniki",
                 "Załączniki",
@@ -186,7 +187,13 @@ def form_10() -> FormDefinition:
                         "zawierających azbest",
                         True,
                     ),
-                    field("FILE_UPLOADER", "oswiadczenie_zalacznik_2", "Oświadczenie", True),
+                    field(
+                        "FILE_UPLOADER",
+                        "oswiadczenie_zalacznik_2",
+                        "Oświadczenie o dostarczeniu zgłoszenia robót lub pozwolenia na budowę",
+                        True,
+                        description="Załącznik nr 2 do wniosku.",
+                    ),
                     field(
                         "FILE_UPLOADER",
                         "pozwolenie_na_wymiane_pokrycia",
@@ -230,7 +237,7 @@ def form_10() -> FormDefinition:
         "Wniosek o usunięcie wyrobów zawierających azbest",
         "Wójt Gminy Dłutów",
         [K.SELF, K.OTHER_PERSON, K.LEGAL_ENTITY],
-        [estate, asbestos],
+        [asbestos, owner],
         contact(statements),
     )
 
@@ -585,6 +592,9 @@ def form_12() -> FormDefinition:
 def main() -> None:
     for name, build in (("10", form_10), ("11", form_11), ("12", form_12)):
         golden = build()
+        for f in _walk(golden):
+            if f.field.tech_name == "seria_i_numer_dowodu_osobistego":
+                f.field.validation.append("SERIAL_NUMBER_ID_CARD")
         tech_names = [p.field.tech_name for p in _walk(golden)]
         assert len(tech_names) == len(set(tech_names)), f"{name}: duplicate techName"
         issues = check_rules(golden) + check_standards(golden) + check_schema(golden.to_dict())

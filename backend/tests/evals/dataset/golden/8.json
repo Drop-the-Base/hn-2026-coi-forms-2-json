@@ -3558,18 +3558,6 @@
                         "required": true
                       },
                       {
-                        "description": "<html><head></head><body><p>Oświadczam, że psy nie będą wykorzystywane do polowań.</p></body></html>",
-                        "required": true
-                      },
-                      {
-                        "description": "<html><head></head><body><p>Oświadczam, że psy są zaszczepione przeciwko wściekliźnie.</p></body></html>",
-                        "required": true
-                      },
-                      {
-                        "description": "<html><head></head><body><p>Oświadczam, że zapewniam warunki utrzymywania psów zgodne z rozporządzeniem Ministra Rolnictwa i Rozwoju Wsi z dnia 5 lipca 2010 r.</p></body></html>",
-                        "required": true
-                      },
-                      {
                         "description": "<html><head></head><body><p>Wyrażam zgodę na otrzymywanie korespondencji na adres e-mail podany w danych do kontaktu.</p></body></html>",
                         "required": false
                       }

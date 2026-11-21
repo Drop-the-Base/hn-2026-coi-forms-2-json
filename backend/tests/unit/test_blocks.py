@@ -124,3 +124,12 @@ def test_draft_consents_keep_required_and_escape_text() -> None:
         },
         {"description": "<html><head></head><body><p>Zgoda</p></body></html>", "required": False},
     ]
+
+
+def test_changing_a_block_does_not_leak_into_the_next_one() -> None:
+    first = contact_page().questions[1].field.repeating_section_grid[0].field
+    assert first.consent_section_config is not None
+    first.consent_section_config["consents"].append({"description": "x", "required": True})  # type: ignore[union-attr]
+    second = contact_page().questions[1].field.repeating_section_grid[0].field
+    assert second.consent_section_config is not None
+    assert len(second.consent_section_config["consents"]) == 1  # type: ignore[arg-type]

@@ -2,7 +2,7 @@
   "title": "Wniosek o usunięcie wyrobów zawierających azbest",
   "tabs": [
     {
-      "id": "f089ce52-385e-40de-94ee-f5cdc5aacf9f",
+      "id": "aac6070b-7985-4893-ab65-3f22008319b9",
       "title": "Dane",
       "type": "MAIN",
       "questions": [
@@ -12,7 +12,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "4b7dc05f-9a20-4415-85a4-ec698920d7fe",
+            "id": "00a5775b-6ed8-4bb0-82ee-34196fdb2f08",
             "type": "SECTION",
             "techName": "organ_do_ktorego_jest_skladany_wniosek",
             "title": "Organ, do którego jest składany wniosek",
@@ -27,7 +27,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ebab86d8-d35b-494e-b255-531e5312c382",
+                  "id": "b44f0ea8-0d11-4652-8bb1-7dea1a175a5a",
                   "type": "TEXT_FIELD",
                   "techName": "nazwa_organu",
                   "title": "Nazwa organu",
@@ -54,7 +54,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "5086ab60-8d93-425e-8b94-09143209a10a",
+            "id": "da443a12-78b9-4e4b-b76b-6c20b1b929ad",
             "type": "SECTION",
             "techName": "podmiot_wniosku",
             "title": "Podmiot wniosku",
@@ -69,7 +69,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "96307b8f-af85-42e1-8c50-832134ef0a14",
+                  "id": "01d2ed5c-8a01-464f-a503-13417a0ed07f",
                   "type": "RADIO",
                   "techName": "wybierz_w_czyim_imieniu_wnioskujesz",
                   "title": "Wybierz, w czyim imieniu wnioskujesz",
@@ -107,7 +107,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "77f2650b-1b24-4e7e-8a59-1f99a2c34995",
+                  "id": "79261eaa-2b54-40a7-9d04-89e03002a450",
                   "type": "RADIO",
                   "techName": "wybierz_jako_kto_wnioskujesz",
                   "title": "Wybierz, jako kto wnioskujesz",
@@ -151,7 +151,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "8b3466de-e22d-4ae9-9655-053530844efd",
+            "id": "f26d5e85-5eea-454b-8a72-f62ec750b2ca",
             "type": "SECTION",
             "techName": "twoje_dane",
             "title": "Twoje dane",
@@ -166,7 +166,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c3d79665-2b34-4a4f-8dc9-87c6853fcf57",
+                  "id": "2e866525-6158-4415-ac0e-1837196b762c",
                   "type": "TEXT_FIELD",
                   "techName": "imie",
                   "title": "Imię",
@@ -190,7 +190,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f19eba6b-26df-4c38-a45f-5e82d0b9d2c4",
+                  "id": "79f1cb4c-cd6f-434e-8060-307a36e65ecb",
                   "type": "TEXT_FIELD",
                   "techName": "nazwisko",
                   "title": "Nazwisko",
@@ -214,7 +214,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ca9624c2-d22c-4541-8dd0-b43f1d003881",
+                  "id": "170e42bc-7987-4741-a2de-03e24bc9793d",
                   "type": "TEXT_FIELD",
                   "techName": "numer_pesel",
                   "title": "Numer PESEL",
@@ -245,7 +245,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "170dd559-af70-4806-a798-39c5eff45588",
+            "id": "b8414bd2-07fd-4809-9a8b-5cc782cb1f1e",
             "type": "SECTION",
             "techName": "adres_zamieszkania",
             "title": "Adres zamieszkania",
@@ -260,7 +260,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "28fda1e7-80c1-49e2-9c47-65f0ade6845f",
+                  "id": "b7f48942-9635-482c-aeb0-72618fee529a",
                   "type": "SELECT",
                   "techName": "kraj",
                   "title": "Kraj",
@@ -288,7 +288,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e0fdbb35-8161-4eda-84fc-de864519674d",
+                  "id": "c74d9e30-ea52-4e23-bcf4-bb271f3bb351",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_zagranica",
                   "title": "Miejscowość",
@@ -315,7 +315,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "44581715-a98e-47ce-8ed2-ea348c8db54a",
+                  "id": "21fc1942-3e2d-4320-983b-56693a886d08",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_zagranica",
                   "title": "Kod pocztowy",
@@ -340,7 +340,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5e910376-c17c-4514-9fa5-d3a73ebad0a1",
+                  "id": "3315a158-f770-425f-82e7-c89e6449ed5a",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_zagranica",
                   "title": "Ulica",
@@ -365,7 +365,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a95e9502-e27a-435e-9440-b6431d8ea983",
+                  "id": "2e1311c7-ad10-47cf-b773-da5b875200a0",
                   "type": "SELECT",
                   "techName": "wojewodztwo",
                   "title": "TERYT_4G_DOWODOWY",
@@ -396,7 +396,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5980816e-7465-4dbc-a79f-62009a7d1d7d",
+                  "id": "277c1fd1-4f5c-4d29-9f51-2e64c3e75046",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy",
                   "title": "Kod pocztowy",
@@ -426,7 +426,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "853d08ab-7539-4820-9990-69bb08f60332",
+                  "id": "14feacb5-efa8-4dc8-bb12-bda7ca276b8c",
                   "type": "TEXT_FIELD",
                   "techName": "ulica",
                   "title": "Ulica",
@@ -453,7 +453,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3d220656-78a7-47eb-bee5-ac0a5a9d1625",
+                  "id": "aab4d836-1f3c-4546-8264-c87fdf232272",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku",
                   "title": "Numer budynku",
@@ -477,7 +477,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b3d41735-25b5-4f90-93f8-5cc0160c7312",
+                  "id": "c74b716c-9cd4-448c-a23d-252ff6fd9ee9",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu",
                   "title": "Numer lokalu",
@@ -505,7 +505,7 @@
           "rows": 5,
           "cols": 3,
           "field": {
-            "id": "c8fef0ec-34cb-4454-b274-f53fd7ebe15f",
+            "id": "15c4f0da-1707-4468-840e-8bc18d667904",
             "type": "SECTION",
             "techName": "dane_podmiotu",
             "title": "Dane podmiotu",
@@ -520,7 +520,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "7e536160-fbb7-406b-9bde-ae5350caf7e5",
+                  "id": "7f5ab043-e61f-4330-abef-45115f771cb7",
                   "type": "TEXT_FIELD",
                   "techName": "nazwa",
                   "title": "Nazwa",
@@ -542,7 +542,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e5d65afc-56fd-4b54-879f-86949591d405",
+                  "id": "3197ecc7-02e8-45ad-b856-84ce2c987a80",
                   "type": "TEXT_FIELD",
                   "techName": "nip",
                   "title": "NIP",
@@ -565,7 +565,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "0f88a71c-9639-4c50-97a3-a4fba137ecec",
+                  "id": "82e81bfe-882c-447d-aa4d-1340cb414915",
                   "type": "TEXT_FIELD",
                   "techName": "regon",
                   "title": "REGON",
@@ -588,7 +588,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "25c4df5f-3dbd-4e11-90e7-11557a2fe31f",
+                  "id": "7e50a773-6aa9-4ab8-82c3-602e3804c591",
                   "type": "TEXT_FIELD",
                   "techName": "numer_krs",
                   "title": "Numer KRS",
@@ -619,7 +619,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "29d13c6c-4178-4b16-8548-c639f404acaa",
+            "id": "1ec99c45-5b67-4bd1-a15c-cfab66774612",
             "type": "SECTION",
             "techName": "adres_siedziby",
             "title": "Adres siedziby",
@@ -634,7 +634,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "40f6e891-5e78-4e0c-aeb7-764b96f80e40",
+                  "id": "87c7e16f-abc2-4ed0-89b7-f40cb89fd9a9",
                   "type": "SELECT",
                   "techName": "kraj_siedziba",
                   "title": "Kraj",
@@ -662,7 +662,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f15cfc7c-aa31-4853-bffa-7d34ac459c13",
+                  "id": "79fcc844-d81d-4f32-85f2-74a4dd6aba00",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_siedziba_zagranica",
                   "title": "Miejscowość",
@@ -689,7 +689,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d221ddb8-0790-42d2-9ad1-6b5ac9e8264f",
+                  "id": "c7b7e56f-ecdd-4daf-9fc2-51e3bea0f8e6",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_siedziba_zagranica",
                   "title": "Kod pocztowy",
@@ -714,7 +714,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "0401ea78-3009-43fa-93f2-dd0ff48c3630",
+                  "id": "a3ddb47f-8a08-4a0c-9d0a-6cdbae6e2437",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_siedziba_zagranica",
                   "title": "Ulica",
@@ -739,7 +739,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b8196688-07ef-4c74-9ee1-53471ed854e5",
+                  "id": "51cf6f2a-9f13-4d47-aea1-4c072228487a",
                   "type": "SELECT",
                   "techName": "wojewodztwo_siedziba",
                   "title": "TERYT_4G_DOWODOWY",
@@ -770,7 +770,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b41ce6be-4dec-4524-aed1-d125e3abe3b9",
+                  "id": "90e3b2fb-a3bf-4b7f-aeaf-34024c70ec8d",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_siedziba",
                   "title": "Kod pocztowy",
@@ -798,7 +798,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5ec2afba-fb02-4ffa-acc6-60dda9449b3b",
+                  "id": "978ab1df-b296-44da-a936-4bac90f5ea8a",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_siedziba",
                   "title": "Ulica",
@@ -824,7 +824,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "0e406943-5c1d-4481-8f5c-5ef73d473385",
+                  "id": "daf3ac81-646d-46fd-a479-b1e05cc93c3f",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_siedziba",
                   "title": "Numer budynku",
@@ -846,7 +846,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ec3f2528-ca9c-4f70-8c9c-c7dd089aeb83",
+                  "id": "6c4e346d-f8e1-4afc-82fb-eb53676687ff",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_siedziba",
                   "title": "Numer lokalu",
@@ -877,7 +877,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "a7d5d907-d346-43f0-87fe-4812bd7aa912",
+            "id": "da662fc1-47fa-4899-8288-69b112e70478",
             "type": "SECTION",
             "techName": "potwierdzenie_ze_jestes_reprezentantem",
             "title": "Potwierdzenie, że jesteś reprezentantem",
@@ -892,7 +892,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d0ce5cf9-ef6a-490b-8fe5-7dbd93c40041",
+                  "id": "e7417405-986c-4df4-96f8-8b7a7f21ff11",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_z_odpisem_danych",
                   "title": "Plik z odpisem danych",
@@ -925,7 +925,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "63ecdb59-959c-497a-a1bf-1a82b3d859b9",
+            "id": "9aa9438c-b082-4260-b2cc-bf0ff8049d06",
             "type": "SECTION",
             "techName": "dane_innej_osoby",
             "title": "Dane innej osoby",
@@ -940,7 +940,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9e052e6b-9352-40dd-bc31-e7f356ef8473",
+                  "id": "7b02cb79-1bb5-4308-921b-b44c2fbc6956",
                   "type": "TEXT_FIELD",
                   "techName": "imie_inna_osoba",
                   "title": "Imię",
@@ -962,7 +962,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3ccb1f35-0d2b-4c64-8415-f184d3a6d15c",
+                  "id": "dcab7b67-1f04-4ec7-896e-75855d6fb9e8",
                   "type": "TEXT_FIELD",
                   "techName": "nazwisko_inna_osoba",
                   "title": "Nazwisko",
@@ -984,7 +984,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c4dd7bf4-09f5-42fc-a195-58050ab99345",
+                  "id": "3ac4ce46-16ad-4871-933c-87eaa3e52581",
                   "type": "TEXT_FIELD",
                   "techName": "numer_pesel_inna_osoba",
                   "title": "Numer PESEL",
@@ -1018,7 +1018,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "882cd048-fe62-4a4c-8daa-6bee1ca36c9e",
+            "id": "b0b56387-64d0-40c9-80bd-2769234788cd",
             "type": "SECTION",
             "techName": "adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem",
             "title": "Adres zamieszkania innej osoby",
@@ -1033,7 +1033,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a47d83ec-694b-402f-b51d-67fb3a043568",
+                  "id": "a95b427c-74aa-49ae-9c0a-71fade96f452",
                   "type": "SELECT",
                   "techName": "kraj_inna_osoba",
                   "title": "Kraj",
@@ -1061,7 +1061,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e8a22d90-2985-4d89-89c7-edff3dbcb7e3",
+                  "id": "0deeabda-b6e1-44da-9e3e-784cc0f5bd84",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_inna_osoba_zagranica",
                   "title": "Miejscowość",
@@ -1088,7 +1088,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "832a6b96-fe5b-42fc-a535-94e173d40a43",
+                  "id": "4b9de53d-2bdd-4350-9ba0-f9cd478c7279",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_inna_osoba_zagranica",
                   "title": "Kod pocztowy",
@@ -1113,7 +1113,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5352a3c5-831b-4813-8ac7-db77c60fdec9",
+                  "id": "01153b89-d72e-4785-a0c4-37cacb1ee6ae",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_inna_osoba_zagranica",
                   "title": "Ulica",
@@ -1138,7 +1138,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4849cfc2-5634-4689-b980-e7f078417e55",
+                  "id": "8231620b-d62d-46b9-a172-e598e366aeb3",
                   "type": "SELECT",
                   "techName": "wojewodztwo_inna_osoba",
                   "title": "TERYT_4G_DOWODOWY",
@@ -1169,7 +1169,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "67ed9010-e8b4-4274-abf8-f527a2730ae7",
+                  "id": "354cd40b-d474-4285-a99d-399570c61d63",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_inna_osoba",
                   "title": "Kod pocztowy",
@@ -1197,7 +1197,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ceeae6bd-35c4-4e9f-8901-0549fabf73b6",
+                  "id": "3034bba0-3ca9-445a-91af-9b59059ad37f",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_inna_osoba",
                   "title": "Ulica",
@@ -1222,7 +1222,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4373b338-df55-4283-99ed-2d8cb73b213f",
+                  "id": "9bcc690b-7308-42a5-a397-b97b553ac847",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_inna_osoba",
                   "title": "Numer budynku",
@@ -1244,7 +1244,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "dd0b6a67-7f9e-4410-b7ba-fb847e0d47ad",
+                  "id": "43dc0d1d-04b5-4c13-8922-bd95237335c3",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_inna_osoba",
                   "title": "Numer lokalu",
@@ -1275,7 +1275,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "889e6a7c-e6cc-46b1-86ab-03a58feca1cf",
+            "id": "f89a7e89-dfb2-4b68-923c-0923921daef1",
             "type": "SECTION",
             "techName": "pelnomocnictwo",
             "title": "Pełnomocnictwo",
@@ -1290,7 +1290,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c117699e-93d8-44e7-bab3-2d81083e69d2",
+                  "id": "5b600aab-9045-4c43-93b2-e00d94c6979a",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_dokumentu_z_pelnomocnictwem",
                   "title": "Plik dokumentu z pełnomocnictwem",
@@ -1323,7 +1323,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "599c10a6-77b6-4837-b6a9-de301065f171",
+            "id": "0509d6d8-fb9b-410f-bef1-f056ec47ad12",
             "type": "SECTION",
             "techName": "oplata_skarbowa_pelnomocnictwo_1",
             "title": "Opłata skarbowa",
@@ -1338,7 +1338,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a56b968c-86fb-4abf-9a18-68d4cfca6da5",
+                  "id": "573dae33-1e20-47e8-bfb8-666cc2509b50",
                   "type": "RADIO",
                   "techName": "czy_zlozenie_pelnomocnictwa_wymaga_oplaty_skarbowej",
                   "title": "Czy złożenie pełnomocnictwa wymaga opłaty skarbowej?",
@@ -1371,7 +1371,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "456ecf2a-afef-4618-9822-5e6fdd63fb6a",
+                  "id": "06db007f-0fc9-4daa-8004-f9c447096c9c",
                   "type": "TEXT_BLOCK",
                   "techName": "oplata_info_1",
                   "title": "",
@@ -1396,7 +1396,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "db8a1730-20c4-4f8f-bc26-65f514d42de3",
+                  "id": "ac813bc2-2ac8-4812-84dd-4cc6c048b125",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_z_potwierdzeniem_przelewu",
                   "title": "Plik z potwierdzeniem przelewu",
@@ -1434,7 +1434,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "77c973fc-9441-4603-a709-acd5730ead94",
+            "id": "18a1d95a-75c2-43c2-aba0-ecf1270f1f08",
             "type": "SECTION",
             "techName": "oplata_skarbowa_pelnomocnictwo_2",
             "title": "Opłata skarbowa za pełnomonictwo",
@@ -1449,7 +1449,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "09d9bcaa-c1ae-4c97-955c-c7fe8197d543",
+                  "id": "383e8a71-1874-4cae-b931-51387ff4ff7a",
                   "type": "TEXT_BLOCK",
                   "techName": "oplata_info",
                   "title": "",
@@ -1469,7 +1469,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "f913bf9b-8645-4b40-a579-4853985d5c11",
+                  "id": "55430122-effe-4838-84aa-19459a0cb7fc",
                   "type": "FILE_UPLOADER",
                   "techName": "plik_z_potwierdzeniem_przelewu_2",
                   "title": "Plik z potwierdzeniem przelewu",
@@ -1499,8 +1499,8 @@
       ]
     },
     {
-      "id": "0629b368-6db3-4f09-92f3-05643313ead6",
-      "title": "Nieruchomość",
+      "id": "f55619d1-aff8-469e-97f3-8bf24a810972",
+      "title": "Nieruchomość i wyroby z azbestem",
       "type": "MAIN",
       "questions": [
         {
@@ -1509,7 +1509,7 @@
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "01a12051-ecfa-441d-8d8b-359f2b5fbf5d",
+            "id": "c20c2c8e-8d75-4f86-9903-b27124c5b74e",
             "type": "SECTION",
             "techName": "adres_nieruchomosci",
             "title": "Adres nieruchomości",
@@ -1524,7 +1524,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a057e9b2-7170-435f-a73a-876515d3b742",
+                  "id": "e1e475fe-ff40-46fb-909b-82bdc5375215",
                   "type": "SELECT",
                   "techName": "kraj_nieruchomosc",
                   "title": "Kraj",
@@ -1552,7 +1552,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "658dec52-009a-4e69-b51e-a57628a172cb",
+                  "id": "47df5c88-4d01-4ebd-b466-d41d02319565",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_nieruchomosc_zagranica",
                   "title": "Miejscowość",
@@ -1566,7 +1566,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "$not(\"Polska\" in tabs['Nieruchomość' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
+                      "query": "$not(\"Polska\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 1,
@@ -1579,7 +1579,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "fca5eb90-0f80-4aea-a294-5bbd5b8eef77",
+                  "id": "0daa8b28-4cc5-440b-8cb4-74e6c9e51133",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_nieruchomosc_zagranica",
                   "title": "Kod pocztowy",
@@ -1591,7 +1591,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "$not(\"Polska\" in tabs['Nieruchomość' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
+                      "query": "$not(\"Polska\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 2,
@@ -1604,7 +1604,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c1eb8e80-3c79-4dec-9096-9dd1a0443776",
+                  "id": "8471b4f5-9ebe-46e2-bc95-cd846be2a0e8",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_nieruchomosc_zagranica",
                   "title": "Ulica",
@@ -1616,7 +1616,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "$not(\"Polska\" in tabs['Nieruchomość' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
+                      "query": "$not(\"Polska\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 3,
@@ -1629,7 +1629,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3717a4be-429c-4b51-936f-8234c1e7da5e",
+                  "id": "bed2438f-1fa0-4c0e-b209-f2cb51193d07",
                   "type": "SELECT",
                   "techName": "wojewodztwo_nieruchomosc",
                   "title": "TERYT_4G_DOWODOWY",
@@ -1647,7 +1647,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Polska\" in tabs['Nieruchomość' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"Polska\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 4,
@@ -1660,7 +1660,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "aee90e0b-4a41-4411-950d-465ff25d6ff3",
+                  "id": "9c606d5f-e166-462a-8afd-31ddb2fc8b22",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_nieruchomosc",
                   "title": "Kod pocztowy",
@@ -1675,7 +1675,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Polska\" in tabs['Nieruchomość' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"Polska\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 5,
@@ -1688,7 +1688,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "846f2ed2-8638-44cf-9c72-97a851ea64d2",
+                  "id": "543b91bd-5e24-4763-81da-833319d946df",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_nieruchomosc",
                   "title": "Ulica",
@@ -1700,7 +1700,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Polska\" in tabs['Nieruchomość' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"Polska\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['adres_nieruchomosci' in field.techName].field.repeatingSectionGrid['kraj_nieruchomosc' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 6,
@@ -1713,7 +1713,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5cec2e14-640e-4733-af83-deab234ac860",
+                  "id": "83482736-8b42-4e73-812a-7948bfad57b5",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku_nieruchomosc",
                   "title": "Numer budynku",
@@ -1735,7 +1735,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a1fa8096-a0f1-4dec-b618-9a136801b0a6",
+                  "id": "ed4f5f1b-8750-4035-b7fa-cde60b9a8d2f",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu_nieruchomosc",
                   "title": "Numer lokalu",
@@ -1761,7 +1761,7 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "3d6eb662-8a94-4064-9731-9a13ef0742ab",
+            "id": "1a34b338-3593-4ca8-907c-684d6d67818b",
             "type": "SECTION",
             "techName": "dane_ewidencyjne_nieruchomosci",
             "title": "Dane ewidencyjne nieruchomości",
@@ -1776,7 +1776,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3036bf1b-1ac8-4e19-b6f5-7ee4543ff015",
+                  "id": "6e9399d3-89fd-4d9b-92b2-9a426f5bdf45",
                   "type": "TEXT_FIELD",
                   "techName": "numer_dzialki_ewidencyjnej",
                   "title": "Numer działki ewidencyjnej",
@@ -1798,7 +1798,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8d487fd6-1492-48d6-b4d7-868f165f3dcf",
+                  "id": "774a36fc-8089-4f8b-964f-51165f447f98",
                   "type": "TEXT_FIELD",
                   "techName": "obreb_geodezyjny",
                   "title": "Obręb geodezyjny",
@@ -1820,7 +1820,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9f653ef2-c72d-4f1b-81de-da4c943c4fe2",
+                  "id": "4c1d0bca-b3fb-4a9d-9495-b545ac4dfed7",
                   "type": "TEXT_FIELD",
                   "techName": "numer_ksiegi_wieczystej",
                   "title": "Numer księgi wieczystej",
@@ -1843,10 +1843,234 @@
         {
           "x": 0,
           "y": 14,
+          "rows": 2,
+          "cols": 3,
+          "field": {
+            "id": "06fdb7f6-0950-4cc9-80b4-54704d50cec3",
+            "type": "SECTION",
+            "techName": "zakres_zadania",
+            "title": "Zakres zadania",
+            "description": "<html><head></head><body><p>Gmina Dłutów może odstąpić od zadania, jeśli nie dostanie dofinansowania z WFOŚiGW w Łodzi.</p></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "c7ec9c7a-67be-4ffb-956b-3b330044ace2",
+                  "type": "RADIO",
+                  "techName": "zakres_zadania_azbest",
+                  "title": "Wybierz zakres zadania",
+                  "description": "",
+                  "options": [
+                    {
+                      "id": "Demontaż, zbieranie, transport i unieszkodliwienie wyrobów",
+                      "name": "Demontaż, zbieranie, transport i unieszkodliwienie wyrobów",
+                      "techName": "demontaz_zbieranie_transport_i_unieszkodliwienie_wyrobow"
+                    },
+                    {
+                      "id": "Zbieranie, transport i unieszkodliwienie wcześniej zdemontowanych wyrobów",
+                      "name": "Zbieranie, transport i unieszkodliwienie wcześniej zdemontowanych wyrobów",
+                      "techName": "zbieranie_transport_i_unieszkodliwienie_wczesniej_zdemontowanych_wyrobow"
+                    }
+                  ],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 14,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 16,
+          "rows": 3,
+          "cols": 3,
+          "field": {
+            "id": "eacef88c-ff80-4664-9001-fbcf6fc65906",
+            "type": "SECTION",
+            "techName": "obiekt_z_azbestem",
+            "title": "Obiekt, na którym jest azbest",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "7ed2491a-4f52-4df6-bdb6-9929da4a9da8",
+                  "type": "TEXT_FIELD",
+                  "techName": "rodzaj_obiektu",
+                  "title": "Rodzaj obiektu",
+                  "description": "<html><head></head><body><p>Na przykład budynek mieszkalny, gospodarczy, inwentarski, garaż, wiata, obiekt małej architektury.</p></body></html>",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "f08da2e2-3f29-4e04-aa74-e48c8f5fb9a9",
+                  "type": "RADIO",
+                  "techName": "przeznaczenie_obiektu",
+                  "title": "Przeznaczenie obiektu",
+                  "description": "",
+                  "options": [
+                    {
+                      "id": "Związany z działalnością gospodarczą, w tym rolniczą",
+                      "name": "Związany z działalnością gospodarczą, w tym rolniczą",
+                      "techName": "zwiazany_z_dzialalnoscia_gospodarcza_w_tym_rolnicza"
+                    },
+                    {
+                      "id": "Niezwiązany z działalnością gospodarczą, w tym rolniczą",
+                      "name": "Niezwiązany z działalnością gospodarczą, w tym rolniczą",
+                      "techName": "niezwiazany_z_dzialalnoscia_gospodarcza_w_tym_rolnicza"
+                    }
+                  ],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 1,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 16,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 19,
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "bfbfa79d-90dc-4aff-a617-ea2022965090",
+            "id": "01bb751f-e968-4e1c-ab84-e196ca299dae",
+            "type": "SECTION",
+            "techName": "wyroby_zawierajace_azbest",
+            "title": "Wyroby zawierające azbest",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "8127fe89-d4f7-4bbf-9a63-aa2c3d2ec880",
+                  "type": "TEXT_FIELD",
+                  "techName": "rodzaj_wyrobow",
+                  "title": "Rodzaj wyrobów zawierających azbest",
+                  "description": "<html><head></head><body><p>Na przykład płyty cementowo-azbestowe faliste lub płaskie.</p></body></html>",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "0973a207-bcff-4d9e-99e9-fce4be6a8c5d",
+                  "type": "TEXT_FIELD",
+                  "techName": "sposob_wykorzystania_wyrobow",
+                  "title": "Sposób wykorzystania wyrobów",
+                  "description": "<html><head></head><body><p>Na przykład pokrycie dachowe, elewacja, osłona balkonowa.</p></body></html>",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 1,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "2b1236a1-3ca3-4705-8f07-cbf1d6225d70",
+                  "type": "TEXT_FIELD",
+                  "techName": "ilosc_wyrobow",
+                  "title": "Ilość wyrobów zawierających azbest",
+                  "description": "<html><head></head><body><p>Dla budynku podaj m² lub tony, dla płyt liczbę sztuk i wymiar płyty.</p></body></html>",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 2,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 19,
+            "tooltipMessage": ""
+          }
+        }
+      ]
+    },
+    {
+      "id": "d1d947d6-93bf-4977-8572-3fd330161a7b",
+      "title": "Właściciel i załączniki",
+      "type": "MAIN",
+      "questions": [
+        {
+          "x": 0,
+          "y": 0,
+          "rows": 4,
+          "cols": 3,
+          "field": {
+            "id": "e87ccbce-0b73-4f82-a40e-72af7d0bf8f8",
             "type": "SECTION",
             "techName": "prawo_do_nieruchomosci",
             "title": "Prawo do dysponowania nieruchomością",
@@ -1861,7 +2085,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5490fd8f-2395-4d42-86e3-5b82698d185d",
+                  "id": "eb0e9ffe-04e0-41ec-87f1-814afe8859c7",
                   "type": "RADIO",
                   "techName": "forma_prawna_wlasciciela",
                   "title": "Forma prawna właściciela obiektu",
@@ -1899,7 +2123,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "64b5e247-d807-4292-8c15-f06505c0dbdd",
+                  "id": "a12ce05c-01d6-422e-85b1-7f93e9262d95",
                   "type": "RADIO",
                   "techName": "tytul_prawny_do_nieruchomosci",
                   "title": "Na jakiej podstawie dysponujesz nieruchomością?",
@@ -1942,7 +2166,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "472c184a-1bf4-41e4-868a-469dd402d312",
+                  "id": "9d0f5e09-7ac5-4eec-b731-985471dfcd5c",
                   "type": "TEXT_FIELD",
                   "techName": "inny_tytul_prawny",
                   "title": "Opisz inny tytuł prawny",
@@ -1956,7 +2180,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Inny\" in tabs['Nieruchomość' in title].questions['prawo_do_nieruchomosci' in field.techName].field.repeatingSectionGrid['tytul_prawny_do_nieruchomosci' in field.techName].field.__userAnswer)"
+                      "query": "(\"Inny\" in tabs['Właściciel i załączniki' in title].questions['prawo_do_nieruchomosci' in field.techName].field.repeatingSectionGrid['tytul_prawny_do_nieruchomosci' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 2,
@@ -1965,17 +2189,17 @@
               }
             ],
             "states": [],
-            "questionOrder": 14,
+            "questionOrder": 0,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 18,
+          "y": 4,
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "acef82c6-7172-41f3-a078-54c34919b0bb",
+            "id": "8dc49922-963d-4260-b2b2-59417a4c2573",
             "type": "SECTION",
             "techName": "dane_do_umowy",
             "title": "Dane do umowy",
@@ -1990,14 +2214,15 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bf96920c-99f1-4d2b-9cbc-4486d2a73ecd",
+                  "id": "9aceca89-3e60-4ab3-9ecb-d6fbeb8b137c",
                   "type": "TEXT_FIELD",
                   "techName": "seria_i_numer_dowodu_osobistego",
                   "title": "Seria i numer dowodu osobistego",
                   "description": "",
                   "options": [],
                   "validation": [
-                    "REQUIRED"
+                    "REQUIRED",
+                    "SERIAL_NUMBER_ID_CARD"
                   ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
@@ -2013,241 +2238,17 @@
                 "query": "$not(\"Osoby prawnej lub jednostki organizacyjnej\" in tabs['Dane' in title].questions['podmiot_wniosku' in field.techName].field.repeatingSectionGrid['wybierz_w_czyim_imieniu_wnioskujesz' in field.techName].field.__userAnswer)"
               }
             ],
-            "questionOrder": 18,
-            "tooltipMessage": ""
-          }
-        }
-      ]
-    },
-    {
-      "id": "5a393545-c45b-458d-be66-daf8b58c3a85",
-      "title": "Wyroby zawierające azbest",
-      "type": "MAIN",
-      "questions": [
-        {
-          "x": 0,
-          "y": 0,
-          "rows": 2,
-          "cols": 3,
-          "field": {
-            "id": "de4336e0-b15e-45e2-9cb1-542ecbdf4ac2",
-            "type": "SECTION",
-            "techName": "zakres_zadania",
-            "title": "Zakres zadania",
-            "description": "<html><head></head><body><p>Gmina Dłutów może odstąpić od zadania, jeśli nie dostanie dofinansowania z WFOŚiGW w Łodzi.</p></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "278f099e-c41b-4e1e-a79d-733935017796",
-                  "type": "RADIO",
-                  "techName": "zakres_zadania_azbest",
-                  "title": "Wybierz zakres zadania",
-                  "description": "",
-                  "options": [
-                    {
-                      "id": "Demontaż, zbieranie, transport i unieszkodliwienie wyrobów",
-                      "name": "Demontaż, zbieranie, transport i unieszkodliwienie wyrobów",
-                      "techName": "demontaz_zbieranie_transport_i_unieszkodliwienie_wyrobow"
-                    },
-                    {
-                      "id": "Zbieranie, transport i unieszkodliwienie wcześniej zdemontowanych wyrobów",
-                      "name": "Zbieranie, transport i unieszkodliwienie wcześniej zdemontowanych wyrobów",
-                      "techName": "zbieranie_transport_i_unieszkodliwienie_wczesniej_zdemontowanych_wyrobow"
-                    }
-                  ],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [],
-            "questionOrder": 0,
+            "questionOrder": 4,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 2,
-          "rows": 3,
-          "cols": 3,
-          "field": {
-            "id": "1adfaeee-ac4c-4e58-bc74-5e4709e711b8",
-            "type": "SECTION",
-            "techName": "obiekt_z_azbestem",
-            "title": "Obiekt, na którym jest azbest",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "46160209-344e-44f7-9a17-7dea22c67afc",
-                  "type": "TEXT_FIELD",
-                  "techName": "rodzaj_obiektu",
-                  "title": "Rodzaj obiektu",
-                  "description": "<html><head></head><body><p>Na przykład budynek mieszkalny, gospodarczy, inwentarski, garaż, wiata, obiekt małej architektury.</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "fdc13b78-cae5-4411-9804-14ea151db86b",
-                  "type": "RADIO",
-                  "techName": "przeznaczenie_obiektu",
-                  "title": "Przeznaczenie obiektu",
-                  "description": "",
-                  "options": [
-                    {
-                      "id": "Związany z działalnością gospodarczą, w tym rolniczą",
-                      "name": "Związany z działalnością gospodarczą, w tym rolniczą",
-                      "techName": "zwiazany_z_dzialalnoscia_gospodarcza_w_tym_rolnicza"
-                    },
-                    {
-                      "id": "Niezwiązany z działalnością gospodarczą, w tym rolniczą",
-                      "name": "Niezwiązany z działalnością gospodarczą, w tym rolniczą",
-                      "techName": "niezwiazany_z_dzialalnoscia_gospodarcza_w_tym_rolnicza"
-                    }
-                  ],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 1,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [],
-            "questionOrder": 2,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 5,
-          "rows": 4,
-          "cols": 3,
-          "field": {
-            "id": "86eefcfc-5c3c-4a50-a748-01b35f992e28",
-            "type": "SECTION",
-            "techName": "wyroby_zawierajace_azbest",
-            "title": "Wyroby zawierające azbest",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "2fb1f01f-d847-4171-b89c-9b6d3c1e373c",
-                  "type": "TEXT_FIELD",
-                  "techName": "rodzaj_wyrobow",
-                  "title": "Rodzaj wyrobów zawierających azbest",
-                  "description": "<html><head></head><body><p>Na przykład płyty cementowo-azbestowe faliste lub płaskie.</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "26f065df-2963-4679-837e-9cfaf4c0bc68",
-                  "type": "TEXT_FIELD",
-                  "techName": "sposob_wykorzystania_wyrobow",
-                  "title": "Sposób wykorzystania wyrobów",
-                  "description": "<html><head></head><body><p>Na przykład pokrycie dachowe, elewacja, osłona balkonowa.</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 1,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "55522f2a-35fc-485c-99b3-415434fe3617",
-                  "type": "TEXT_FIELD",
-                  "techName": "ilosc_wyrobow",
-                  "title": "Ilość wyrobów zawierających azbest",
-                  "description": "<html><head></head><body><p>Dla budynku podaj m² lub tony, dla płyt liczbę sztuk i wymiar płyty.</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [],
-            "questionOrder": 5,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 9,
+          "y": 6,
           "rows": 5,
           "cols": 3,
           "field": {
-            "id": "42dc9ddf-7e52-4640-a8d2-91d22d0eb152",
+            "id": "79898cfd-0bb8-4a86-bd18-d22aa70e76e1",
             "type": "SECTION",
             "techName": "zalaczniki",
             "title": "Załączniki",
@@ -2262,7 +2263,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "38ececa0-d43a-4e64-99f8-c615082c03d4",
+                  "id": "ebd3a4b3-8df3-4910-9467-9cc385b4ad9c",
                   "type": "FILE_UPLOADER",
                   "techName": "ocena_stanu_wyrobow",
                   "title": "Ocena stanu i możliwości bezpiecznego użytkowania wyrobów zawierających azbest",
@@ -2284,11 +2285,11 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "02d9e45f-2824-4759-a64d-a6ca41f8348b",
+                  "id": "9bd4f54e-61a7-4969-a743-9ea8c8bb5311",
                   "type": "FILE_UPLOADER",
                   "techName": "oswiadczenie_zalacznik_2",
-                  "title": "Oświadczenie",
-                  "description": "",
+                  "title": "Oświadczenie o dostarczeniu zgłoszenia robót lub pozwolenia na budowę",
+                  "description": "<html><head></head><body><p>Załącznik nr 2 do wniosku.</p></body></html>",
                   "options": [],
                   "validation": [
                     "REQUIRED"
@@ -2306,7 +2307,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8fb643c4-840d-4346-b8e1-3e0c715c53a2",
+                  "id": "a6ab6e3f-00a4-43d6-9774-4c8e9637f040",
                   "type": "FILE_UPLOADER",
                   "techName": "pozwolenie_na_wymiane_pokrycia",
                   "title": "Kopia pozwolenia lub zgłoszenia wymiany pokrycia dachowego z mapą",
@@ -2320,7 +2321,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Demontaż, zbieranie, transport i unieszkodliwienie wyrobów\" in tabs['Wyroby zawierające azbest' in title].questions['zakres_zadania' in field.techName].field.repeatingSectionGrid['zakres_zadania_azbest' in field.techName].field.__userAnswer)"
+                      "query": "(\"Demontaż, zbieranie, transport i unieszkodliwienie wyrobów\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['zakres_zadania' in field.techName].field.repeatingSectionGrid['zakres_zadania_azbest' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 2,
@@ -2333,7 +2334,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c5bf1be0-4c8b-4dbf-9a93-7296a87b1834",
+                  "id": "ca9610e2-2964-43ce-a42d-5312f7e01575",
                   "type": "FILE_UPLOADER",
                   "techName": "oswiadczenie_de_minimis",
                   "title": "Oświadczenie o pomocy de minimis",
@@ -2347,7 +2348,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Związany z działalnością gospodarczą, w tym rolniczą\" in tabs['Wyroby zawierające azbest' in title].questions['obiekt_z_azbestem' in field.techName].field.repeatingSectionGrid['przeznaczenie_obiektu' in field.techName].field.__userAnswer)"
+                      "query": "(\"Związany z działalnością gospodarczą, w tym rolniczą\" in tabs['Nieruchomość i wyroby z azbestem' in title].questions['obiekt_z_azbestem' in field.techName].field.repeatingSectionGrid['przeznaczenie_obiektu' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 3,
@@ -2356,14 +2357,14 @@
               }
             ],
             "states": [],
-            "questionOrder": 9,
+            "questionOrder": 6,
             "tooltipMessage": ""
           }
         }
       ]
     },
     {
-      "id": "ba1b13d5-5e8e-43d3-8ae3-8cc3b0b3f01c",
+      "id": "e4833777-c77b-4e09-b8d8-f8abef45b64b",
       "title": "Kontakt i zgody",
       "type": "MAIN",
       "questions": [
@@ -2373,7 +2374,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "296fa6b7-678a-435c-8c90-c4d67b30ab0e",
+            "id": "631aef16-42e4-4a4c-a7d2-877205a9a8c3",
             "type": "SECTION",
             "techName": "dane_do_kontaktu",
             "title": "Dane do kontaktu",
@@ -2388,7 +2389,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8b42f3a9-2298-4d98-807e-0e91e04e770b",
+                  "id": "4a021bb5-6697-4ce0-92cc-57ce735b47c9",
                   "type": "TEXT_FIELD",
                   "techName": "numer_telefonu",
                   "title": "Numer telefonu",
@@ -2410,7 +2411,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "d401cb50-df29-44e2-96ce-f47a77a822d2",
+                  "id": "f8d1de96-767b-450a-a607-5e95f3f97028",
                   "type": "TEXT_FIELD",
                   "techName": "adres_e_mail",
                   "title": "Adres e-mail",
@@ -2440,7 +2441,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "389978fb-d266-485f-aebb-ff02c89819c7",
+            "id": "ca8d5712-4a18-45a9-8673-41a1f076a987",
             "type": "SECTION",
             "techName": "zgoda_wyrazenie",
             "title": "Zgody i oświadczenia",
@@ -2455,7 +2456,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b3e13dfe-8197-44dd-9570-c8a43de26e8d",
+                  "id": "7c6187ca-2b5f-4550-9a5e-f153825c8f80",
                   "type": "CONSENT_SECTION",
                   "techName": "zgoda",
                   "title": "",
@@ -2503,7 +2504,7 @@
       ]
     },
     {
-      "id": "b85becf6-c249-41ac-a41f-d8f1962c70ae",
+      "id": "4347bf7f-4f70-48dd-993e-5765c8bff27f",
       "title": "Strona końcowa",
       "type": "FINISH",
       "questions": [
@@ -2513,7 +2514,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "c1dc419c-7b1e-4f41-bbbf-f7ea0cfb8b21",
+            "id": "9afd1e0b-a078-4371-9361-81f64e947f4c",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
             "title": "Podgląd uzupełnionego wniosku",
@@ -2528,7 +2529,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "84750dad-9c58-486d-b6d7-da4ef9e7bd24",
+                  "id": "fca9d933-770e-4fab-82f2-aab3c9c57123",
                   "type": "TEXT_BLOCK",
                   "techName": "podglad_1",
                   "title": "",
@@ -2554,24 +2555,24 @@
   "flow": {
     "links": [
       {
-        "id": "6b4a3a32-8a1e-4f30-a453-c86baf9eb660",
-        "source": "f089ce52-385e-40de-94ee-f5cdc5aacf9f",
-        "target": "0629b368-6db3-4f09-92f3-05643313ead6"
+        "id": "5c233905-0ac1-4b78-a74a-d62b9b139835",
+        "source": "aac6070b-7985-4893-ab65-3f22008319b9",
+        "target": "f55619d1-aff8-469e-97f3-8bf24a810972"
       },
       {
-        "id": "8cd77752-ed54-4239-91d5-3fcdcf04261b",
-        "source": "0629b368-6db3-4f09-92f3-05643313ead6",
-        "target": "5a393545-c45b-458d-be66-daf8b58c3a85"
+        "id": "a8e78723-4118-43b9-8f81-12200076a811",
+        "source": "f55619d1-aff8-469e-97f3-8bf24a810972",
+        "target": "d1d947d6-93bf-4977-8572-3fd330161a7b"
       },
       {
-        "id": "5a2bb08b-dafd-4811-b60d-f5b1f7b4b63f",
-        "source": "5a393545-c45b-458d-be66-daf8b58c3a85",
-        "target": "ba1b13d5-5e8e-43d3-8ae3-8cc3b0b3f01c"
+        "id": "43e09dcf-dce5-4623-abe4-abca5ff56607",
+        "source": "d1d947d6-93bf-4977-8572-3fd330161a7b",
+        "target": "e4833777-c77b-4e09-b8d8-f8abef45b64b"
       },
       {
-        "id": "99560d06-dec1-49ae-9bbc-e9cbbe2bc8ed",
-        "source": "ba1b13d5-5e8e-43d3-8ae3-8cc3b0b3f01c",
-        "target": "b85becf6-c249-41ac-a41f-d8f1962c70ae"
+        "id": "e154f43a-4010-477e-b199-a4d4532f275e",
+        "source": "e4833777-c77b-4e09-b8d8-f8abef45b64b",
+        "target": "4347bf7f-4f70-48dd-993e-5765c8bff27f"
       }
     ]
   }
