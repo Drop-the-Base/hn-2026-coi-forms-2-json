@@ -74,8 +74,10 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_TIMEOUT_SECONDS` | `120` | `120` | timeout jednego wywołania LLM |
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
+| `COST_PER_1K_TOKENS` | `0` | `0` | umowna stawka za 1000 tokenów w metryce kosztu ([Metryki](#metryki)) |
+| `COST_PER_GPU_SECOND` | `0` | `0` | umowna stawka za sekundę pracy LLM w metryce kosztu |
 
-Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/jobs`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`.
+Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/jobs`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `OTEL_SEMCONV_STABILITY_OPT_IN`.
 
 ### Profile compose
 
@@ -159,10 +161,26 @@ http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wg
 ## Obserwowalność
 
 `docker compose --profile observability up -d`, potem:
-- Jaeger http://127.0.0.1:16686: trace zadania ze spanem na każdy krok pipeline'u;
+- Jaeger http://127.0.0.1:16686: trace zadania ze spanem na każdy krok pipeline'u; zakładka Monitor: liczba wywołań, błędy i latencja per usługa i operacja;
 - Prometheus http://127.0.0.1:9090: metryki z otel-collectora.
 
 Bez tego profilu otel-collector loguje błąd eksportu do jaegera; nie wpływa to na działanie.
+
+### Metryki
+
+Eksport co 60 s (NFR-13, NFR-14). Nazwy w Prometheusie:
+
+| Metryka | Co mierzy | Etykiety |
+| --- | --- | --- |
+| `forms2json_job_duration_seconds` | czas zadania; `_count` to liczba zadań | `outcome` (`done`/`failed`), `error_type` |
+| `forms2json_pipeline_step_duration_seconds` | czas kroku pipeline'u | `step`, `error_type` |
+| `gen_ai_client_token_usage` | tokeny na wywołanie LLM | `gen_ai_token_type` (`input`/`output`), `gen_ai_request_model` |
+| `forms2json_job_cost` | koszt zadania: tokeny × `COST_PER_1K_TOKENS` / 1000 + czas LLM × `COST_PER_GPU_SECOND` (umowne jednostki, domyślnie 0) | `gen_ai_request_model` |
+| `forms2json_job_confidence` | confidence ogólny zadania | |
+| `http_server_request_duration_seconds` | żądania HTTP do `api` | `http_route`, `http_response_status_code` |
+| `traces_span_metrics_*` | metryki z trace'ów liczone przez Jaegera dla zakładki Monitor | `service_name`, `span_name` |
+
+Przykłady: `sum by (outcome) (forms2json_job_duration_seconds_count)`, `histogram_quantile(0.95, sum by (le, step) (rate(forms2json_pipeline_step_duration_seconds_bucket[5m])))`, `forms2json_job_cost_sum / forms2json_job_cost_count`.
 
 ## Rozwój lokalny
 
@@ -211,7 +229,7 @@ Złote JSON-y formularzy 2, 3, 4, 6, 7, 8, 9 i decyzje przy ich tworzeniu: [back
 | `backend/src/forms2json/adapters` | HTTP (FastAPI), worker, czytniki plików, LLM, RabbitMQ, tmpfs |
 | `backend/tests` | `unit`, `integration`, `evals` |
 | `frontend/` | SPA React + Vite, `design/` z prototypami ekranów |
-| `deploy/` | konfiguracja otel-collectora i Prometheusa |
+| `deploy/` | konfiguracja otel-collectora, Jaegera i Prometheusa |
 | `data/` | materiały konkursowe (formularze 1–9) |
 | `docs/` | wymagania, architektura, ADR |
 

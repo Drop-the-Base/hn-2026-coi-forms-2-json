@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from typing import Literal
@@ -7,6 +8,7 @@ from uuid import UUID
 
 from forms2json.application.pipeline.pipeline import Pipeline
 from forms2json.application.ports.file_store import FileStore
+from forms2json.application.ports.job_observer import JobObserver
 from forms2json.application.ports.job_queue import Job, JobQueue, JobResult, ProgressEvent
 from forms2json.application.ports.pipeline_observer import PipelineObserver
 from forms2json.domain.document import SourceFile
@@ -24,15 +26,18 @@ class ProcessJob:
         files: FileStore,
         pipelines: Callable[[PipelineObserver], Pipeline],
         queue: JobQueue,
+        observer: JobObserver | None = None,
     ) -> None:
         self._files = files
         # A fresh pipeline per job: steps keep per-run state, and progress belongs to the job.
         self._pipelines = pipelines
         self._queue = queue
+        self._observer = observer
 
     async def execute(self, job: Job) -> None:
         job_id = str(job.job_id)
         progress = _ProgressObserver(job.job_id, self._queue, asyncio.get_running_loop())
+        start = time.monotonic()
         try:
             source = SourceFile(self._files.read(job_id), job.mime_type)
             # The pipeline blocks (LLM calls take minutes); a thread keeps AMQP heartbeats alive.
@@ -45,6 +50,11 @@ class ProcessJob:
         finally:
             self._files.delete(job_id)
 
+        if self._observer:
+            try:
+                self._observer.job_finished(result, time.monotonic() - start)
+            except Exception:  # metrics are best effort: the result must still go out
+                logger.warning("Observing job %s failed", job_id, exc_info=True)
         await self._queue.publish_result(result)
         await self._queue.publish_progress(
             ProgressEvent(job.job_id, step="job", status="failed" if result.error else "done")
