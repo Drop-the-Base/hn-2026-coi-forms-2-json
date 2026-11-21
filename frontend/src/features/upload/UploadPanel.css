@@ -1,0 +1,114 @@
+/* Z prototypu design/zadania.html */
+.drop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-6);
+  border: 1px dashed var(--color-field-border);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out);
+}
+.drop--active {
+  background: var(--color-accent-subtle);
+  border-color: var(--color-accent);
+}
+.drop__text {
+  flex: 1 1 20rem;
+}
+.drop__text strong {
+  display: block;
+}
+.drop__text p {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-top: var(--space-1);
+}
+/* the real input is visually hidden, so its label shows the focus ring */
+.drop input:focus-visible + .btn {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.upload__alert {
+  margin-top: var(--space-4);
+}
+.queue {
+  margin-top: var(--space-6);
+}
+.queue h3 {
+  margin-bottom: var(--space-2);
+}
+.queue .table td:first-child {
+  width: 45%;
+}
+.queue__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-4);
+  align-items: center;
+  margin-top: var(--space-4);
+}
+.file-name {
+  display: flex;
+  gap: var(--space-2);
+  align-items: start;
+  overflow-wrap: anywhere;
+}
+.file-name .i {
+  margin-top: 0.2em;
+  color: var(--color-muted);
+}
+.file-error {
+  color: var(--color-error);
+  display: flex;
+  gap: var(--space-2);
+  align-items: start;
+}
+.file-error .i {
+  margin-top: 0.2em;
+}
+.file-ok {
+  color: var(--color-success);
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.row-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+@media (max-width: 48rem) {
+  .queue thead {
+    display: none;
+  }
+  .queue tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .queue td {
+    border: 0;
+    padding: 0;
+  }
+  .queue .table td:first-child {
+    width: auto;
+    grid-column: 1 / -1;
+  }
+  .queue td.num {
+    text-align: left;
+    color: var(--color-muted);
+  }
+  .queue td:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+  .queue .row-actions {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: end;
+  }
+}
