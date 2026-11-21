@@ -244,6 +244,7 @@ cd frontend && npm ci && npm run dev
 | backend: lint, format, typy, testy | `uv run ruff check && uv run ruff format --check && uv run mypy src tests && uv run pytest` (`backend/`) |
 | backend: integracyjne (RabbitMQ, Ollama) | `uv run pytest -m integration` (`backend/`, z działającymi usługami jak w [Rozwoju lokalnym](#rozwój-lokalny)) |
 | ewaluacje jakości (ADR-0010) | `EVAL_PREDICTED_DIR=<wyniki> EVAL_GOLDEN_DIR=tests/evals/dataset/golden uv run pytest -m evals` (`backend/`); pliki parowane po nazwie (`3.json` …) |
+| jakość czytnika DOCX bez LLM: pokrycie tekstu z PDF, kratki, listy, przypisy | `uv run python -m tests.evals.reader_eval --name <nazwa> [--baseline <nazwa>]` (`backend/`) |
 | frontend | `npm run lint && npx prettier --check . && npx vitest run && npm run build` (`frontend/`) |
 
 ### Ewaluacja przez działającą aplikację
