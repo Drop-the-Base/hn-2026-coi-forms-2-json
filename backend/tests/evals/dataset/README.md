@@ -1,5 +1,7 @@
 # Zbiór ewaluacyjny (FR-T4, ADR-0010)
 
+Formularze 10+ to zbiór walidacyjny w `walidacja/` (hold-out, tylko do pomiaru, zasady w `walidacja/README.md` i `AGENTS.md`).
+
 `golden/<nr formularza>.json` to złoty JSON, przygotowany ręcznie według Standardów i reguł technicznych. Runner (`tests/evals/test_evals.py`) paruje go z predykcją o tej samej nazwie pliku. `tests/unit/test_golden.py` sprawdza każdy plik z `golden/`: reguły bez ERROR, brak odwołań w `states` do nieistniejących pól i stron, oficjalny schemat.
 
 ## 2, 3, 4: wspólne

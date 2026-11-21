@@ -9,7 +9,8 @@ from forms2json.domain.form_definition import FormDefinition
 from forms2json.domain.rules import Severity, check_rules
 from forms2json.domain.standards import check_schema, check_standards
 
-GOLDEN = sorted((Path(__file__).parents[1] / "evals" / "dataset" / "golden").glob("*.json"))
+DATASET = Path(__file__).parents[1] / "evals" / "dataset"
+GOLDEN = sorted([*(DATASET / "golden").glob("*.json"), *(DATASET / "walidacja").glob("*.json")])
 # Registry data (FR-E1) describe the applicant, so only the applicant's own blocks use them.
 APPLICANT_SECTIONS = {"twoje_dane", "adres_zamieszkania", "dane_do_kontaktu"}
 
