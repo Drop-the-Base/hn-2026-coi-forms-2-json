@@ -39,7 +39,15 @@ export const server = setupServer(
     HttpResponse.json({ max_upload_bytes: MAX_UPLOAD_BYTES }),
   ),
   http.get("*/api/v1/form-schema", () => HttpResponse.json(FORM_SCHEMA)),
+  http.post("*/api/v1/login", async ({ request }) => {
+    const { password } = (await request.json()) as { password: string };
+    return password === TEST_PASSWORD
+      ? HttpResponse.json({ token: fakeToken() })
+      : HttpResponse.json({ detail: "Nieprawidłowe hasło." }, { status: 401 });
+  }),
 );
+
+export const TEST_PASSWORD = "haslo-urzednika";
 
 /** Unsigned JWT-shaped token; only the API checks the signature. */
 export function fakeToken(expiresInSeconds = 3600) {

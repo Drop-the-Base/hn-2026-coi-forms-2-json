@@ -1,17 +1,18 @@
 """HTTP api (FR-T3). The use cases live in app.state, set by the lifespan from bootstrap.py."""
 
 import asyncio
+import hmac
 from collections.abc import AsyncIterable, AsyncIterator
 from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, FastAPI, Request, UploadFile, status
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, UploadFile, status
 from fastapi.responses import JSONResponse, Response
 from fastapi.sse import EventSourceResponse, ServerSentEvent
 from pydantic import BaseModel
 from starlette.types import Lifespan
 
-from forms2json.adapters.inbound.http.auth import require_jwt
+from forms2json.adapters.inbound.http.auth import issue_token, require_jwt
 from forms2json.adapters.inbound.http.progress_hub import ProgressHub, job_finished
 from forms2json.application.ports.job_queue import JobResult, ProgressEvent
 from forms2json.application.ports.pdf_renderer import PreviewFailed
@@ -67,6 +68,29 @@ def _get_job_result(request: Request) -> GetJobResult:
 
 def _render_preview(request: Request) -> RenderPreview:
     return cast(RenderPreview, request.app.state.render_preview)
+
+
+class LoginRequest(BaseModel):
+    password: str
+
+
+class LoginToken(BaseModel):
+    token: str
+
+
+# The only /api/v1 route without require_jwt: it is how the clerk gets a token (ADR-0032).
+login_router = APIRouter(prefix="/api/v1")
+
+
+@login_router.post("/login", responses={401: {"description": "Nieprawidłowe hasło"}})
+async def login(
+    body: LoginRequest, settings: Annotated[Settings, Depends(get_settings)]
+) -> LoginToken:
+    # shortcut: no rate limiting, a long random APP_PASSWORD is the defence; add it for real users.
+    expected = settings.app_password.get_secret_value().encode()
+    if not hmac.compare_digest(body.password.encode(), expected):
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Nieprawidłowe hasło.")
+    return LoginToken(token=issue_token(settings, "urzednik"))
 
 
 # Handlers are async on purpose: the in-memory ResultStore is then only touched by the event loop.
@@ -185,6 +209,7 @@ async def convert_form(
 
 def create_app(lifespan: Lifespan[FastAPI] | None = None) -> FastAPI:
     app = FastAPI(title="forms2json", lifespan=lifespan)
+    app.include_router(login_router)
     app.include_router(router)
     for error_type in _HTTP_STATUS:
         app.add_exception_handler(error_type, _error_response)

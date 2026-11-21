@@ -46,7 +46,10 @@ class Settings(BaseSettings):
     jwt_algorithm: Literal["HS256", "HS384", "HS512"] = "HS256"
     jwt_issuer: str = "forms2json"
     jwt_audience: str = "forms2json-api"
-    jwt_ttl_seconds: int = Field(default=3600, gt=0)
+    # 0 = tokens without `exp`: the clerk's session does not run out mid-review (ADR-0032).
+    jwt_ttl_seconds: int = Field(default=0, ge=0)
+    # The one shared clerk password that POST /api/v1/login trades for a JWT (ADR-0032).
+    app_password: SecretStr = Field(min_length=8)
 
 
 @cache

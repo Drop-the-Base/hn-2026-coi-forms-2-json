@@ -11,7 +11,7 @@ export const setToken = (token: string) =>
   sessionStorage.setItem(TOKEN_KEY, token);
 export const clearToken = () => sessionStorage.removeItem(TOKEN_KEY);
 
-/** `exp` from the JWT payload. The signature is checked only by the API. */
+/** `exp` from the JWT payload, null without one (JWT_TTL_SECONDS=0). The API checks the signature. */
 export function tokenExpiry(token: string): Date | null {
   const parts = token.split(".");
   if (parts.length !== 3 || !token.startsWith("eyJ")) return null;
@@ -28,13 +28,3 @@ export function tokenExpiry(token: string): Date | null {
 
 export const formatTime = (date: Date) =>
   date.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
-
-/** Message for the login screen, or null when the token looks usable. */
-export function tokenProblem(token: string, now = new Date()): string | null {
-  const expiry = tokenExpiry(token);
-  if (!expiry)
-    return "To nie wygląda na token. Token ma trzy części rozdzielone kropkami i zaczyna się od „eyJ”.";
-  if (expiry <= now)
-    return `Token wygasł ${expiry.toLocaleDateString("pl-PL")} o ${formatTime(expiry)}. Poproś administratora o nowy token i wklej go poniżej.`;
-  return null;
-}

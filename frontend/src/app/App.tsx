@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { RouterProvider, type DataRouter } from "react-router";
 import { ApiError } from "../shared/api/client";
-import { clearToken, getToken, tokenProblem } from "../shared/api/token";
+import { clearToken, getToken } from "../shared/api/token";
 
 export function App({ router }: { router: DataRouter }) {
   const [queryClient] = useState(() => {
@@ -17,12 +17,11 @@ export function App({ router }: { router: DataRouter }) {
       // No token: another request already handled this 401.
       if (!(error instanceof ApiError) || error.status !== 401 || !token)
         return;
-      const message =
-        tokenProblem(token) ??
-        "Serwer nie przyjął tokenu. Sprawdź, czy wkleiłeś go w całości.";
       clearToken();
       client.clear();
-      void router.navigate("/logowanie", { state: { error: message } });
+      void router.navigate("/logowanie", {
+        state: { error: "Sesja wygasła. Zaloguj się ponownie." },
+      });
     };
     const client: QueryClient = new QueryClient({
       queryCache: new QueryCache({ onError }),

@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
 import { expect, test } from "vitest";
-import { fakeToken, server, sseStream } from "../test/server";
+import { fakeToken, server, sseStream, TEST_PASSWORD } from "../test/server";
 import { setToken } from "../shared/api/token";
 import { App } from "./App";
 import wynik from "../features/review/fixtures/wynik-wzorzec-1.json";
@@ -27,25 +27,44 @@ test("bez tokenu przekierowuje do logowania", () => {
   expect(screen.getByRole("heading", { name: "Zaloguj się" })).toBeDefined();
 });
 
-test("odrzuca token w złym formacie, przyjmuje poprawny", async () => {
+test("odrzuca złe hasło, loguje poprawnym", async () => {
   renderApp("/logowanie");
-  const input = screen.getByLabelText("Token dostępu");
+  const input = screen.getByLabelText("Hasło");
+  expect(input.getAttribute("type")).toBe("password");
 
-  fireEvent.change(input, { target: { value: "nie-token" } });
+  fireEvent.change(input, { target: { value: "zle-haslo" } });
   fireEvent.click(screen.getByRole("button", { name: "Zaloguj" }));
-  expect(screen.getByRole("alert").textContent).toContain(
-    "To nie wygląda na token",
+  expect((await screen.findByRole("alert")).textContent).toBe(
+    "Nieprawidłowe hasło.",
   );
+  expect(input.getAttribute("aria-describedby")).toBe("login-msg");
+  expect(document.activeElement).toBe(input);
 
-  fireEvent.change(input, { target: { value: fakeToken(-60) } });
-  fireEvent.click(screen.getByRole("button", { name: "Zaloguj" }));
-  expect(screen.getByRole("alert").textContent).toContain("Token wygasł");
-
-  fireEvent.change(input, { target: { value: `  ${fakeToken()}\n` } });
+  fireEvent.change(input, { target: { value: TEST_PASSWORD } });
   fireEvent.click(screen.getByRole("button", { name: "Zaloguj" }));
   expect(await screen.findByRole("heading", { name: "Zadania" })).toBeDefined();
+  expect(sessionStorage.getItem("forms2json.token")).not.toBeNull();
   expect(await screen.findByText(/Maksymalnie 20 MB na plik/)).toBeDefined();
   expect(screen.getByText("Nie masz jeszcze zadań")).toBeDefined();
+});
+
+test("logowanie bez połączenia pokazuje błąd sieci", async () => {
+  server.use(http.post("*/api/v1/login", () => HttpResponse.error()));
+  renderApp("/logowanie");
+  fireEvent.change(screen.getByLabelText("Hasło"), {
+    target: { value: TEST_PASSWORD },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Zaloguj" }));
+  expect((await screen.findByRole("alert")).textContent).toContain(
+    "Brak połączenia z serwerem",
+  );
+});
+
+test("token bez exp: brak czasu sesji w nagłówku", async () => {
+  setToken(`eyJhbGciOiJIUzI1NiJ9.${btoa(JSON.stringify({ sub: "u" }))}.sig`);
+  renderApp();
+  expect(await screen.findByRole("button", { name: "Wyloguj" })).toBeDefined();
+  expect(screen.queryByText(/Sesja do/)).toBeNull();
 });
 
 test("401 z API wraca do logowania z komunikatem", async () => {
@@ -60,9 +79,7 @@ test("401 z API wraca do logowania z komunikatem", async () => {
   );
   renderApp();
   await screen.findByRole("heading", { name: "Zaloguj się" });
-  expect(screen.getByRole("alert").textContent).toContain(
-    "Serwer nie przyjął tokenu",
-  );
+  expect(screen.getByRole("alert").textContent).toContain("Sesja wygasła");
   expect(sessionStorage.getItem("forms2json.token")).toBeNull();
 });
 

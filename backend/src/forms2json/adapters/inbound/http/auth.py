@@ -12,7 +12,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from forms2json.config import Settings, get_settings
 
-_REQUIRED_CLAIMS = ["exp", "iat", "iss", "aud", "sub"]
+# `exp` is optional (JWT_TTL_SECONDS=0, ADR-0032); PyJWT still rejects an expired one if present.
+_REQUIRED_CLAIMS = ["iat", "iss", "aud", "sub"]
 
 # auto_error=False so a missing header gets the same 401 + WWW-Authenticate as a bad token.
 _bearer = HTTPBearer(auto_error=False)
@@ -20,13 +21,9 @@ _bearer = HTTPBearer(auto_error=False)
 
 def issue_token(settings: Settings, subject: str) -> str:
     now = datetime.now(UTC)
-    claims = {
-        "sub": subject,
-        "iss": settings.jwt_issuer,
-        "aud": settings.jwt_audience,
-        "iat": now,
-        "exp": now + timedelta(seconds=settings.jwt_ttl_seconds),
-    }
+    claims = {"sub": subject, "iss": settings.jwt_issuer, "aud": settings.jwt_audience, "iat": now}
+    if settings.jwt_ttl_seconds:
+        claims["exp"] = now + timedelta(seconds=settings.jwt_ttl_seconds)
     return jwt.encode(
         claims, settings.jwt_secret.get_secret_value(), algorithm=settings.jwt_algorithm
     )
