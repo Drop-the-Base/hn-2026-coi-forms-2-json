@@ -31,13 +31,13 @@ Obowiązują ludzi i agentów. Jakość kodu to 20% oceny (Z 8). Nowa biblioteka
 | Lint + format | `ruff` (`ruff check`, `ruff format`) | zero ostrzeżeń na `main` |
 | Typy | `mypy --strict` | pełne adnotacje w `src/`, bez `Any` w domenie |
 | Testy | `pytest` | patrz §2.6 |
-| Modele danych i walidacja | `pydantic` v2 | na granicach systemu (HTTP, wiadomości, wyjście LLM, konfiguracja) |
+| Modele danych i walidacja | `pydantic` v2 | na granicach systemu (HTTP, wiadomości, wyjście LLM, konfiguracja); w domenie tylko modele-kontrakty z LLM ([ADR-0020](adr/0020-pydantic-w-domenie.md)) |
 | Konfiguracja | `pydantic-settings` | jedna klasa `Settings`, wartości ze zmiennych środowiskowych |
 
 ### 2.2 Architektura heksagonalna
 
 - Warstwy: `domain` ← `application` ← `adapters`. Import w drugą stronę to błąd przeglądu.
-- `domain/` nie importuje FastAPI, aio-pika, httpx, pydantic-settings ani niczego z `adapters/`.
+- `domain/` nie importuje FastAPI, aio-pika, httpx, pydantic-settings ani niczego z `adapters/`. Jedyny wyjątek to `pydantic` w modelach, które są kontraktem z LLM-em (dziś `FormDraft`), patrz [ADR-0020](adr/0020-pydantic-w-domenie.md).
 - Port to klasa `ABC` w `application/ports/` z metodami `@abstractmethod`. Adapter dziedziczy po porcie.
 - Konkretne adaptery tworzy tylko `bootstrap.py`. Przy starcie instancjonuje wszystkie, więc brakująca metoda daje `TypeError` od razu, a nie przy pierwszym żądaniu.
 - Wymiana dostawcy (inny model, OCR, broker) to nowy adapter + zmiana w `bootstrap.py` i konfiguracji. Nic więcej.
@@ -81,7 +81,7 @@ class DocxReader(DocumentReader):
 
 - Wywołania LLM tylko przez port `LlmClient`. Adapter mówi z runtime'em bezpośrednio przez API zgodne z OpenAI i zapisuje tokeny w atrybutach OTel `gen_ai.usage.*`.
 - Guardrails są nasze, w kodzie: limit długości wejścia, walidacja wyjścia pydantikiem, wyłącznik `LLM_ENABLED=false` (pipeline zwraca wtedy szkielet z bloków Standardów i niski confidence).
-- Wyjście LLM zawsze strukturalne: JSON Schema z modelu pydantic. Waliduj je pydantikiem i nie ufaj mu bez walidacji.
+- Wyjście LLM zawsze strukturalne: JSON Schema z modelu pydantic w domenie (`model_json_schema()`, tryb strict: bez wartości domyślnych, `extra="forbid"`). Waliduj je tym samym modelem i nie ufaj mu bez walidacji ([ADR-0020](adr/0020-pydantic-w-domenie.md)).
 - Prompty trzymamy w osobnych plikach (`prompts/*.md`) z wersją w nazwie albo nagłówku. Zmiana promptu = uruchomienie evali.
 - Żadnych kluczy API zewnętrznych dostawców w kodzie ani w konfiguracji domyślnej (NFR-03).
 
