@@ -91,10 +91,13 @@ services:
 
   otel-collector:
     <<: *hardening
-    image: otel/opentelemetry-collector:0.165.0
+    image: otel/opentelemetry-collector-contrib:0.165.0  # contrib: receiver docker_stats
     command: ["--config=/etc/otelcol/config.yaml"]
+    # Socket Docker Desktop jest root:root 0660; grupa 0 zamiast user: "0" (ADR-0030).
+    group_add: ["0"]
     volumes:
       - ./deploy/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   jaeger:
     <<: *hardening

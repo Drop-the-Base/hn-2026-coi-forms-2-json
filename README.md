@@ -187,7 +187,7 @@ http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wg
 `docker compose --profile observability up -d`, potem:
 - Jaeger http://127.0.0.1:16686: trace zadania ze spanem na każdy krok pipeline'u; zakładka Monitor: liczba wywołań, błędy i latencja per usługa i operacja;
 - Prometheus http://127.0.0.1:9090: metryki z otel-collectora;
-- Perses http://127.0.0.1:8081/projects/forms2json/dashboards/koszty: dashboard kosztu i jakości (koszt łączny, na zadanie i na wywołanie LLM, tokeny we/wy, zadania wg wyniku, błędy LLM, czasy p50/p95, confidence). Dashboard jest kodem w `deploy/perses/resources/` (ADR-0030); UI jest tylko do odczytu, zmiany rób w pliku i zrestartuj `perses`.
+- Perses http://127.0.0.1:8081/projects/forms2json/dashboards/koszty: dashboard kosztu i jakości (koszt łączny, na zadanie i na wywołanie LLM, tokeny we/wy, zadania wg wyniku, błędy LLM, czasy p50/p95, confidence, RAM i CPU per kontener). Dashboard jest kodem w `deploy/perses/resources/` (ADR-0030); UI jest tylko do odczytu, zmiany rób w pliku i zrestartuj `perses`.
 
 Bez tego profilu otel-collector loguje błąd eksportu do jaegera; nie wpływa to na działanie.
 
@@ -205,7 +205,7 @@ Z logu do trace'a: skopiuj `trace_id` i wklej w pole wyszukiwania Jaegera (http:
 
 ### Metryki
 
-Eksport co 60 s (NFR-13, NFR-14). Nazwy w Prometheusie:
+Eksport co 60 s (NFR-13, NFR-14), zasoby kontenerów co 15 s (`docker_stats` w otel-collectorze, ADR-0030). Nazwy w Prometheusie:
 
 | Metryka | Co mierzy | Etykiety |
 | --- | --- | --- |
@@ -217,6 +217,8 @@ Eksport co 60 s (NFR-13, NFR-14). Nazwy w Prometheusie:
 | `forms2json_llm_errors_total` | nieudane próby wywołania LLM | `error_type` (`429`, `413`, `APITimeoutError`, ...), `gen_ai_request_model` |
 | `forms2json_job_confidence` | confidence ogólny zadania | |
 | `http_server_request_duration_seconds` | żądania HTTP do `api` | `http_route`, `http_response_status_code` |
+| `container_memory_usage_total_bytes` | RAM kontenera (jak `docker stats`) | `compose_service`, `container_name` |
+| `container_cpu_utilization_ratio` | CPU kontenera w procentach (100 = jeden rdzeń), mimo sufiksu `_ratio` | `compose_service`, `container_name` |
 | `traces_span_metrics_*` | metryki z trace'ów liczone przez Jaegera dla zakładki Monitor | `service_name`, `span_name` |
 
 Przykłady: `sum by (outcome) (forms2json_job_duration_seconds_count)`, `histogram_quantile(0.95, sum by (le, step) (rate(forms2json_pipeline_step_duration_seconds_bucket[5m])))`, `forms2json_job_cost_sum / forms2json_job_cost_count`.
@@ -235,6 +237,7 @@ Obserwowalność wystarcza na demo i pilotaż. Przed produkcją brakuje:
 | Prometheus i Jaeger bez trwałego zapisu | restart kontenera kasuje historię metryk i trace'ów | wolumeny z retencją; Jaeger na trwałym storage (np. OpenSearch, Apache-2.0) |
 | Logi tylko w `docker logs` | brak wyszukiwania po logach wielu replik | logi przez OTLP do otel-collectora i dalej do magazynu logów zgodnego z ADR-0013 (np. OpenSearch, VictoriaLogs); Loki odpada, AGPL |
 | Brak alertów | nikt nie wie, że LLM zwraca 429 albo zadania padają | Alertmanager (Apache-2.0) z regułami na `forms2json_llm_errors_total` i `outcome="failed"` |
+| otel-collector czyta `docker.sock` (grupa root, ADR-0030) | przejęty Collector steruje Dockerem na hoście | w k8s `kubeletstats` zamiast socketu |
 | Perses bez logowania | dostęp tylko z localhosta | reverse proxy z SSO albo natywne uwierzytelnianie Perses |
 
 ## Rozwój lokalny
