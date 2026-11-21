@@ -18,21 +18,22 @@ for name in VPS_HOSTNAME VPS_PASSWORD VPS_PATH; do
   value=$(env_get "$name")
   [[ -n $value ]] || { echo "Ustaw $name w .env." >&2; exit 1; }
 done
-# sshpass -e czyta hasło ze zmiennej SSHPASS, więc nie widać go w `ps`.
+# Hasło bez sshpass: OpenSSH >= 8.4 pyta program z SSH_ASKPASS. Pomocnik czyta hasło ze zmiennej,
+# więc nie ma go w `ps` ani w pliku; sam pomocnik znika po zakończeniu skryptu.
 export SSHPASS
-
-command -v sshpass >/dev/null || {
-  echo "Brak sshpass. Zainstaluj: brew install hudochenkov/sshpass/sshpass (macOS) albo sudo apt install sshpass (Debian/Ubuntu)." >&2
-  exit 1
-}
+ASKPASS=$(mktemp)
+trap 'rm -f "$ASKPASS"' EXIT
+printf '#!/bin/sh\nprintf "%%s\\n" "$SSHPASS"\n' > "$ASKPASS"
+chmod 700 "$ASKPASS"
+export SSH_ASKPASS=$ASKPASS SSH_ASKPASS_REQUIRE=force DISPLAY=${DISPLAY:-:0}
 
 # VPS_HOSTNAME może już zawierać użytkownika (root@1.2.3.4); wtedy VPS_USER jest pomijany.
 case $VPS_HOSTNAME in
   *@*) TARGET=$VPS_HOSTNAME ;;
   *) TARGET="$VPS_USER@$VPS_HOSTNAME" ;;
 esac
-# accept-new: pierwsze połączenie zapisuje klucz hosta bez pytania (sshpass nie odpowie na prompt).
-SSH=(sshpass -e ssh -o StrictHostKeyChecking=accept-new "$TARGET")
+# accept-new: pierwsze połączenie zapisuje klucz hosta bez pytania (pomocnik odpowiada tylko na hasło).
+SSH=(ssh -o StrictHostKeyChecking=accept-new "$TARGET")
 
 echo "==> $TARGET:$VPS_PATH: git pull, przebudowa kontenerów"
 # --ff-only: lokalne zmiany na serwerze zatrzymują wdrożenie zamiast tworzyć merge.

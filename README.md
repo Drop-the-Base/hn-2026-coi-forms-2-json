@@ -117,7 +117,7 @@ Na zewnątrz wystawiony jest tylko port 8080 (nginx: SPA + proxy `/api/` i `/hea
 
 ### Wdrożenie na VPS
 
-W `.env` ustaw `VPS_HOSTNAME`, `VPS_PASSWORD` i `VPS_PATH` (katalog z klonem repo na serwerze; opcjonalnie `VPS_USER`, domyślnie `root`), potem `./deploy.sh`. Skrypt loguje się przez SSH, w `VPS_PATH` robi `git pull --ff-only` i `docker compose up -d --build --remove-orphans`, potem `docker compose ps` i `curl localhost:8080/health`. Na serwerze musi być klon repo z własnym `.env` (konfiguracja aplikacji, LLM), Docker z Compose v2 i `curl`; lokalnie `sshpass`. Wdrażany jest to, co jest wypchnięte na gałąź sprawdzoną na serwerze.
+W `.env` ustaw `VPS_HOSTNAME`, `VPS_PASSWORD` i `VPS_PATH` (katalog z klonem repo na serwerze; opcjonalnie `VPS_USER`, domyślnie `root`), potem `./deploy.sh`. Skrypt loguje się przez SSH, w `VPS_PATH` robi `git pull --ff-only` i `docker compose up -d --build --remove-orphans`, potem `docker compose ps` i `curl localhost:8080/health`. Na serwerze musi być klon repo z własnym `.env` (konfiguracja aplikacji, LLM), Docker z Compose v2 i `curl`; lokalnie wystarczy OpenSSH ≥ 8.4 (hasło przez `SSH_ASKPASS`, bez `sshpass`). Wdrażany jest to, co jest wypchnięte na gałąź sprawdzoną na serwerze.
 
 ## REST API
 
