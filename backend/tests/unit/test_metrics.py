@@ -104,7 +104,7 @@ def test_llm_call_records_input_and_output_tokens_with_model() -> None:
     http_client = httpx2.Client(
         transport=httpx2.MockTransport(lambda _: completion('{"title": "ok"}'))
     )
-    OpenAiCompatibleLlmClient("http://llm/v1", "m", 5.0, http_client).generate_json(
+    OpenAiCompatibleLlmClient("http://llm/v1", "m", 5.0, 100, http_client).generate_json(
         "system", "user", SCHEMA
     )
 
