@@ -140,13 +140,13 @@ Elementy papieru, które **usuwamy lub zamieniamy** (wynika ze Standardów i wzo
 
 | # | Problem | Gdzie | Wpływ |
 |---|---|---|---|
-| 1 | `validation` **zawsze puste**, a czasem `{}` zamiast `[]`. Standardy wymagają REQUIRED, PESEL, NIP, EMAIL, ZIP_CODE. Reguły: „każde pole musi mieć atrybut obligatoryjności" | oba wzorce | nie znamy formatu wpisu walidacji (zakładamy `["REQUIRED","PESEL"]`) |
-| 2 | Nazwy słowników: wzorce używają `Kraje`, `TERYT_4G_DOWODOWY`, `TERYT_DOWODOWY`. Dokument „Słowniki" wymienia Województwo / Powiat / Gmina / Miejscowość / Kraje / Numery kierunkowe | wzorce vs Słowniki.docx | które nazwy wpisywać w `dictionaryName`? |
+| 1 | `validation` **zawsze puste** (139 pól), w 3 polach `{}` zamiast `[]` (wzorzec 1: Numer KRS, Ulica, Nazwisko innej osoby). Zgody nie mają `consentSectionConfig.required`. Standardy wymagają REQUIRED, PESEL, NIP, EMAIL, ZIP_CODE. Reguły: „każde pole musi mieć atrybut obligatoryjności" | oba wzorce | nie znamy formatu wpisu walidacji (zakładamy `["REQUIRED","PESEL"]`) |
+| 2 | Nazwy słowników: wzorce używają `Kraje`, `TERYT_4G_DOWODOWY`, `TERYT_DOWODOWY`, i to niespójnie: Adres zamieszkania ma `TERYT_DOWODOWY` we wzorcu 1 i `TERYT_4G_DOWODOWY` we wzorcu 5, a Adres innej osoby odwrotnie. Dokument „Słowniki" wymienia Województwo / Powiat / Gmina / Miejscowość / Kraje / Numery kierunkowe | wzorce vs Słowniki.docx | które nazwy wpisywać w `dictionaryName`? |
 | 3 | TERYT to jedna lista kaskadowa (`multiLevelTree: true`) zamiast 4 list; `title` pola = nazwa słownika | wzorce | klucz `multiLevelTree` nieopisany |
-| 4 | Klucze spoza schematu: `multiLevelTree`, `searchEnabled` (opisany w regułach, brak w schemacie), `defaultValue` jako tablica (`["Polska"]`, `[]`), choć schemat mówi string | wzorce vs schemat | walidacja schematem odrzuci poprawny wzorzec |
-| 5 | Pola adresu z `EXTERNAL_SYSTEM` mają `readOnly: false`. „Dane inicjalne": pole z rejestru *musi* być readOnly | wzorce | sprzeczne reguły |
-| 6 | Twoje dane: wzorzec 1 bierze `MLPZ.name`, wzorzec 5 `PESEL.name`. Standardy mówią MLPZ | wzorce | które źródło? |
-| 7 | FINISH: reguły mówią „wyłącznie INFO_SECTION", a wzorce mają SECTION + TEXT_BLOCK | reguły vs wzorce | co przejdzie import? |
+| 4 | Klucze spoza schematu: `multiLevelTree`, `searchEnabled` (opisany w regułach, brak w schemacie), `defaultValue` jako tablica (`["Polska"]`, `[]`), choć schemat mówi string | wzorce vs schemat | schemat **tego nie wykryje**: przez literówkę `repetingSectionGrid` nie sprawdza żadnego pola, więc wzorce przechodzą walidację z 0 błędów (sprawdzone `jsonschema`). Własny walidator musi schodzić w pola sam (K-09) |
+| 5 | Pola adresu z `EXTERNAL_SYSTEM` mają `readOnly: false`. „Dane inicjalne": specyfikacja pola z rejestru „powinna zawierać wskazanie, że pole jest readOnly" | wzorce | decyzja: K-10 |
+| 6 | Twoje dane: wzorzec 1 bierze `MLPZ.name`, wzorzec 5 `PESEL.name`. Standardy mówią MLPZ | wzorce | decyzja: K-11, bierzemy MLPZ |
+| 7 | FINISH: reguły mówią „wyłącznie INFO_SECTION", a wzorce mają SECTION + TEXT_BLOCK. Na najwyższym poziomie stron są tylko SECTION (nawet CONSENT_SECTION leży w sekcji), więc różnica to tylko TEXT_BLOCK zamiast INFO_SECTION | reguły vs wzorce | co przejdzie import? (K-07, P-3) |
 | 8 | Wzorce pomijają pola ze Standardów: PESEL w Dane innej osoby, REGON/KRS w Dane podmiotu (nr 5), checkbox „Brak kodu pocztowego" | wzorce | brak klucza JSON na checkbox „Brak …" |
 | 9 | Standardy każą podać limity plików (rozmiar, formaty, liczba), ale w JSON-ie nie ma na nie klucza | Standardy vs schemat | pominąć albo dać do `description` |
 | 10 | Standardy: Ulica ma walidację „Kod pocztowy" | Standardy | błąd kopiuj-wklej, ignorujemy |

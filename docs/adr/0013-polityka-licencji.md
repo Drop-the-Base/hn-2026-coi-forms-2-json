@@ -23,11 +23,11 @@ Przed dodaniem zależności sprawdzamy licencję na PyPI/npm **i** w repozytoriu
 | Zależność | Licencja | Zamiennik |
 |---|---|---|
 | PyMuPDF (`fitz`) | AGPL-3.0 | `pypdf`, `pdfplumber`, `pypdfium2` |
-| Grafana, Tempo, Loki | AGPL-3.0 | Perses, Jaeger (patrz [ADR-0009](0009-obserwowalnosc-opentelemetry.md)) |
+| Grafana, Tempo, Loki | AGPL-3.0 | Jaeger SPM, Perses (patrz [ADR-0009](0009-obserwowalnosc-opentelemetry.md)) |
 | Redis 8+ | AGPL / SSPL / RSAL | Valkey (BSD) |
 | Arize Phoenix | Elastic License 2.0 | Jaeger + OTel |
 | antiword, catdoc | GPL | LibreOffice headless |
-| Modele Llama, Gemma | licencje własne | Bielik, Qwen (Apache-2.0) |
+| Modele Llama, Gemma, część Qwen2.5 | licencje własne | Bielik, Qwen3 (Apache-2.0) |
 | LiteLLM | MIT + katalog enterprise; incydenty bezpieczeństwa | patrz [ADR-0008](0008-bramka-llm.md) |
 
 ### Wyjątki warunkowe
@@ -36,7 +36,6 @@ Przed dodaniem zależności sprawdzamy licencję na PyPI/npm **i** w repozytoriu
 |---|---|---|
 | RabbitMQ | MPL-2.0 | niezmodyfikowany oficjalny obraz |
 | LibreOffice (konwersja `.doc`) | MPL-2.0 | niezmodyfikowany program wywoływany jako proces |
-| Grafana | AGPL-3.0 | tylko profil opcjonalny, czeka na decyzję mentorów (K-03) |
 
 ## Konsekwencje
 

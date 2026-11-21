@@ -79,7 +79,8 @@ class DocxReader(DocumentReader):
 
 ### 2.4 LLM
 
-- Wywołania LLM tylko przez port `LlmClient`. Adapter mówi z bramką przez API zgodne z OpenAI.
+- Wywołania LLM tylko przez port `LlmClient`. Adapter mówi z runtime'em bezpośrednio przez API zgodne z OpenAI i zapisuje tokeny w atrybutach OTel `gen_ai.usage.*`.
+- Guardrails są nasze, w kodzie: limit długości wejścia, walidacja wyjścia pydantikiem, wyłącznik `LLM_ENABLED=false` (pipeline zwraca wtedy szkielet z bloków Standardów i niski confidence).
 - Wyjście LLM zawsze strukturalne: JSON Schema z modelu pydantic. Waliduj je pydantikiem i nie ufaj mu bez walidacji.
 - Prompty trzymamy w osobnych plikach (`prompts/*.md`) z wersją w nazwie albo nagłówku. Zmiana promptu = uruchomienie evali.
 - Żadnych kluczy API zewnętrznych dostawców w kodzie ani w konfiguracji domyślnej (NFR-03).

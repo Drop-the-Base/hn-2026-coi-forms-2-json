@@ -1,6 +1,6 @@
-# ADR-0009: Obserwowalność: OTel Collector + Jaeger + Prometheus + Grafana (opcjonalnie)
+# ADR-0009: Obserwowalność: OTel Collector + Jaeger + Prometheus, bez Grafany
 
-- Status: Proponowana (Grafana czeka na odpowiedź mentorów, konflikt K-03)
+- Status: Zaakceptowana (2026-11-21, K-03 zamknięty: bez Grafany)
 - Data: 2026-11-21
 - Wymagania: NFR-14, NFR-13, NFR-02
 
@@ -12,23 +12,22 @@ Chcemy widzieć każde żądanie od uploadu do wyniku: latencję per krok, wywo�
 
 | Element | Narzędzie | Licencja |
 |---|---|---|
-| Instrumentacja | OpenTelemetry SDK (Python, JS), instrumentacje FastAPI, aio-pika, httpx, OpenAI; konwencje GenAI | Apache-2.0 |
+| Instrumentacja | OpenTelemetry SDK (Python, JS), instrumentacje FastAPI, aio-pika, httpx, OpenAI; konwencje GenAI (`gen_ai.usage.*` dla tokenów) | Apache-2.0 |
 | Zbieranie | OpenTelemetry Collector | Apache-2.0 |
 | Traces | Jaeger v2 | Apache-2.0 |
 | Metryki | Prometheus | Apache-2.0 |
-| Dashboardy | **Grafana**, tylko w profilu `observability` | **AGPL-3.0** |
+| Widoki | Jaeger, zakładka Monitor (SPM): latencja, liczba żądań i błędy per endpoint z metryk Prometheusa; UI Prometheusa dla tokenów i kosztu | Apache-2.0 |
+| Dashboardy (opcjonalnie) | **Perses**, tylko jeśli na demo potrzebny dashboard kosztów; dashboardy jako kod w repo | Apache-2.0 |
 
 Aplikacja zależy tylko od OTLP. Backend obserwowalności to wymienny element infrastruktury.
 
-Grafana nie jest biblioteką aplikacji, tylko osobnym, niezmodyfikowanym narzędziem uruchamianym opcjonalnie. Mimo to AGPL jest wprost wymieniona w zakazie, więc:
-1. pytamy mentorów, czy Grafana jako opcjonalne narzędzie operacyjne jest dopuszczalna;
-2. jeśli nie: zastępujemy ją **Perses** (Apache-2.0, projekt CNCF), który czyta z Prometheusa. Dashboardy trzymamy w repo jako kod.
+Grafany nie używamy: AGPL jest wprost wymieniona w zakazie (NFR-02), a SPM w Jaegerze pokrywa podstawowe metryki bez dodatkowej usługi.
 
 ## Rozważone alternatywy
 
 | Opcja | Dlaczego nie |
 |---|---|
-| Grafana Tempo / Loki | AGPL-3.0 |
+| Grafana, Tempo, Loki | AGPL-3.0 (NFR-02) |
 | Langfuse | self-hosting wymaga Postgres + ClickHouse + Redis + S3, za ciężki; część funkcji w `ee/` |
 | Arize Phoenix | licencja Elastic License 2.0, nie open source (NFR-02); w łańcuchu zależności był skompromitowany LiteLLM |
 | SigNoz | ClickHouse, cięższy niż Jaeger + Prometheus |
@@ -36,5 +35,5 @@ Grafana nie jest biblioteką aplikacji, tylko osobnym, niezmodyfikowanym narzęd
 
 ## Konsekwencje
 
-- Dashboard kosztów liczy koszt modeli lokalnych ze stawki konfiguracyjnej (`COST_PER_1K_TOKENS` / `COST_PER_GPU_SECOND`), bo nie ma faktury.
+- Koszt liczymy modeli lokalnych ze stawki konfiguracyjnej (`COST_PER_1K_TOKENS` / `COST_PER_GPU_SECOND`), bo nie ma faktury.
 - Bez profilu `observability` aplikacja działa normalnie, a Collector może eksportować do logów.

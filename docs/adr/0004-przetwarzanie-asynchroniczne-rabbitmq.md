@@ -6,7 +6,7 @@
 
 ## Kontekst
 
-Przetwarzanie (konwersja DOC, OCR, LLM) trwa od kilku sekund do minut. Trzymanie tego w procesie HTTP blokuje API i utrudnia batch. Jednocześnie zadanie mówi: „w odpowiedzi aplikacja zwraca dokument JSON" (konflikt K-01).
+Przetwarzanie (konwersja DOC, OCR, LLM) trwa od kilku sekund do minut. Trzymanie tego w procesie HTTP blokuje API i utrudnia batch. Jednocześnie zadanie mówi: „w odpowiedzi aplikacja zwraca dokument JSON" (K-01: to nie konflikt w wymaganiach, tylko skutek wyboru kolejki).
 
 ## Decyzja
 
@@ -14,7 +14,7 @@ Przetwarzanie (konwersja DOC, OCR, LLM) trwa od kilku sekund do minut. Trzymanie
 - Dwa endpointy:
   - `POST /api/v1/forms:convert`: czeka na wynik do `SYNC_TIMEOUT_SECONDS` i zwraca JSON (spełnia FR-01/FR-06). Po przekroczeniu limitu zwraca `202` z `job_id`.
   - `POST /api/v1/jobs` → `202` + `job_id`, `GET /api/v1/jobs/{id}` → status i wynik. Dla frontendu i batcha.
-- Kolejki nietrwałe, wiadomości z `delivery_mode=1` (NFR-06: nic nie ląduje na dysku brokera).
+- Kolejki nietrwałe, wiadomości z `delivery_mode=1`. RabbitMQ 3.12+ i tak może odłożyć wiadomość na dysk, dlatego w wiadomości są tylko ścieżka i metadane, nigdy bajty pliku (NFR-06, [ADR-0005](0005-pliki-tymczasowe-tmpfs.md)).
 - Klient Pythona: `aio-pika` (Apache-2.0).
 - Kontekst OTel jest przekazywany w nagłówkach wiadomości, więc trace przechodzi przez API i workera.
 

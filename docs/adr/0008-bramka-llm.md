@@ -1,6 +1,6 @@
 # ADR-0008: Bramka LLM: Bifrost zamiast LiteLLM
 
-- Status: Proponowana (do weryfikacji: plik LICENSE i zakres funkcji w wersji OSS)
+- Status: Odrzucona (2026-11-21), przyjmujemy wariant bez bramki
 - Data: 2026-11-21
 - Wymagania: NFR-02, NFR-03, NFR-04, NFR-13, NFR-14, NFR-16
 
@@ -17,6 +17,10 @@ Chcemy jednego punktu wejścia do modeli: routing między modelami, limity, zlic
 Kill switch: wyłączenie dostawcy w konfiguracji bramki albo flaga `LLM_ENABLED=false` w workerze. Przy wyłączonym LLM pipeline zwraca szkielet z blokami Standardów i niski confidence.
 
 Jeśli weryfikacja wypadnie źle: brak bramki (YAGNI). Worker mówi bezpośrednio z runtime'em, a tokeny i koszt zbieramy z atrybutów OTel `gen_ai.usage.*`. Port `LlmClient` się nie zmienia.
+
+## Rozstrzygnięcie (2026-11-21)
+
+Bifrost ma licencję Apache-2.0, ale bramki nie wdrażamy. Guardrails piszemy sami w kodzie, więc bramka zostałaby tylko do routingu i liczenia tokenów. To samo daje adapter `LlmClient` z atrybutami OTel `gen_ai.usage.*`. Jeden kontener mniej (YAGNI). Obowiązuje plan „brak bramki" opisany wyżej, z wyłącznikiem `LLM_ENABLED=false`.
 
 ## Rozważone alternatywy
 

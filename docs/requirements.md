@@ -67,18 +67,33 @@ Oznaczenia:
 
 ## 3. Konflikty i niejasności w wymaganiach
 
-Każdy konflikt ma decyzję roboczą. Zmieniamy ją po odpowiedzi mentorów COI.
+Każdy otwarty konflikt ma decyzję roboczą. Zmieniamy ją po odpowiedzi mentorów COI. Numerów nie zmieniamy, bo odwołują się do nich ADR-y.
 
-| # | Konflikt | Decyzja robocza | Gdzie opisane |
-|---|---|---|---|
-| K-01 | Kolejka asynchroniczna kontra „w odpowiedzi aplikacja zwraca dokument JSON" (FR-01, FR-06). | Dwa tryby: synchroniczny endpoint czeka na wynik z limitem czasu, asynchroniczny `/jobs` służy frontendowi i batchowi. | [ADR-0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
-| K-02 | Plik musi przejść z API do workera, a NFR-06 pozwala tylko na przestrzeń tymczasową na czas żądania. | Współdzielony wolumen `tmpfs` (RAM). Plik usuwany po zadaniu i po TTL. Wiadomości w brokerze nie są trwałe. | [ADR-0005](adr/0005-pliki-tymczasowe-tmpfs.md) |
-| K-03 | Grafana (a także Tempo i Loki) ma licencję **AGPL**, a NFR-02 zabrania copyleftu. | Grafana tylko w opcjonalnym profilu `observability`, nie jest zależnością aplikacji. Zamiennik bez copyleftu: Perses. Pytanie do mentorów. | [ADR-0009](adr/0009-obserwowalnosc-opentelemetry.md) |
-| K-04 | Preferowany Alpine kontra biblioteki ML/OCR (musl, brak gotowych wheeli). | Obraz `python:3.14-slim` dla workera. Alpine tam, gdzie się da (frontend, API, jeśli zależności pozwolą). | [ADR-0012](adr/0012-obraz-bazowy-slim.md) |
-| K-05 | Wzorce mają puste `validation`, a reguły wymagają atrybutu obligatoryjności. | Wpisujemy `["REQUIRED", …]` jako tablicę stringów, zgodnie z opisem pliku JSON. | [analiza §5](analiza-i-charakterystyka-danych.md#5-niespójności-wzorce-vs-dokumentacja) |
-| K-06 | Nazwy słowników we wzorcach (`TERYT_4G_DOWODOWY`, `Kraje`) są inne niż w dokumencie Słowniki. | Używamy nazw ze wzorców. | analiza §5 |
-| K-07 | Strona `FINISH`: reguły pozwalają tylko na `INFO_SECTION`, wzorce mają `SECTION` + `TEXT_BLOCK`. | Idziemy za wzorcami. | analiza §5 |
-| K-08 | Bramka LLM z „wyłączaniem LLM" i kosztami kontra NFR-03/04 (open-core, funkcje enterprise). | Bramka tylko z funkcjami z licencji open source. | [ADR-0008](adr/0008-bramka-llm.md) |
+Statusy: `otwarty` = czeka na mentorów, `zamknięty` = rozstrzygnięty, `nie konflikt` = skutek naszej architektury, nie sprzeczność w wymaganiach.
+
+| # | Konflikt | Decyzja robocza | Status | Gdzie opisane |
+|---|---|---|---|---|
+| K-01 | Kolejka asynchroniczna kontra „w odpowiedzi aplikacja zwraca dokument JSON" (FR-01, FR-06). | Zadanie nie mówi o kolejce. Endpoint synchroniczny czeka na wynik z limitem czasu, `/jobs` służy frontendowi i batchowi. | nie konflikt | [ADR-0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
+| K-02 | Plik przechodzi z API do workera, a NFR-06 pozwala tylko na przestrzeń tymczasową. | Kolejka i `tmpfs` to przestrzeń tymczasowa. W wiadomości idzie tylko ścieżka, plik leży w `tmpfs` i znika po zadaniu lub po TTL. „Żądanie" rozumiemy jako całe zadanie. | nie konflikt | [ADR-0005](adr/0005-pliki-tymczasowe-tmpfs.md) |
+| K-03 | Grafana (a także Tempo i Loki) ma licencję **AGPL**, a NFR-02 zabrania copyleftu. | Bez Grafany. Jaeger (zakładka Monitor/SPM) i UI Prometheusa, opcjonalnie Perses (Apache-2.0). | zamknięty | [ADR-0009](adr/0009-obserwowalnosc-opentelemetry.md) |
+| K-04 | Preferowany Alpine kontra biblioteki ML/OCR (musl, brak gotowych wheeli). | Zadanie mówi „preferować", więc to dopuszczalne odstępstwo: `python:3.14-slim` dla workera, Alpine tam, gdzie się da. | zamknięty | [ADR-0012](adr/0012-obraz-bazowy-slim.md) |
+| K-05 | Wzorce mają `validation: []` we wszystkich polach (3 razy `{}`), a Standardy każą „pole wymagane" przy imieniu, nazwisku i PESEL. Reguły: „każde pole musi mieć atrybut obligatoryjności". Zgody nie mają `consentSectionConfig.required`. | Pole obowiązkowe: `["REQUIRED", …]` plus walidatory ze Standardów (PESEL, EMAIL, ZIP_CODE…). Pole opcjonalne: `[]`. Nigdy `{}`. Zgody zawsze mają `required`. | otwarty (P-1) | [analiza §5](analiza-i-charakterystyka-danych.md#5-niespójności-wzorce-vs-dokumentacja) |
+| K-06 | Dokument Słowniki: 4 słowniki (Województwo, Powiat, Gmina, Miejscowość) bez nazw technicznych. Wzorce: jedno pole kaskadowe `TERYT_DOWODOWY` albo `TERYT_4G_DOWODOWY`, użyte niespójnie między wzorcami, `multiLevelTree` raz `true`, raz `false`, raz brak. Numery kierunkowe nie mają nazwy technicznej. | Adres: `TERYT_4G_DOWODOWY` z `multiLevelTree: true`. Kraj: `Kraje`, domyślnie `Polska`. Telefon bez słownika. Nazwy słowników w jednym miejscu w konfiguracji. | otwarty (P-2) | analiza §5 |
+| K-07 | Strona `FINISH`: reguły pozwalają tylko na `INFO_SECTION`, wzorce mają `SECTION` z `TEXT_BLOCK`. | `SECTION` „Podgląd uzupełnionego wniosku" z `INFO_SECTION` w środku. Spełnia regułę wprost i regułę „każde pole w sekcji". | otwarty (P-3) | analiza §5 |
+| K-08 | Bramka LLM z wyłącznikiem i kosztami kontra NFR-03/04 (open-core, funkcje enterprise). | Bez bramki. Guardrails piszemy sami, tokeny i koszt z atrybutów OTel `gen_ai.usage.*` w adapterze `LlmClient`. | nie konflikt | [ADR-0008](adr/0008-bramka-llm.md) |
+| K-09 | Oficjalny schemat ma klucz `repetingSectionGrid` (literówka), wzorce używają `repeatingSectionGrid`. Przez to schemat nie sprawdza żadnego pola: wzorce przechodzą walidację mimo `{}` w `validation` i `defaultValue` jako tablicy. | Generujemy `repeatingSectionGrid` jak we wzorcach. Nasz walidator (FR-08) sam schodzi rekurencyjnie w pola, nie polegamy na schemacie. | otwarty (P-4) | analiza §5 |
+| K-10 | Dane inicjalne: pole z rejestru ma być `readOnly`. Wzorce mają `readOnly: false` dla adresu, telefonu i e-maila z MLPZ. | Imię, nazwisko, PESEL: `readOnly: true`. Adres, telefon, e-mail: `readOnly: false`, jak we wzorcach (obywatel może je poprawić). | zamknięty | analiza §5 |
+| K-11 | Źródło imienia i nazwiska: wzorzec 1 `MLPZ.*`, wzorzec 5 `PESEL.*`. | `MLPZ`, zgodnie ze Standardami. | zamknięty | analiza §5 |
+
+### 3.1 Pytania do mentorów COI
+
+| # | Pytanie | Konflikt |
+|---|---|---|
+| P-1 | Czy obowiązkowość pola zapisujemy jako `"validation": ["REQUIRED", "PESEL"]`, a pusta tablica oznacza pole opcjonalne? Wzorce mają wszędzie `[]`, a w 3 polach `{}`. | K-05 |
+| P-2 | Czym różnią się słowniki `TERYT_DOWODOWY` i `TERYT_4G_DOWODOWY`? Jaka jest nazwa techniczna słownika numerów kierunkowych? | K-06 |
+| P-3 | Czy import przyjmie na stronie `FINISH` pole `TEXT_BLOCK` (jak we wzorcach), czy tylko `INFO_SECTION` (jak w regułach)? | K-07 |
+| P-4 | Schemat ma `repetingSectionGrid`, wzorce `repeatingSectionGrid`. Którą pisownię przyjmuje system docelowy? | K-09 |
+| P-5 | Formularz 9 (3 wnioski w 1): warunki `SHOW` na jednej ścieżce czy osobne strony w `flow`? | — |
 
 ## 4. Rezultaty do oddania
 

@@ -18,15 +18,12 @@ flowchart LR
     MQ --> API
     API <-->|plik| TMP[(wolumen tmpfs)]
     W <-->|plik| TMP
-    W -->|OpenAI API| GW[llm-gateway<br/>Bifrost]
-    GW --> LLM[llm-runtime<br/>Ollama, modele lokalne]
+    W -->|OpenAI API| LLM[llm-runtime<br/>Ollama, modele lokalne]
     API -. OTLP .-> OC[otel-collector]
     W -. OTLP .-> OC
-    GW -. OTLP .-> OC
     OC --> J[jaeger<br/>traces]
     OC --> P[prometheus<br/>metryki]
-    J --> G[grafana<br/>profil opcjonalny]
-    P --> G
+    P --> J
 ```
 
 | Usługa | Odpowiedzialność | Technologia | ADR |
@@ -35,15 +32,13 @@ flowchart LR
 | `api` | JWT, walidacja pliku (FR-02..05), zapis do tmpfs, publikacja zadania, zwrot wyniku (tryb sync i async) | FastAPI | [0002](adr/0002-python-fastapi.md), [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
 | `rabbitmq` | Kolejka `jobs` i `results`, wiadomości nietrwałe | RabbitMQ | [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
 | `worker` | Pipeline: ekstrakcja → rozumienie → kompozycja → walidacja | czysty Python | [0006](adr/0006-pipeline-czysty-python.md) |
-| `llm-gateway` | Jeden punkt wejścia do modeli: routing, limity, koszty, wyłącznik LLM, telemetria | Bifrost (propozycja) | [0008](adr/0008-bramka-llm.md) |
 | `llm-runtime` | Lokalne małe modele z API zgodnym z OpenAI | Ollama | [0007](adr/0007-lokalny-runtime-llm.md) |
 | `otel-collector` | Odbiór OTLP, przetwarzanie, eksport | OpenTelemetry Collector | [0009](adr/0009-obserwowalnosc-opentelemetry.md) |
-| `jaeger`, `prometheus` | Traces, metryki | Jaeger, Prometheus | [0009](adr/0009-obserwowalnosc-opentelemetry.md) |
-| `grafana` | Dashboardy: latencja, koszty, tokeny, błędy, confidence | Grafana (profil `observability`, licencja AGPL: patrz K-03) | [0009](adr/0009-obserwowalnosc-opentelemetry.md) |
+| `jaeger`, `prometheus` | Traces, metryki, widok Monitor (SPM) w Jaegerze | Jaeger, Prometheus | [0009](adr/0009-obserwowalnosc-opentelemetry.md) |
 
 Profile `docker compose`:
-- domyślny: `frontend`, `api`, `rabbitmq`, `worker`, `llm-gateway`, `llm-runtime`, `otel-collector`;
-- `observability`: `jaeger`, `prometheus`, `grafana`.
+- domyślny: `frontend`, `api`, `rabbitmq`, `worker`, `llm-runtime`, `otel-collector`;
+- `observability`: `jaeger`, `prometheus` (opcjonalnie `perses`).
 
 ## 3. Przepływ żądania
 
@@ -142,7 +137,7 @@ backend/
 │   │   └── outbound/
 │   │       ├── readers/         # docx, pdf, xlsx, ods, doc, image
 │   │       ├── ocr/
-│   │       ├── llm/             # klient OpenAI-compatible (przez bramkę)
+│   │       ├── llm/             # klient OpenAI-compatible, bezpośrednio do runtime'u
 │   │       ├── queue/           # RabbitMQ
 │   │       └── storage/         # tmpfs FileStore, in-memory ResultStore
 │   ├── config.py                # pydantic-settings, jedno miejsce konfiguracji
@@ -183,9 +178,9 @@ Typy API generujemy z OpenAPI FastAPI, więc kontrakt ma jedno źródło prawdy.
 |---|---|---|
 | Trace żądania end-to-end | OTel SDK w `api` i `worker`, propagacja kontekstu w nagłówkach wiadomości RabbitMQ | Jaeger |
 | Span per krok pipeline'u i per wywołanie LLM | OTel, konwencje GenAI (`gen_ai.*`) | Jaeger |
-| Latencja, liczba żądań, błędy | OTel metrics | Prometheus → Grafana |
-| Tokeny i koszt per żądanie | bramka LLM + atrybuty `gen_ai.usage.*` | Prometheus → Grafana |
-| Confidence ogólny per zadanie | metryka z workera | Prometheus → Grafana |
+| Latencja, liczba żądań, błędy | OTel metrics | Prometheus → Jaeger Monitor (SPM) |
+| Tokeny i koszt per żądanie | adapter `LlmClient`, atrybuty `gen_ai.usage.*` | Prometheus |
+| Confidence ogólny per zadanie | metryka z workera | Prometheus |
 
 Koszt modeli lokalnych to nie faktura, tylko czas obliczeń. Liczymy go z konfigurowalnej stawki (`COST_PER_1K_TOKENS` lub `COST_PER_GPU_SECOND`), żeby porównywać modele i pokazać koszt wdrożenia (NFR-13).
 
@@ -200,6 +195,5 @@ Poprawki urzędnika z panelu (FR-T2) eksportujemy jako pliki JSON. Można je dod
 | # | Kwestia | Status |
 |---|---|---|
 | 1 | Wybór modelu (Bielik vs Qwen, rozmiar) i OCR | do ADR po pierwszych evalach |
-| 2 | Grafana a zakaz AGPL (K-03) | pytanie do mentorów |
-| 3 | Bifrost: sprawdzić plik LICENSE i czy potrzebne funkcje są w wersji OSS | do weryfikacji przed implementacją |
-| 4 | Formularz 9 (3 w 1): SHOW czy strony alternatywne w `flow` | pytanie do mentorów |
+| 2 | Formularz 9 (3 w 1): SHOW czy strony alternatywne w `flow` | pytanie do mentorów (P-5) |
+| 3 | Niespójności danych COI (K-05, K-06, K-07, K-09) | pytania P-1..P-4 w [requirements.md §3.1](requirements.md#31-pytania-do-mentorów-coi) |
