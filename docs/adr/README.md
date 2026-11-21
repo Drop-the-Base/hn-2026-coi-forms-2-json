@@ -51,6 +51,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0025](0025-warunki-podgladu-jsonata.md) | Warunki `states` w podglądzie formularza: `jsonata` w przeglądarce | Proponowana |
 | [0026](0026-frontend-typy-api-msw-css.md) | Frontend: typy z `openapi-typescript`, MSW w testach, CSS z design systemu zamiast Tailwind | Proponowana |
 | [0027](0027-edytor-json-codemirror.md) | Edytor JSON na ekranie przeglądu: pakiety CodeMirror 6 | Proponowana |
+| [0028](0028-model-wymienny-open-source-w-chmurze.md) | Model wymienny: open source u organizatorów, development na modelu open-weights w chmurze | Proponowana |
 
 ## Szablon
 

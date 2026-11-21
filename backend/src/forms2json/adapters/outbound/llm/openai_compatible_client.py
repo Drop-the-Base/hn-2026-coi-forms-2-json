@@ -1,10 +1,11 @@
 import json
 import time
-from typing import Any
+from typing import Any, Literal
 
 import httpx2
 import openai
 from openai import OpenAI
+from openai.types.chat.completion_create_params import ResponseFormat
 from opentelemetry import metrics, trace
 
 from forms2json.application.ports.llm_client import LlmCallFailed, LlmClient, LlmResult, LlmUsage
@@ -30,14 +31,17 @@ class OpenAiCompatibleLlmClient(LlmClient):
         timeout_seconds: float,
         max_output_tokens: int,
         http_client: httpx2.Client | None = None,
+        api_key: str = "local",
+        response_format: Literal["json_schema", "json_object"] = "json_schema",
     ) -> None:
         self._model = model
         self._max_output_tokens = max_output_tokens
+        self._response_format = response_format
         # Local runtimes ignore the key, but the SDK requires one. Retries are ours (below),
         # so one loop covers both network errors and invalid JSON.
         self._client = OpenAI(
             base_url=base_url,
-            api_key="local",
+            api_key=api_key,
             timeout=timeout_seconds,
             max_retries=0,
             http_client=http_client,
@@ -69,6 +73,15 @@ class OpenAiCompatibleLlmClient(LlmClient):
             return result
 
     def _generate_json(self, system: str, user: str, schema: dict[str, Any]) -> LlmResult:
+        response_format: ResponseFormat = {
+            "type": "json_schema",
+            "json_schema": {"name": "output", "schema": schema, "strict": True},
+        }
+        if self._response_format == "json_object":
+            # json_object only promises valid JSON, so the model learns the shape from the prompt.
+            system = f"{system}\n\nAnswer with one JSON object matching this JSON Schema:\n"
+            system += json.dumps(schema, ensure_ascii=False)
+            response_format = {"type": "json_object"}
         prompt_tokens = completion_tokens = 0
         started = time.perf_counter()
         last_error: Exception | None = None
@@ -80,10 +93,7 @@ class OpenAiCompatibleLlmClient(LlmClient):
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
                     ],
-                    response_format={
-                        "type": "json_schema",
-                        "json_schema": {"name": "output", "schema": schema, "strict": True},
-                    },
+                    response_format=response_format,
                     temperature=0,
                     max_tokens=self._max_output_tokens,
                 )
