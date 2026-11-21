@@ -1,0 +1,43 @@
+/* Z prototypu design/zadania.html; kolumny pewności, oceny i problemów dojdą z ekranem przeglądu (#52-#54) */
+.jobs-wrap {
+  padding: 0 var(--space-6) var(--space-2);
+}
+.jobs .status {
+  white-space: normal;
+}
+.empty {
+  padding: var(--space-12) var(--space-6);
+  max-width: 38rem;
+}
+.empty h3 {
+  font-size: var(--text-lg);
+}
+.empty p {
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+@media (max-width: 48rem) {
+  .jobs thead {
+    display: none;
+  }
+  .jobs tr {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .jobs td {
+    border: 0;
+    padding: 0;
+  }
+  .jobs td.num {
+    text-align: left;
+  }
+  .jobs td[data-label]::before {
+    content: attr(data-label) ": ";
+    color: var(--color-muted);
+  }
+  .jobs .row-actions {
+    text-align: left;
+  }
+}

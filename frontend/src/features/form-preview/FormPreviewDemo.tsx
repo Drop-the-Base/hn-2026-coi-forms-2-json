@@ -13,7 +13,7 @@ const forms: Record<string, FormJson> = {
 export function FormPreviewDemo() {
   const [name, setName] = useState("Wzorzec 1");
   return (
-    <div className="eu-demo">
+    <main className="eu-demo">
       <div role="group" aria-label="Wzorzec formularza">
         {Object.keys(forms).map((n) => (
           <button
@@ -27,6 +27,6 @@ export function FormPreviewDemo() {
         ))}
       </div>
       <FormPreview key={name} form={forms[name]} />
-    </div>
+    </main>
   );
 }
