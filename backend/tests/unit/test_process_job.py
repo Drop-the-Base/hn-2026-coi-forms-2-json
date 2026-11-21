@@ -72,7 +72,7 @@ def run_job(step: PipelineStep[SourceFile, str]) -> tuple[FakeFileStore, FakeJob
     files, queue = FakeFileStore(), FakeJobQueue()
     job = Job(uuid.uuid4(), "application/pdf")
     files.save(str(job.job_id), b"form")
-    use_case = ProcessJob(files, Pipeline([step]), queue)
+    use_case = ProcessJob(files, lambda progress: Pipeline([step], progress), queue)
 
     asyncio.run(use_case.execute(job))
     return files, queue, job
@@ -111,9 +111,10 @@ def test_lost_progress_event_does_not_fail_the_job() -> None:
     files, queue = FakeFileStore(), UnreachableQueue()
     job = Job(uuid.uuid4(), "application/pdf")
     files.save(str(job.job_id), b"form")
+    use_case = ProcessJob(files, lambda progress: Pipeline([Describe()], progress), queue)
 
     with pytest.raises(ConnectionError):  # only the final event, published outside the pipeline
-        asyncio.run(ProcessJob(files, Pipeline([Describe()]), queue).execute(job))
+        asyncio.run(use_case.execute(job))
 
     assert queue.results == [JobResult(job.job_id, result="application/pdf:form")]
 
@@ -122,6 +123,8 @@ def test_missing_file_publishes_error() -> None:
     files, queue = FakeFileStore(), FakeJobQueue()
     job = Job(uuid.uuid4(), "application/pdf")
 
-    asyncio.run(ProcessJob(files, Pipeline([Describe()]), queue).execute(job))
+    asyncio.run(
+        ProcessJob(files, lambda progress: Pipeline([Describe()], progress), queue).execute(job)
+    )
 
     assert queue.results == [JobResult(job.job_id, error="KeyError")]

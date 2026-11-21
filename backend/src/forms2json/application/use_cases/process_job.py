@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from typing import Literal
 from uuid import UUID
@@ -19,18 +19,24 @@ logger = logging.getLogger(__name__)
 class ProcessJob:
     """Worker side of a job: file → pipeline → result, and the file never outlives it (NFR-06)."""
 
-    def __init__(self, files: FileStore, pipeline: Pipeline, queue: JobQueue) -> None:
+    def __init__(
+        self,
+        files: FileStore,
+        pipelines: Callable[[PipelineObserver], Pipeline],
+        queue: JobQueue,
+    ) -> None:
         self._files = files
-        self._pipeline = pipeline
+        # A fresh pipeline per job: steps keep per-run state, and progress belongs to the job.
+        self._pipelines = pipelines
         self._queue = queue
 
     async def execute(self, job: Job) -> None:
         job_id = str(job.job_id)
-        observer = _ProgressObserver(job.job_id, self._queue, asyncio.get_running_loop())
+        progress = _ProgressObserver(job.job_id, self._queue, asyncio.get_running_loop())
         try:
             source = SourceFile(self._files.read(job_id), job.mime_type)
             # The pipeline blocks (LLM calls take minutes); a thread keeps AMQP heartbeats alive.
-            output = await asyncio.to_thread(self._pipeline.run, source, observer)
+            output = await asyncio.to_thread(self._pipelines(progress).run, source)
             result = JobResult(job.job_id, result=output)
         except Exception as error:
             logger.exception("Job %s failed", job_id)

@@ -7,7 +7,7 @@ from forms2json.domain.form_draft import FormDraft
 class ComposeStep(PipelineStep[FormDraft, FormDefinition]):
     """FormDraft → FormDefinition without AI (FR-07, FR-09, K-14).
 
-    `confidence` holds the last run's per-element confidence, keyed by techName (FR-T1).
+    `confidence` holds the last run's per-element confidence, keyed by JSON path (FR-T1).
     """
 
     name = "compose"

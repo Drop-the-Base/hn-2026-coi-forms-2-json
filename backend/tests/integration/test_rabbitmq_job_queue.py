@@ -50,7 +50,9 @@ async def round_trip(tmp_path: Path) -> None:
     results_queue = await channel.get_queue(RESULTS)
 
     try:
-        await queue.consume_jobs(ProcessJob(files, Pipeline([Size()]), queue).execute)
+        await queue.consume_jobs(
+            ProcessJob(files, lambda progress: Pipeline([Size()], progress), queue).execute
+        )
         await queue.publish_job(job)
 
         result_message = await asyncio.wait_for(first_message(results_queue), timeout=10)
