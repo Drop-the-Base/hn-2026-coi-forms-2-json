@@ -7,12 +7,12 @@ kinds need, sets their visibility and gives every element a fresh id.
 
 import html
 import json
-import uuid
 from collections.abc import Collection, Sequence
 from importlib.resources import files
 
 from forms2json.domain.form_definition import JsonObject, JsonValue, Question, State, Tab
 from forms2json.domain.form_draft import ApplicantKind, Consent
+from forms2json.domain.layout import layout_page, new_id
 
 # SHOW queries address pages by title, so these titles are part of the conditions.
 APPLICANT_TAB = "Dane"
@@ -108,15 +108,14 @@ def _subject(options: set[str], entity: bool) -> Question:
     for_whom.options = [o for o in for_whom.options if o.name in options]
     if not entity:  # "Pełnomocnik / Reprezentant" applies only to legal entities
         subject.field.repeating_section_grid = subject.field.repeating_section_grid[:1]
-        subject.rows -= 1
     return subject
 
 
 def _section(name: str, visible_when: str | None = None) -> Question:
     section = Question.from_dict(_TEMPLATES[name])
-    section.field.id = str(uuid.uuid4())
+    section.field.id = new_id()
     for child in section.field.repeating_section_grid:
-        child.field.id = str(uuid.uuid4())
+        child.field.id = new_id()
     if visible_when:
         section.field.states = [State("SHOW", visible_when)]
     return section
@@ -131,12 +130,8 @@ def _answer(field: str, option: str) -> str:
 
 
 def _page(title: str, type_: str, sections: list[Question]) -> Tab:
-    # shortcut: sections stacked by their template rows; real layout comes with #14.
-    y = 0
-    for section in sections:
-        section.y = section.field.question_order = y
-        y += section.rows
-    return Tab(str(uuid.uuid4()), title, type_, sections)
+    layout_page(sections)
+    return Tab(new_id(), title, type_, sections)
 
 
 def _html(text: str) -> str:
