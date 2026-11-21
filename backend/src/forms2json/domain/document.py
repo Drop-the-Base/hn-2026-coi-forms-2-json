@@ -2,6 +2,14 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
+class SourceFile:
+    """Input of the Ingest step: the uploaded bytes and the MIME type detected at upload."""
+
+    content: bytes
+    mime_type: str
+
+
+@dataclass(frozen=True)
 class TextBlock:
     text: str
 

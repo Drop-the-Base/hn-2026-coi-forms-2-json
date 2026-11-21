@@ -44,6 +44,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0018](0018-klient-llm-openai-sdk.md) | Klient LLM: SDK `openai` z własną pętlą ponowień | Zaakceptowana |
 | [0019](0019-uwierzytelnianie-jwt-pyjwt.md) | Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu | Proponowana |
 | [0020](0020-pydantic-w-domenie.md) | Pydantic w domenie: tylko dla modeli-kontraktów z LLM (`FormDraft`) | Zaakceptowana |
+| [0021](0021-kolejka-aio-pika.md) | Kolejka zadań: `aio-pika` za portem `JobQueue` | Proponowana |
 
 ## Szablon
 

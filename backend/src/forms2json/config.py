@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     llm_base_url: str = "http://llm-runtime:11434/v1"  # Ollama in compose (ADR-0007)
     llm_model: str = "qwen3:1.7b"  # placeholder until the eval-based model ADR
     llm_timeout_seconds: float = Field(default=120.0, gt=0)
+    rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
 
     # FR-10. No default secret: the API must not start with a guessable key (NFR-07).
     # 32 bytes is the HS256 minimum from RFC 7518 §3.2.
