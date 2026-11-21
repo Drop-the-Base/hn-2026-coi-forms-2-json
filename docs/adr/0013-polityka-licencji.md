@@ -37,6 +37,7 @@ Przed dodaniem zależności sprawdzamy licencję na PyPI/npm **i** w repozytoriu
 | RabbitMQ | MPL-2.0 | niezmodyfikowany oficjalny obraz |
 | LibreOffice (konwersja `.doc`) | MPL-2.0 | niezmodyfikowany program wywoływany jako proces |
 | pathspec (zależność mypy) | MPL-2.0 | niezmodyfikowana biblioteka, tylko narzędzia dev ([ADR-0015](0015-narzedzia-backendu.md)) |
+| lightningcss (zależność Vite, z paczkami binarnymi `lightningcss-*`) | MPL-2.0 | niezmodyfikowane narzędzie build, tylko dev, nie trafia do zbudowanej aplikacji ([ADR-0016](0016-router-react-router.md)) |
 
 ## Konsekwencje
 
