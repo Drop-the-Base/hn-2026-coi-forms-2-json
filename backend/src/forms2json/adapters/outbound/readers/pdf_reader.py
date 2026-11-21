@@ -9,7 +9,7 @@ import pdfplumber
 from pdfplumber.page import Page as PdfPage
 
 from forms2json.adapters.outbound.readers.docx_reader import BOX_SPLIT, BOX_STATES
-from forms2json.application.ports.document_reader import DocumentReader
+from forms2json.application.ports.document_reader import DocumentReader, ExtractionFailed
 from forms2json.domain.document import Block, Checkbox, NormalizedDocument, Page, Table, TextBlock
 from forms2json.domain.upload import PDF
 
@@ -17,7 +17,7 @@ from forms2json.domain.upload import PDF
 MAX_PAGES = 100
 
 
-class ScannedPdf(ValueError):
+class ScannedPdf(ExtractionFailed):
     """A page has images but no text layer, so the PDF needs OCR (#25)."""
 
 
@@ -26,16 +26,22 @@ class PdfReader(DocumentReader):
         return mime_type == PDF
 
     def read(self, content: bytes) -> NormalizedDocument:
-        # shortcut: a ValueError subclass until ExtractionFailed (#77) lands, then derive from it.
-        with pdfplumber.open(io.BytesIO(content)) as pdf:
-            if len(pdf.pages) > MAX_PAGES:
-                raise ValueError(f"PDF ma za dużo stron (maks. {MAX_PAGES})")
-            return NormalizedDocument(pages=tuple(map(_page, pdf.pages)))
+        try:
+            with pdfplumber.open(io.BytesIO(content)) as pdf:
+                if len(pdf.pages) > MAX_PAGES:
+                    raise ExtractionFailed(f"PDF ma za dużo stron (maks. {MAX_PAGES}).")
+                return NormalizedDocument(pages=tuple(map(_page, pdf.pages)))
+        except ExtractionFailed:
+            raise
+        # pdfminer raises many unrelated types (its own, TypeError, KeyError...) on crafted files.
+        except Exception as error:
+            message = "Plik jest uszkodzony albo ma nieprawidłową strukturę."
+            raise ExtractionFailed(message) from error
 
 
 def _page(page: PdfPage) -> Page:
     if page.images and not page.chars:
-        raise ScannedPdf(f"Strona {page.page_number} nie ma warstwy tekstowej (skan), wymaga OCR")
+        raise ScannedPdf(f"Strona {page.page_number} nie ma warstwy tekstowej (skan), wymaga OCR.")
     return Page(number=page.page_number, blocks=tuple(_blocks(page)))
 
 

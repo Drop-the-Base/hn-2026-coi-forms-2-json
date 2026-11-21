@@ -4,6 +4,7 @@ import pytest
 
 from forms2json.adapters.outbound.readers import pdf_reader
 from forms2json.adapters.outbound.readers.pdf_reader import PdfReader, ScannedPdf
+from forms2json.application.ports.document_reader import ExtractionFailed
 from forms2json.domain.document import Block, Checkbox, NormalizedDocument, Table, TextBlock
 from forms2json.domain.upload import DOCX, PDF
 
@@ -81,5 +82,10 @@ def test_page_without_text_layer_needs_ocr() -> None:
 def test_too_many_pages_are_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(pdf_reader, "MAX_PAGES", 1)
 
-    with pytest.raises(ValueError, match="za dużo stron"):
+    with pytest.raises(ExtractionFailed, match="za dużo stron"):
         read_form("1. */*.pdf")
+
+
+def test_damaged_pdf_fails_with_extraction_failed() -> None:
+    with pytest.raises(ExtractionFailed, match="uszkodzony"):
+        PdfReader().read(b"%PDF-1.4\n" + b"\x00" * 64)

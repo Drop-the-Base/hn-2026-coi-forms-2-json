@@ -28,7 +28,7 @@ Koła `pypdfium2` dla musl dołączają `libgcc`/`libstdc++` (GPL z wyjątkiem r
 
 Kształt wyniku: strona PDF = `Page` z tym samym numerem. Na stronie linie tekstu i tabele posortowane po pozycji pionowej; tekst wewnątrz tabeli trafia tylko do tabeli. W tabeli zostają niepuste komórki w kolejności kolumn (jak w readerach arkuszy, bo ramki dzielą wiersze na wiele cienkich komórek). Znaki ☐ □ ❑ ☒ ☑ w linii tekstu dzielą ją na `Checkbox`-y, tą samą regułą co w DOCX.
 
-Strona z obrazami i bez żadnego znaku = skan: reader rzuca `ScannedPdf` z komunikatem „wymaga OCR”. Limit 100 stron chroni przed „bombą stron”; rozmiar pliku ogranicza walidacja przy wgrywaniu.
+Strona z obrazami i bez żadnego znaku = skan: reader rzuca `ScannedPdf` (podklasa `ExtractionFailed`) z komunikatem „wymaga OCR”. Inne błędy pdfminera (uszkodzony albo spreparowany plik) zamienia na `ExtractionFailed`. Limit 100 stron chroni przed „bombą stron”; rozmiar pliku ogranicza walidacja przy wgrywaniu.
 
 ## Rozważone alternatywy
 
