@@ -14,7 +14,10 @@ SCHEMA = {
 def test_local_runtime_returns_json_matching_the_schema() -> None:
     settings = Settings()  # LLM_BASE_URL / LLM_MODEL point at a running Ollama
     client = OpenAiCompatibleLlmClient(
-        settings.llm_base_url, settings.llm_model, settings.llm_timeout_seconds
+        settings.llm_base_url,
+        settings.llm_model,
+        settings.llm_timeout_seconds,
+        settings.llm_max_output_tokens,
     )
 
     result = client.generate_json(

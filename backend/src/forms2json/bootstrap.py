@@ -104,7 +104,10 @@ def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineOb
 
 def new_llm_client(settings: Settings) -> LlmClient:
     return OpenAiCompatibleLlmClient(
-        settings.llm_base_url, settings.llm_model, settings.llm_timeout_seconds
+        settings.llm_base_url,
+        settings.llm_model,
+        settings.llm_timeout_seconds,
+        settings.llm_max_output_tokens,
     )
 
 

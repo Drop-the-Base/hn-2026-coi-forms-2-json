@@ -19,9 +19,11 @@ class OpenAiCompatibleLlmClient(LlmClient):
         base_url: str,
         model: str,
         timeout_seconds: float,
+        max_output_tokens: int,
         http_client: httpx2.Client | None = None,
     ) -> None:
         self._model = model
+        self._max_output_tokens = max_output_tokens
         # Local runtimes ignore the key, but the SDK requires one. Retries are ours (below),
         # so one loop covers both network errors and invalid JSON.
         self._client = OpenAI(
@@ -49,6 +51,7 @@ class OpenAiCompatibleLlmClient(LlmClient):
                         "json_schema": {"name": "output", "schema": schema, "strict": True},
                     },
                     temperature=0,
+                    max_tokens=self._max_output_tokens,
                 )
             except openai.APIConnectionError as error:  # includes APITimeoutError
                 last_error = error
@@ -58,6 +61,12 @@ class OpenAiCompatibleLlmClient(LlmClient):
             if response.usage:
                 prompt_tokens += response.usage.prompt_tokens
                 completion_tokens += response.usage.completion_tokens
+            if response.choices[0].finish_reason == "length":
+                # temperature=0 repeats the same cut-off answer, so a retry only wastes time.
+                raise LlmCallFailed(
+                    f"answer cut off at {self._max_output_tokens} tokens"
+                    " (model looping, or input + output above the runtime context)"
+                )
             try:
                 data = json.loads(response.choices[0].message.content or "")
             except json.JSONDecodeError as error:

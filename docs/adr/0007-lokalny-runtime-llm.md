@@ -28,3 +28,4 @@ Rozwiązanie nie może używać LLM dostępnych tylko przez API (Z 5). Modele mu
 
 - Wagi modeli są duże: nie wkładamy ich do obrazu, tylko pobieramy do wolumenu przy pierwszym uruchomieniu (opis w README).
 - Każdy runtime z API OpenAI da się podstawić zmianą `LLM_BASE_URL`.
+- API OpenAI nie ustawia okna kontekstu, więc ustawia je runtime: Ollama ma domyślnie 4096 tokenów, a wtedy przy dłuższym formularzu prompt i odpowiedź się nie mieszczą. Ollama przesuwa wtedy kontekst, model gubi dokument i zaczyna wymyślać pola (#103). Ollamę uruchamiamy z `OLLAMA_CONTEXT_LENGTH=16384` (`LLM_MAX_INPUT_CHARS` 30 000 znaków to około 11k tokenów, do tego prompt i `LLM_MAX_OUTPUT_TOKENS` 4096). Odpowiedź ucięta na `LLM_MAX_OUTPUT_TOKENS` kończy próbę od razu błędem `LlmCallFailed`.
