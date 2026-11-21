@@ -1,6 +1,6 @@
 # ADR-0019: Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu
 
-- Status: Proponowana
+- Status: Proponowana; częściowo zastąpiona przez [ADR-0032](0032-logowanie-haslem-jwt-bez-wygasania.md) (token z `POST /api/v1/login`, `exp` opcjonalny)
 - Data: 2026-11-21
 - Wymagania: FR-10, NFR-07, NFR-08
 

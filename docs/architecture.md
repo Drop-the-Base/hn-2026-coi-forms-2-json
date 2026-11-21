@@ -29,7 +29,7 @@ flowchart LR
 | Usługa | Odpowiedzialność | Technologia | ADR |
 |---|---|---|---|
 | `frontend` | Upload, lista zadań, edytor JSON, podgląd formularza, confidence score | React + Vite + TypeScript, serwowany przez nginx bez roota | [0011](adr/0011-frontend-react-vite.md) |
-| `api` | JWT, walidacja pliku (FR-02..05), zapis do tmpfs, publikacja zadania, zwrot wyniku (tryb sync i async) | FastAPI | [0002](adr/0002-python-fastapi.md), [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
+| `api` | JWT (logowanie hasłem z `APP_PASSWORD`, [ADR-0032](adr/0032-logowanie-haslem-jwt-bez-wygasania.md)), walidacja pliku (FR-02..05), zapis do tmpfs, publikacja zadania, zwrot wyniku (tryb sync i async) | FastAPI | [0002](adr/0002-python-fastapi.md), [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
 | `rabbitmq` | Kolejka `jobs` i `results`, wiadomości nietrwałe | RabbitMQ | [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
 | `worker` | Pipeline: ekstrakcja → rozumienie → kompozycja → walidacja | czysty Python | [0006](adr/0006-pipeline-czysty-python.md) |
 | `llm-runtime` | Lokalne małe modele z API zgodnym z OpenAI | Ollama | [0007](adr/0007-lokalny-runtime-llm.md) |

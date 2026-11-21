@@ -1,9 +1,10 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { setToken, tokenProblem } from "../../shared/api/token";
+import { ApiError, login } from "../../shared/api/client";
+import { setToken } from "../../shared/api/token";
 import "./LoginPage.css";
 
-/** Pasting the token printed by `issue_token` (FR-10); there are no user accounts. */
+/** One shared clerk password from the server's .env, traded for a JWT (FR-10, ADR-0032). */
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -11,19 +12,27 @@ export function LoginPage() {
     (location.state as { error?: string } | null)?.error ?? null,
   );
   const [visible, setVisible] = useState(false);
+  const [pending, setPending] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const token = String(new FormData(event.currentTarget).get("token")).trim();
-    const problem = tokenProblem(token);
-    if (problem) {
-      setError(problem);
+    const password = String(new FormData(event.currentTarget).get("password"));
+    setPending(true);
+    try {
+      setToken((await login(password)).token);
+      void navigate("/", { replace: true });
+    } catch (e) {
+      setError(
+        e instanceof ApiError && e.status === 401
+          ? "Nieprawidłowe hasło."
+          : e instanceof Error
+            ? e.message
+            : String(e),
+      );
+      setPending(false);
       input.current?.focus();
-      return;
     }
-    setToken(token);
-    void navigate("/", { replace: true });
   }
 
   return (
@@ -41,34 +50,34 @@ export function LoginPage() {
             <div>
               <h1>Zaloguj się</h1>
               <p className="login__lede">
-                Wklej token dostępu, który dostałeś od administratora.
+                Wpisz hasło, które dostałeś od administratora.
               </p>
             </div>
 
             {error && (
-              <div className="alert alert--error" role="alert" id="token-msg">
+              <div className="alert alert--error" role="alert" id="login-msg">
                 <span className="i i-x-circle" aria-hidden="true"></span>
                 <p>{error}</p>
               </div>
             )}
 
-            <form onSubmit={onSubmit} noValidate>
+            <form onSubmit={(e) => void onSubmit(e)} noValidate>
               <div className="field">
-                <label className="field__label" htmlFor="token">
-                  Token dostępu
+                <label className="field__label" htmlFor="password">
+                  Hasło
                 </label>
                 <div className="input-row">
                   <input
                     ref={input}
-                    className="input input--mono"
-                    id="token"
-                    name="token"
+                    className="input"
+                    id="password"
+                    name="password"
                     type={visible ? "text" : "password"}
-                    autoComplete="off"
+                    autoComplete="current-password"
                     spellCheck={false}
                     autoFocus
                     aria-invalid={error ? true : undefined}
-                    aria-describedby={error ? "token-msg" : "token-hint"}
+                    aria-describedby={error ? "login-msg" : undefined}
                   />
                   <button
                     className="btn btn--secondary"
@@ -79,12 +88,12 @@ export function LoginPage() {
                     <span className="i i-eye" aria-hidden="true"></span>Pokaż
                   </button>
                 </div>
-                <p className="field__hint" id="token-hint">
-                  Token zaczyna się od „eyJ”. Nie zapisujemy go po zamknięciu
-                  karty.
-                </p>
               </div>
-              <button className="btn btn--primary" type="submit">
+              <button
+                className="btn btn--primary"
+                type="submit"
+                disabled={pending}
+              >
                 Zaloguj
               </button>
             </form>

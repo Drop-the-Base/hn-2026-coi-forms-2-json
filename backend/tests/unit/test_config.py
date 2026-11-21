@@ -21,6 +21,18 @@ def test_jwt_secret_is_required(monkeypatch: pytest.MonkeyPatch) -> None:
         Settings()
 
 
+@pytest.mark.parametrize("password", [None, "short"])
+def test_app_password_is_required_and_not_short(
+    monkeypatch: pytest.MonkeyPatch, password: str | None
+) -> None:
+    if password is None:
+        monkeypatch.delenv("APP_PASSWORD")
+    else:
+        monkeypatch.setenv("APP_PASSWORD", password)
+    with pytest.raises(ValidationError):
+        Settings()
+
+
 def test_short_jwt_secret_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("JWT_SECRET", "too-short")
     with pytest.raises(ValidationError):

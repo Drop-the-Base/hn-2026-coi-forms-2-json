@@ -5,6 +5,7 @@ type Schemas = components["schemas"];
 export type ApiConfig = Schemas["ApiConfig"];
 export type JobAccepted = Schemas["JobAccepted"];
 export type JobStatus = Schemas["JobStatus"];
+export type LoginToken = Schemas["LoginToken"];
 
 /** status 0 = no response from the server. `message` is ready to show to the user. */
 export class ApiError extends Error {
@@ -56,6 +57,14 @@ export async function apiFetch<T>(
   const response = await okResponse(path, init);
   return (await response.json().catch(() => null)) as T;
 }
+
+/** Trades the clerk password from the server's .env for a JWT (ADR-0032); 401 = wrong password. */
+export const login = (password: string) =>
+  apiFetch<LoginToken>("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
 
 export const getConfig = () => apiFetch<ApiConfig>("/config");
 
