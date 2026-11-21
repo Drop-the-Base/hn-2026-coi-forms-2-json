@@ -1,6 +1,6 @@
 # ADR-0018: Klient LLM: SDK `openai` z własną pętlą ponowień
 
-- Status: Proponowana
+- Status: Zaakceptowana
 - Data: 2026-11-21
 - Wymagania: NFR-03, NFR-13, NFR-16
 
