@@ -21,7 +21,7 @@ _job_duration = _meter.create_histogram(
 _job_cost = _meter.create_histogram(
     "forms2json.job.cost",
     unit="{cost}",
-    description="From COST_PER_1K_TOKENS and COST_PER_GPU_SECOND",
+    description="usage.cost of the job result, in COST_CURRENCY",
 )
 _job_confidence = _meter.create_histogram(
     "forms2json.job.confidence",
@@ -49,21 +49,14 @@ class MetricsObserver(PipelineObserver):
 class JobMetrics(JobObserver):
     """Job latency and outcome; for done jobs also cost and overall confidence (NFR-13)."""
 
-    def __init__(self, model: str, cost_per_1k_tokens: float, cost_per_gpu_second: float) -> None:
+    def __init__(self, model: str) -> None:
         self._model = model
-        self._cost_per_1k_tokens = cost_per_1k_tokens
-        self._cost_per_gpu_second = cost_per_gpu_second
 
     def job_finished(self, result: JobResult, seconds: float) -> None:
         if result.error:
             _job_duration.record(seconds, {"outcome": "failed", "error.type": result.error})
             return
         _job_duration.record(seconds, {"outcome": "done"})
-        # Shape set by ReportStep. Local models cost compute time, not an invoice (architecture §7).
-        usage = result.result["usage"]
-        tokens = usage["prompt_tokens"] + usage["completion_tokens"]
-        cost = (
-            tokens / 1000 * self._cost_per_1k_tokens + usage["seconds"] * self._cost_per_gpu_second
-        )
-        _job_cost.record(cost, {"gen_ai.request.model": self._model})
+        # Shape set by ReportStep.
+        _job_cost.record(result.result["usage"]["cost"], {"gen_ai.request.model": self._model})
         _job_confidence.record(result.result["confidence"]["overall"])

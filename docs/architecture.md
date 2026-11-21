@@ -35,10 +35,11 @@ flowchart LR
 | `llm-runtime` | Lokalne małe modele z API zgodnym z OpenAI | Ollama | [0007](adr/0007-lokalny-runtime-llm.md) |
 | `otel-collector` | Odbiór OTLP, przetwarzanie, eksport | OpenTelemetry Collector | [0009](adr/0009-obserwowalnosc-opentelemetry.md) |
 | `jaeger`, `prometheus` | Traces, metryki, widok Monitor (SPM) w Jaegerze | Jaeger, Prometheus | [0009](adr/0009-obserwowalnosc-opentelemetry.md) |
+| `perses` | Dashboard kosztu i jakości (dashboard jako kod) | Perses | [0030](adr/0030-dashboard-kosztow-perses.md) |
 
 Profile `docker compose`:
 - domyślny: `frontend`, `api`, `rabbitmq`, `worker`, `llm-runtime`, `otel-collector`;
-- `observability`: `jaeger`, `prometheus` (opcjonalnie `perses`).
+- `observability`: `jaeger`, `prometheus`, `perses`.
 
 ## 3. Przepływ żądania
 
@@ -108,7 +109,7 @@ Dlaczego AI jest tylko w kroku 2: 85–93% wzorcowego JSON-a to powtarzalne blok
 | Reguły | element naruszający regułę R/S dostaje karę |
 | Pochodzenie | element z bloku predefiniowanego ma 1.0 |
 
-Wynik ogólny to ważona średnia. Frontend podświetla elementy poniżej progu `CONFIDENCE_REVIEW_THRESHOLD`.
+Pewność OCR (średnia dokumentu) ogranicza z góry confidence każdego elementu; poniżej progu dochodzi ostrzeżenie `OCR-LOW-CONFIDENCE` ([ADR-0029](adr/0029-ocr-tesseract.md)). Wynik ogólny to ważona średnia. Frontend podświetla elementy poniżej progu `CONFIDENCE_REVIEW_THRESHOLD`.
 
 ## 5. Architektura heksagonalna (backend)
 
@@ -179,10 +180,10 @@ Typy API generujemy z OpenAPI FastAPI, więc kontrakt ma jedno źródło prawdy.
 | Trace żądania end-to-end | OTel SDK w `api` i `worker`, propagacja kontekstu w nagłówkach wiadomości RabbitMQ | Jaeger |
 | Span per krok pipeline'u i per wywołanie LLM | OTel, konwencje GenAI (`gen_ai.*`) | Jaeger |
 | Latencja, liczba żądań, błędy | OTel metrics (`http.server.request.duration`, czas kroków i zadania), `span_metrics` w Jaegerze | Prometheus → Jaeger Monitor (SPM) |
-| Tokeny i koszt per żądanie | adapter `LlmClient` (`gen_ai.client.token.usage`), koszt zadania w adapterze `JobMetrics` | Prometheus |
+| Tokeny i koszt per żądanie | adapter `LlmClient` (`gen_ai.client.token.usage`, koszt wywołania `forms2json.llm.call.cost`, błędy `forms2json.llm.errors`), koszt zadania (`usage.cost`) w adapterze `JobMetrics` | Prometheus → Perses |
 | Confidence ogólny per zadanie | metryka z workera (`JobMetrics`) | Prometheus |
 
-Koszt modeli lokalnych to nie faktura, tylko czas obliczeń. Liczymy go z konfigurowalnej stawki (`COST_PER_1K_TOKENS` lub `COST_PER_GPU_SECOND`), żeby porównywać modele i pokazać koszt wdrożenia (NFR-13).
+Koszt modeli lokalnych to nie faktura, tylko czas obliczeń. Liczymy go z konfigurowalnych stawek (`COST_PER_1M_INPUT_TOKENS`, `COST_PER_1M_OUTPUT_TOKENS` dla dostawcy w chmurze, `COST_PER_GPU_SECOND` dla modelu lokalnego; ADR-0030), żeby porównywać modele i pokazać koszt wdrożenia (NFR-13).
 
 ## 8. Ewaluacje
 

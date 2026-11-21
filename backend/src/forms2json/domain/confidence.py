@@ -23,13 +23,22 @@ class ConfidenceReport:
 
 
 def score(
-    sources: Mapping[str, float], issues: list[Issue], review_threshold: float
+    sources: Mapping[str, float],
+    issues: list[Issue],
+    review_threshold: float,
+    ocr_confidence: float | None = None,
 ) -> ConfidenceReport:
-    """Combine source confidences (OCR/LLM, 1.0 for predefined blocks) with rule penalties.
+    """Combine source confidences (LLM, 1.0 for predefined blocks) with OCR and rule penalties.
 
     An issue penalises every element whose path is a prefix of the issue path: the element itself
     and the elements that contain it (a field error also lowers its section and tab).
+    A form read by OCR is only as sure as its text, so no element scores above the OCR mean.
     """
+    if ocr_confidence is not None:
+        sources = {path: min(conf, ocr_confidence) for path, conf in sources.items()}
+        if ocr_confidence < review_threshold:
+            message = f"Tekst ze skanu odczytany z pewnością {ocr_confidence:.0%}, sprawdź pola."
+            issues = [*issues, Issue("OCR-LOW-CONFIDENCE", message, "", Severity.WARNING)]
     elements = {
         path: max(0.0, conf - sum(PENALTIES[i.severity] for i in issues if _within(i.path, path)))
         for path, conf in sources.items()

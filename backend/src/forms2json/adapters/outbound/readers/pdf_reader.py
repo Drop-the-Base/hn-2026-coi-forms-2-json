@@ -1,4 +1,7 @@
-"""PDF reader on pdfplumber (ADR-0023): text lines and ruled tables in reading order per page."""
+"""PDF reader on pdfplumber (ADR-0023): text lines and ruled tables in reading order per page.
+
+Pages without a text layer (scans) go to OCR (ADR-0029).
+"""
 
 import io
 from collections.abc import Iterator
@@ -10,18 +13,20 @@ from pdfplumber.page import Page as PdfPage
 
 from forms2json.adapters.outbound.readers.docx_reader import BOX_SPLIT, BOX_STATES
 from forms2json.application.ports.document_reader import DocumentReader, ExtractionFailed
+from forms2json.application.ports.ocr_engine import MAX_PIXELS, OcrEngine
 from forms2json.domain.document import Block, Checkbox, NormalizedDocument, Page, Table, TextBlock
 from forms2json.domain.upload import PDF
 
 # Guards against page bombs; the longest PDF in data/ (the standards guide) has 29 pages.
 MAX_PAGES = 100
-
-
-class ScannedPdf(ExtractionFailed):
-    """A page has images but no text layer, so the PDF needs OCR (#25)."""
+# Scans are rendered for OCR at the usual scanner resolution.
+SCAN_DPI = 300
 
 
 class PdfReader(DocumentReader):
+    def __init__(self, ocr: OcrEngine) -> None:
+        self._ocr = ocr
+
     def supports(self, mime_type: str) -> bool:
         return mime_type == PDF
 
@@ -30,7 +35,7 @@ class PdfReader(DocumentReader):
             with pdfplumber.open(io.BytesIO(content)) as pdf:
                 if len(pdf.pages) > MAX_PAGES:
                     raise ExtractionFailed(f"PDF ma za dużo stron (maks. {MAX_PAGES}).")
-                return NormalizedDocument(pages=tuple(map(_page, pdf.pages)))
+                return NormalizedDocument(pages=tuple(map(self._page, pdf.pages)))
         except ExtractionFailed:
             raise
         # pdfminer raises many unrelated types (its own, TypeError, KeyError...) on crafted files.
@@ -38,11 +43,20 @@ class PdfReader(DocumentReader):
             message = "Plik jest uszkodzony albo ma nieprawidłową strukturę."
             raise ExtractionFailed(message) from error
 
+    def _page(self, page: PdfPage) -> Page:
+        if page.images and not page.chars:
+            return Page(number=page.page_number, blocks=self._ocr.recognize(_render(page)))
+        return Page(number=page.page_number, blocks=tuple(_blocks(page)))
 
-def _page(page: PdfPage) -> Page:
-    if page.images and not page.chars:
-        raise ScannedPdf(f"Strona {page.page_number} nie ma warstwy tekstowej (skan), wymaga OCR.")
-    return Page(number=page.page_number, blocks=tuple(_blocks(page)))
+
+def _render(page: PdfPage) -> bytes:
+    """A page without a text layer (a scan) as PNG for OCR."""
+    # Checked before rendering: a crafted page size would allocate gigabytes.
+    if page.width * page.height * (SCAN_DPI / 72) ** 2 > MAX_PIXELS:
+        raise ExtractionFailed(f"Strona {page.page_number} jest za duża do OCR.")
+    png = io.BytesIO()
+    page.to_image(resolution=SCAN_DPI).original.save(png, format="PNG")
+    return png.getvalue()
 
 
 def _blocks(page: PdfPage) -> Iterator[Block]:

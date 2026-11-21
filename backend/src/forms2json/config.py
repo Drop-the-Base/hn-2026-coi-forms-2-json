@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     llm_response_format: Literal["json_schema", "json_object"] = "json_schema"
     # soffice can hang on a broken .doc; the worker kills it after this (#24).
     doc_conversion_timeout_seconds: float = Field(default=60.0, gt=0)
+    ocr_lang: str = "pol"  # Tesseract language pack installed in the worker image (ADR-0029)
     rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
     # Roughly 10k tokens of Polish text: fits the context of small local models with the prompt.
     llm_max_input_chars: int = Field(default=30_000, gt=0)
@@ -32,9 +33,11 @@ class Settings(BaseSettings):
     llm_max_output_tokens: int = Field(default=4096, gt=0)
     # FR-T1: below this an element is not "high" in frontend/DESIGN.md and needs a human look.
     confidence_review_threshold: float = Field(default=0.85, ge=0, le=1)
-    # NFR-13: job cost in made-up units to compare models; 0 = not counted.
-    cost_per_1k_tokens: float = Field(default=0.0, ge=0)
+    # NFR-13: provider prices per 1M tokens (or GPU time for a local model); 0 = not counted.
+    cost_per_1m_input_tokens: float = Field(default=0.0, ge=0)
+    cost_per_1m_output_tokens: float = Field(default=0.0, ge=0)
     cost_per_gpu_second: float = Field(default=0.0, ge=0)
+    cost_currency: str = "USD"
 
     # FR-10. No default secret: the API must not start with a guessable key (NFR-07).
     # 32 bytes is the HS256 minimum from RFC 7518 §3.2.

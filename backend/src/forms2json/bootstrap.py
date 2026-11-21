@@ -31,9 +31,11 @@ from forms2json.adapters.outbound.observability.log_observer import (
 )
 from forms2json.adapters.outbound.observability.metrics import JobMetrics, MetricsObserver
 from forms2json.adapters.outbound.observability.tracing_observer import TracingObserver
+from forms2json.adapters.outbound.ocr.tesseract_ocr import TesseractOcr
 from forms2json.adapters.outbound.queue.rabbitmq_job_queue import RabbitMqJobQueue
 from forms2json.adapters.outbound.readers.doc_reader import DocReader
 from forms2json.adapters.outbound.readers.docx_reader import DocxReader
+from forms2json.adapters.outbound.readers.image_reader import ImageReader
 from forms2json.adapters.outbound.readers.ods_reader import OdsReader
 from forms2json.adapters.outbound.readers.pdf_reader import PdfReader
 from forms2json.adapters.outbound.readers.xlsx_reader import XlsxReader
@@ -54,6 +56,7 @@ from forms2json.application.use_cases.get_job_result import GetJobResult
 from forms2json.application.use_cases.process_job import ProcessJob
 from forms2json.application.use_cases.submit_job import SubmitJob
 from forms2json.config import Settings, get_settings
+from forms2json.domain.cost import CostRates
 
 FILE_CLEANUP_INTERVAL_SECONDS = 60
 
@@ -129,19 +132,23 @@ async def _delete_expired_files_forever(files: FileStore) -> None:
 
 def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineObserver], Pipeline]:
     """Adapters are created once; steps per job, because Understand and Compose keep run state."""
+    ocr = TesseractOcr(settings.ocr_lang)
     readers = [
         DocxReader(),
         DocReader(settings.doc_conversion_timeout_seconds),
         XlsxReader(),
         OdsReader(),
-        PdfReader(),
+        PdfReader(ocr),
+        ImageReader(ocr),
     ]
     tracing, logs, step_metrics = TracingObserver(), LogObserver(), MetricsObserver()
 
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
         understand = UnderstandStep(llm, settings.llm_max_input_chars)
         compose = ComposeStep()
-        report = ReportStep(understand, compose, settings.confidence_review_threshold)
+        report = ReportStep(
+            understand, compose, settings.confidence_review_threshold, cost_rates(settings)
+        )
         return Pipeline(
             [IngestStep(readers), understand, compose, ValidateStep(), report],
             tracing,
@@ -161,6 +168,16 @@ def new_llm_client(settings: Settings) -> LlmClient:
         settings.llm_max_output_tokens,
         api_key=settings.llm_api_key.get_secret_value(),
         response_format=settings.llm_response_format,
+        cost_rates=cost_rates(settings),
+    )
+
+
+def cost_rates(settings: Settings) -> CostRates:
+    return CostRates(
+        settings.cost_per_1m_input_tokens,
+        settings.cost_per_1m_output_tokens,
+        settings.cost_per_gpu_second,
+        settings.cost_currency,
     )
 
 
@@ -170,7 +187,4 @@ async def build_worker(settings: Settings) -> tuple[RabbitMqJobQueue, ProcessJob
     queue = await RabbitMqJobQueue.connect(settings.rabbitmq_url)
     files = TmpfsFileStore(settings.file_store_dir, settings.file_ttl_seconds)
     pipelines = pipeline_factory(settings, new_llm_client(settings))
-    job_metrics = JobMetrics(
-        settings.llm_model, settings.cost_per_1k_tokens, settings.cost_per_gpu_second
-    )
-    return queue, ProcessJob(files, pipelines, queue, [job_metrics, JobLog()])
+    return queue, ProcessJob(files, pipelines, queue, [JobMetrics(settings.llm_model), JobLog()])

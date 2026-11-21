@@ -1,0 +1,6 @@
+kind: Project
+metadata:
+  name: forms2json
+spec:
+  display:
+    name: forms2json

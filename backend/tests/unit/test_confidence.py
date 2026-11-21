@@ -55,3 +55,19 @@ def test_empty_form_scores_zero() -> None:
     assert report.elements == {}
     assert report.overall == 0.0
     assert report.to_review == []
+
+
+def test_ocr_confidence_caps_every_element() -> None:
+    report = score({TAB: 1.0, FIELD: 0.6}, [], review_threshold=0.85, ocr_confidence=0.9)
+
+    assert report.elements == {TAB: 0.9, FIELD: 0.6}
+    assert report.issues == []
+
+
+def test_low_ocr_confidence_is_a_warning_and_sends_all_to_review() -> None:
+    report = score({TAB: 1.0, FIELD: 0.9}, [], review_threshold=0.85, ocr_confidence=0.7)
+
+    assert report.to_review == [TAB, FIELD]
+    assert [(i.code, i.severity) for i in report.issues] == [
+        ("OCR-LOW-CONFIDENCE", Severity.WARNING)
+    ]

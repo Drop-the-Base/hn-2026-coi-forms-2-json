@@ -38,4 +38,5 @@ Grafany nie używamy: AGPL jest wprost wymieniona w zakazie (NFR-02), a SPM w Ja
 ## Konsekwencje
 
 - Koszt liczymy modeli lokalnych ze stawki konfiguracyjnej (`COST_PER_1K_TOKENS` / `COST_PER_GPU_SECOND`), bo nie ma faktury.
+- Dopisek 2026-11-21: Perses włączony, stawki osobno za tokeny wejścia i wyjścia (`COST_PER_1M_*`), patrz [ADR-0030](0030-dashboard-kosztow-perses.md).
 - Bez profilu `observability` aplikacja działa normalnie, a Collector może eksportować do logów.

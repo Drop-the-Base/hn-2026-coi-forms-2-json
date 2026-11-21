@@ -9,6 +9,7 @@ import {
 import { JsonEditor, type JsonEditorHandle } from "./JsonEditor";
 import { PreviewBoundary } from "./PreviewBoundary";
 import { ProblemKind, ProblemList } from "./ProblemList";
+import { SourceView } from "./SourceView";
 import {
   buildProblems,
   checkJson,
@@ -21,7 +22,8 @@ import {
 } from "./review";
 import "./ReviewScreen.css";
 
-type Pane = "podglad" | "edytor" | "problemy";
+type Pane = "podglad" | "oryginal" | "edytor" | "problemy";
+type Right = "podglad" | "oryginal";
 
 const LEVEL_WORD = { low: "niska", medium: "średnia", high: "wysoka" };
 
@@ -89,6 +91,12 @@ function ReviewScreen({ result, jobId, fileName }: Props) {
   const [current, setCurrent] = useState<number | null>(null);
   const [selection, setSelection] = useState<{ path: string } | null>(null);
   const [pane, setPane] = useState<Pane>("podglad");
+  // The right column on a wide screen; on a narrow one every pane is its own tab.
+  const [right, setRight] = useState<Right>("podglad");
+  const show = (id: Pane) => {
+    setPane(id);
+    if (id === "podglad" || id === "oryginal") setRight(id);
+  };
   const [announcement, setAnnouncement] = useState("");
   const describe = (path: string) => describePath(form, path);
 
@@ -152,6 +160,10 @@ function ReviewScreen({ result, jobId, fileName }: Props) {
     className: "pane",
     "aria-labelledby": `${id}-h`,
     "data-hidden": pane !== id || undefined,
+    "data-off":
+      (id === "podglad" || id === "oryginal") && right !== id
+        ? true
+        : undefined,
   });
 
   return (
@@ -277,6 +289,7 @@ function ReviewScreen({ result, jobId, fileName }: Props) {
           [
             ["podglad", "i-eye", "Podgląd"],
             ["edytor", "i-braces", "JSON"],
+            ["oryginal", "i-file", "Oryginał"],
             ["problemy", "i-list", "Problemy"],
           ] as const
         ).map(([id, icon, label]) => (
@@ -287,7 +300,7 @@ function ReviewScreen({ result, jobId, fileName }: Props) {
             type="button"
             aria-selected={pane === id}
             aria-controls={id}
-            onClick={() => setPane(id)}
+            onClick={() => show(id)}
           >
             <span className={`i ${icon}`} aria-hidden="true"></span>
             {label}
@@ -392,6 +405,44 @@ function ReviewScreen({ result, jobId, fileName }: Props) {
                 Zgodny ze schematem eUsługi
               </span>
             )}
+          </div>
+        </section>
+
+        <div className="right-head">
+          <div className="tabs" role="tablist" aria-label="Prawa kolumna">
+            {(
+              [
+                ["podglad", "Podgląd formularza"],
+                ["oryginal", "Oryginał"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                className="tab"
+                role="tab"
+                type="button"
+                aria-selected={right === id}
+                aria-controls={id}
+                onClick={() => show(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <span className="muted note">
+            {right === "oryginal"
+              ? (fileName ?? "wgrany dokument")
+              : "tak zobaczy go wnioskodawca w eUsłudze"}
+          </span>
+        </div>
+
+        <section {...paneProps("oryginal")}>
+          <div className="pane__head">
+            <h2 id="oryginal-h">Oryginał</h2>
+            <span className="muted note">{fileName ?? "wgrany dokument"}</span>
+          </div>
+          <div className="pane__body">
+            <SourceView jobId={jobId} sourceText={result.source_text} />
           </div>
         </section>
 
