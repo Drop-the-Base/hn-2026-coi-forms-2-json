@@ -2,6 +2,7 @@ import io
 
 from openpyxl import load_workbook
 
+from forms2json.adapters.outbound.readers.zip_archive import open_archive
 from forms2json.application.ports.document_reader import DocumentReader
 from forms2json.domain.document import NormalizedDocument, Page, Table
 from forms2json.domain.upload import XLSX
@@ -19,15 +20,17 @@ class XlsxReader(DocumentReader):
         return mime_type == XLSX
 
     def read(self, content: bytes) -> NormalizedDocument:
-        workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
-        try:
-            pages = []
-            for number, sheet in enumerate(workbook.worksheets, start=1):
-                rows = tuple(row for row in map(_row, sheet.iter_rows(values_only=True)) if row)
-                pages.append(Page(number=number, blocks=(Table(rows=rows),) if rows else ()))
-            return NormalizedDocument(pages=tuple(pages))
-        finally:
-            workbook.close()
+        # openpyxl opens the ZIP itself; the guard checks sizes first and maps openpyxl's errors.
+        with open_archive(content):
+            workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+            try:
+                pages = []
+                for number, sheet in enumerate(workbook.worksheets, start=1):
+                    rows = tuple(r for r in map(_row, sheet.iter_rows(values_only=True)) if r)
+                    pages.append(Page(number=number, blocks=(Table(rows=rows),) if rows else ()))
+                return NormalizedDocument(pages=tuple(pages))
+            finally:
+                workbook.close()
 
 
 def _row(values: tuple[object, ...]) -> tuple[str, ...]:

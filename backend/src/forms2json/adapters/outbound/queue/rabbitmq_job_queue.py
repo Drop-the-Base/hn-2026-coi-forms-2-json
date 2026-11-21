@@ -68,6 +68,12 @@ class RabbitMqJobQueue(JobQueue):
     async def publish_progress(self, event: ProgressEvent) -> None:
         await self._publish(self._progress, str(event.job_id), _progress.dump_json(event))
 
+    async def consume_progress(self, handler: Callable[[ProgressEvent], Awaitable[None]]) -> None:
+        # Each api replica gets its own queue with every job's progress; it dies with the replica.
+        queue = await self._channel.declare_queue(exclusive=True, auto_delete=True)
+        await queue.bind(self._progress, routing_key="#")
+        await self._consume(queue.name, _progress, handler)
+
     async def _consume[T](
         self, queue_name: str, schema: TypeAdapter[T], handler: Callable[[T], Awaitable[None]]
     ) -> None:
