@@ -38,6 +38,78 @@
   gap: var(--space-1);
 }
 
+/* samouczek (#188): natywny <dialog> na cały ekran, przyciemnienie z wycięciem wokół celu i karta obok */
+.tour {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: hidden;
+}
+.tour::backdrop {
+  background: none;
+}
+.tour__hole {
+  position: absolute;
+  border-radius: var(--radius-sheet);
+  box-shadow:
+    0 0 0 2px var(--color-sheet),
+    0 0 0 4px var(--color-accent),
+    0 0 0 100vmax var(--color-backdrop);
+  pointer-events: none;
+}
+.tour__card {
+  position: absolute;
+  box-sizing: border-box;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: var(--space-5);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sheet);
+  background: var(--color-sheet);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-raised);
+}
+.tour__card h2 {
+  font-size: var(--text-lg);
+  margin-top: var(--space-1);
+}
+.tour__card #tour-p {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+.tour__pos {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+.tour__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.tour__skip {
+  margin-right: auto;
+  padding-inline: 0;
+}
+.tour__q {
+  display: inline-grid;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-strong);
+  line-height: 1;
+}
+
 /* pasek „Problem N z M”: zawsze widoczny, pokazuje tylko następną decyzję */
 .band {
   position: sticky;

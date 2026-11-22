@@ -18,6 +18,7 @@ import { FormTree } from "./FormTree";
 import { JsonEditor, type JsonEditorHandle } from "./JsonEditor";
 import { PreviewBoundary } from "./PreviewBoundary";
 import { ProblemKind, ProblemList } from "./ProblemList";
+import { ReviewTour } from "./ReviewTour";
 import { SourceView } from "./SourceView";
 import {
   buildProblems,
@@ -251,10 +252,11 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           </p>
         </div>
         <div className="rhead__summary">
-          <span>
+          <ReviewTour />
+          <span data-tour="ocena">
             Ocena ogólna <ConfidenceBadge value={result.confidence.overall} />
           </span>
-          <span>
+          <span data-tour="ocena">
             {problems.length === 0
               ? "Brak problemów"
               : [
@@ -264,7 +266,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
                   .filter(Boolean)
                   .join(", ")}
           </span>
-          <div className="rhead__dl">
+          <div className="rhead__dl" data-tour="pobierz">
             <button
               className="btn btn--primary"
               type="button"
@@ -357,6 +359,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           id="lista"
           className="pane"
           aria-label="Struktura i problemy"
+          data-tour="problemy"
           data-a={a === "lista" || undefined}
         >
           <div className="pane__head pane__head--tabs">
@@ -433,6 +436,13 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
               key={column}
               id={`kolumna-${column}`}
               className={`colhead colhead--${column}`}
+              data-tour={
+                view === "podglad"
+                  ? "podglad"
+                  : view === "oryginal"
+                    ? undefined
+                    : "edycja"
+              }
             >
               {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
               <div
@@ -455,6 +465,11 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
                       aria-selected={on}
                       tabIndex={on ? 0 : -1}
                       aria-controls={id}
+                      data-tour={
+                        column === "a" && id === "oryginal"
+                          ? "oryginal"
+                          : undefined
+                      }
                       onClick={() => choose(column, id)}
                     >
                       {label}
@@ -506,6 +521,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           id="pole"
           className="pane__body pane--view"
           aria-label="Pole"
+          data-tour="edycja"
           {...placed("pole")}
         >
           <FieldInspector
@@ -526,6 +542,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           id="edytor"
           className="pane__body pane--view"
           aria-label="JSON"
+          data-tour="edycja"
           {...placed("edytor")}
         >
           <JsonEditor
@@ -549,6 +566,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           id="podglad"
           className="pane__body pane--view pane--preview"
           aria-label="Podgląd formularza"
+          data-tour="podglad"
           {...placed("podglad")}
         >
           {!valid && (
