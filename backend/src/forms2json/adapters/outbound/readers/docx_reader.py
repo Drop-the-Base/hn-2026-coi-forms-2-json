@@ -5,6 +5,7 @@ from collections.abc import Iterator
 from itertools import batched
 from xml.etree import ElementTree
 
+from forms2json.adapters.outbound.readers import docx_layout
 from forms2json.adapters.outbound.readers.zip_archive import open_archive
 from forms2json.application.ports.document_reader import DocumentReader
 from forms2json.domain.document import Block, Checkbox, NormalizedDocument, Page, Table, TextBlock
@@ -39,6 +40,8 @@ class DocxReader(DocumentReader):
         with open_archive(content) as archive:
             names = archive.namelist()
             body = ElementTree.fromstring(archive.read("word/document.xml"))
+            if docx_layout.is_positioned(body):  # a PDF converted to Word: text boxes, no flow
+                return docx_layout.read(body)
             numbering = "word/numbering.xml"
             bullets = (
                 _bullets(ElementTree.fromstring(archive.read(numbering)))
