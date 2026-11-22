@@ -142,9 +142,9 @@ def test_fill_in_adds_missing_fields_after_their_section() -> None:
     assert [(c.target, c.source) for c in draft.conditions] == [("a2", "a1")]
 
 
-def test_fill_in_off_makes_one_call() -> None:
+def test_short_document_gets_no_fill_in() -> None:
     llm = FakeLlm(VALID)
-    UnderstandStep(llm, max_input_chars=10_000, fill=False).run(DOCUMENT)
+    UnderstandStep(llm, max_input_chars=10_000, fill_min_chars=10_000).run(DOCUMENT)
     assert len(llm.calls) == 1
 
 
