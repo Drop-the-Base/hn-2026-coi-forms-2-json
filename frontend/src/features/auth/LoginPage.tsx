@@ -37,6 +37,7 @@ export function LoginPage() {
 
   return (
     <div className="login">
+      <title>Logowanie – forms2json</title>
       <header className="shell">
         <div className="shell__in">
           <span className="wordmark">
@@ -75,6 +76,8 @@ export function LoginPage() {
                     type={visible ? "text" : "password"}
                     autoComplete="current-password"
                     spellCheck={false}
+                    // The only field on the page; the user comes here to type it.
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
                     aria-invalid={error ? true : undefined}
                     aria-describedby={error ? "login-msg" : undefined}

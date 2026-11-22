@@ -17,6 +17,10 @@ export function Layout() {
 
   return (
     <>
+      {/* First focusable element, so keyboard users can bypass the header (WCAG 2.4.1). */}
+      <a className="skip" href="#tresc">
+        Przejdź do treści
+      </a>
       <header className="shell">
         <div className="shell__in">
           <span className="wordmark">
@@ -37,7 +41,9 @@ export function Layout() {
           </div>
         </div>
       </header>
-      <Outlet />
+      <div id="tresc">
+        <Outlet />
+      </div>
     </>
   );
 }

@@ -44,6 +44,8 @@ export function PreviewQuestions(props: Props) {
         const value = props.confidence[path];
         const flagged = value !== undefined && value < REVIEW_THRESHOLD;
         return (
+          // Mouse shortcut only: keyboard users pick the element in the structure list (WCAG 2.1.1 met there).
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div
             key={q.field.id}
             className={

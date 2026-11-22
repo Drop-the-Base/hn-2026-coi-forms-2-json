@@ -190,6 +190,23 @@ nginx nie przekazuje `/docs` do api (http://localhost:8080/docs to strona SPA). 
 
 http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wgraj pliki (przeciągnij albo „Wybierz pliki”) → lista zadań ze statusem → „Zobacz wynik”. Token żyje w karcie przeglądarki (`sessionStorage`); po wygaśnięciu UI wraca do logowania.
 
+## Deklaracja dostępności
+
+Panel urzędnika ma spełniać **WCAG 2.1 na poziomie AA** (ustawa o dostępności cyfrowej podmiotów publicznych).
+
+Jak sprawdzamy:
+- **lint**: `eslint-plugin-jsx-a11y` (reguły `recommended`) w `npm run lint`;
+- **axe**: `axe-core` w Vitest (`frontend/src/app/a11y.test.tsx`) na ekranach logowania, wgrywania z listą zadań, postępu, przeglądu i podglądu formularza, bez błędów WCAG 2.1 A/AA ([ADR-0033](docs/adr/0033-narzedzia-dostepnosci-frontendu.md));
+- **kontrast**: `python3 frontend/design/kontrast.py` liczy kontrast par tokenów (tekst 4,5:1, elementy UI 3:1);
+- **klawiatura**: testy ekranów przechodzą główne ścieżki rolami i etykietami; link „Przejdź do treści”, widoczny fokus, postęp zadania ogłaszany przez `aria-live="polite"`.
+
+Znane ograniczenia:
+- kliknięcie pola w podglądzie wybiera je do edycji tylko myszą; z klawiatury ten sam wybór jest w liście „Struktura”;
+- oryginał dokumentu (PDF w ramce, obraz skanu) jest dostępny tak, jak sam plik; skan nie ma warstwy tekstowej;
+- testy axe w jsdom nie liczą kontrastu na żywo ani układu; brak jeszcze audytu z czytnikiem ekranu (NVDA, VoiceOver) i testu e2e klawiaturą w CI.
+
+Problemy z dostępnością zgłaszaj jako issue z etykietą `frontend`.
+
 ## Obserwowalność
 
 `docker compose --profile observability up -d`, potem:
