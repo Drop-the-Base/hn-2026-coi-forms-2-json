@@ -12,6 +12,7 @@ from forms2json.application.log_context import job_id_var
 from forms2json.application.ports.job_observer import JobObserver
 from forms2json.application.ports.job_queue import JobResult
 from forms2json.application.ports.pipeline_observer import PipelineObserver
+from forms2json.domain.form_draft import InvalidFormDraft
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +54,13 @@ class LogObserver(PipelineObserver):
         try:
             yield
         except Exception as error:
-            # Only the type: parser messages may quote document content.
+            # Only the type: parser messages may quote document content. InvalidFormDraft
+            # holds only field paths and pydantic messages, and says why the LLM answer failed.
             seconds = time.monotonic() - start
-            logger.warning("Step %s failed in %.2fs: %s", name, seconds, type(error).__name__)
+            reason = f": {error}" if isinstance(error, InvalidFormDraft) else ""
+            logger.warning(
+                "Step %s failed in %.2fs: %s%s", name, seconds, type(error).__name__, reason
+            )
             raise
         logger.info("Step %s done in %.2fs", name, time.monotonic() - start)
 

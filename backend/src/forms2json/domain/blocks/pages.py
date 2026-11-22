@@ -93,6 +93,30 @@ def finish_page() -> Tab:
     return _page(FINISH_TAB, "FINISH", [_section("podglad_uzupelnionego_wniosku")])
 
 
+def other_address(tech_name: str, title: str, tab: str, suffix: str) -> Question:
+    """The Standardy address block (template adres_zamieszkania) for someone else's address.
+
+    Fields get `suffix` in their techNames (kraj_<suffix>, ulica_<suffix>_zagranica) and the
+    block's country conditions follow the new names and page. Dictionaries stay; registry data
+    (MLPZ) belongs to the applicant only, so it is dropped.
+    """
+    block = _section("adres_zamieszkania")
+    block.field.tech_name, block.field.title = tech_name, title
+    for child in block.field.repeating_section_grid:
+        base = child.field.tech_name.removesuffix("_zagranica")
+        tail = "_zagranica" if base != child.field.tech_name else ""
+        child.field.tech_name = f"{base}_{suffix}{tail}"
+        if child.field.default_value_type == "EXTERNAL_SYSTEM":
+            child.field.default_value = child.field.default_value_type = None
+        for state in child.field.states or []:
+            state.query = (
+                state.query.replace(f"'{APPLICANT_TAB}' in title", f"'{tab}' in title")
+                .replace("'adres_zamieszkania' in", f"'{tech_name}' in")
+                .replace("'kraj' in", f"'kraj_{suffix}' in")
+            )
+    return block
+
+
 def _office(addressee: str) -> Question:
     is_organ = addressee.lower().removeprefix("do ").startswith(ORGAN_PREFIXES)
     office = _section(

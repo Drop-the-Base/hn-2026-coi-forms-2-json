@@ -14,6 +14,7 @@ from forms2json.application.use_cases.process_job import ProcessJob
 from forms2json.bootstrap import pipeline_factory
 from forms2json.config import Settings
 from forms2json.domain.document import SourceFile
+from forms2json.domain.form_draft import DRAFT_ADDITION_SCHEMA
 from forms2json.domain.upload import DOCX
 from tests.unit.test_compose_step import DRAFT_5
 from tests.unit.test_process_job import FakeFileStore, FakeJobQueue
@@ -21,16 +22,18 @@ from tests.unit.test_process_job import FakeFileStore, FakeJobQueue
 DATA = Path(__file__).parents[3] / "data"
 (DOCX_5,) = DATA.glob("5. */Wniosek o stwierdzenie nadpłaty podatku.docx")
 VALID = DRAFT_5.model_dump(mode="json")
+NOTHING_MISSING: dict[str, Any] = {"fields": [], "conditions": []}
 
 
 class FakeLlm(LlmClient):
-    """Answers in order; each answer costs 10 + 5 tokens and 1 s."""
+    """Answers in order, the fill-in finds nothing missing; each call costs 10 + 5 tokens, 1 s."""
 
     def __init__(self, *answers: dict[str, Any]) -> None:
         self._answers = list(answers)
 
     def generate_json(self, system: str, user: str, schema: dict[str, Any]) -> LlmResult:
-        return LlmResult(self._answers.pop(0), LlmUsage(10, 5, 1.0))
+        answer = NOTHING_MISSING if schema is DRAFT_ADDITION_SCHEMA else self._answers.pop(0)
+        return LlmResult(answer, LlmUsage(10, 5, 1.0))
 
 
 def _run(llm: LlmClient, mime_type: str = DOCX) -> object:
@@ -53,9 +56,9 @@ def test_docx_becomes_form_with_confidence_issues_usage_and_source_text() -> Non
     # numer_rachunku: field 0.8, condition 0.6 -> below the 0.85 review threshold
     assert any(confidence["elements"][p] == 0.6 for p in confidence["to_review"])
     assert result["usage"] == {
-        "prompt_tokens": 10,
-        "completion_tokens": 5,
-        "seconds": 1.0,
+        "prompt_tokens": 20,  # the answer and the fill-in call
+        "completion_tokens": 10,
+        "seconds": 2.0,
         "cost": 0.0,  # rates default to 0
         "currency": "USD",
     }
@@ -71,9 +74,9 @@ def test_usage_cost_comes_from_configured_rates() -> None:
 
     result = pipeline.run(SourceFile(DOCX_5.read_bytes(), DOCX))
 
-    # 10 input tokens at 1 per token + 5 output tokens at 2 per token
+    # 20 input tokens at 1 per token + 10 output tokens at 2 per token (answer + fill-in)
     assert isinstance(result, dict)
-    assert (result["usage"]["cost"], result["usage"]["currency"]) == (20.0, "PLN")
+    assert (result["usage"]["cost"], result["usage"]["currency"]) == (40.0, "PLN")
 
 
 def test_unsupported_format_fails_with_readable_error() -> None:
@@ -82,7 +85,7 @@ def test_unsupported_format_fails_with_readable_error() -> None:
 
 
 def test_usage_does_not_leak_between_jobs() -> None:
-    # Job 1 needs a retry (2 calls), job 2 one call; both share one LLM client like in the worker.
+    # Job 1 needs a retry (3 calls with the fill-in), job 2 two; one LLM client like in the worker.
     llm = FakeLlm({"title": "no"}, VALID, VALID)
     files, queue = FakeFileStore(), FakeJobQueue()
     use_case = ProcessJob(files, pipeline_factory(Settings(), llm), queue)
@@ -91,4 +94,4 @@ def test_usage_does_not_leak_between_jobs() -> None:
         files.save(str(job.job_id), DOCX_5.read_bytes())
         asyncio.run(use_case.execute(job))
 
-    assert [r.result["usage"]["prompt_tokens"] for r in queue.results] == [20, 10]
+    assert [r.result["usage"]["prompt_tokens"] for r in queue.results] == [30, 20]
