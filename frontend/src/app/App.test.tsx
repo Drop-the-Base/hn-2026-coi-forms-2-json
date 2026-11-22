@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { createMemoryRouter } from "react-router";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { fakeToken, server, sseStream, TEST_PASSWORD } from "../test/server";
 import { setToken } from "../shared/api/token";
 import { App } from "./App";
@@ -367,4 +367,28 @@ test("401 ze strumienia SSE wraca do logowania", async () => {
   expect(
     await screen.findByRole("heading", { name: "Zaloguj się" }),
   ).toBeDefined();
+});
+
+test("uszkodzona lista zadań w sessionStorage nie wywraca strony", async () => {
+  setToken(fakeToken());
+  sessionStorage.setItem("forms2json.jobs", "{nie json");
+  renderApp();
+  expect(await screen.findByRole("button", { name: "Wyloguj" })).toBeDefined();
+});
+
+test("błąd renderowania pokazuje ekran z Odśwież zamiast pustej strony", async () => {
+  setToken(fakeToken());
+  vi.spyOn(console, "error").mockImplementation(() => {});
+  const form = { ...wynik.form, title: { zly: "kształt" } };
+  server.use(
+    http.get(`*/api/v1/jobs/${JOB_ID}`, () =>
+      HttpResponse.json({ status: "done", result: { ...wynik, form } }),
+    ),
+  );
+  renderApp(`/zadania/${JOB_ID}`);
+  expect(
+    await screen.findByText("Coś poszło nie tak", {}, { timeout: 4000 }),
+  ).toBeDefined();
+  expect(screen.getByRole("button", { name: "Odśwież" })).toBeDefined();
+  expect(screen.getByRole("link", { name: "Wróć do zadań" })).toBeDefined();
 });

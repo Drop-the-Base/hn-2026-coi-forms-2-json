@@ -402,16 +402,18 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
             aria-label="Struktura"
             data-off={left !== "struktura" || undefined}
           >
-            <FormTree
-              form={form}
-              selected={selected}
-              flagged={flagged}
-              confidence={result.confidence.elements}
-              onSelect={(path) => {
-                pick(path);
-                if (narrow()) choose("a", "pole");
-              }}
-            />
+            <PreviewBoundary form={form}>
+              <FormTree
+                form={form}
+                selected={selected}
+                flagged={flagged}
+                confidence={result.confidence.elements}
+                onSelect={(path) => {
+                  pick(path);
+                  if (narrow()) choose("a", "pole");
+                }}
+              />
+            </PreviewBoundary>
           </div>
           <div
             id="problemy"
@@ -524,19 +526,21 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           data-tour="edycja"
           {...placed("pole")}
         >
-          <FieldInspector
-            form={(check.data ?? form) as FormJson}
-            path={selected}
-            confidence={result.confidence.elements}
-            focus={
-              problem && selected && problem.path.startsWith(`${selected}.`)
-                ? problem.path.slice(selected.length + 1).split(/[.[]/)[0]
-                : undefined
-            }
-            editable={!check.syntaxError}
-            onEdit={edit}
-            describe={describe}
-          />
+          <PreviewBoundary form={check.data ?? form}>
+            <FieldInspector
+              form={(check.data ?? form) as FormJson}
+              path={selected}
+              confidence={result.confidence.elements}
+              focus={
+                problem && selected && problem.path.startsWith(`${selected}.`)
+                  ? problem.path.slice(selected.length + 1).split(/[.[]/)[0]
+                  : undefined
+              }
+              editable={!check.syntaxError}
+              onEdit={edit}
+              describe={describe}
+            />
+          </PreviewBoundary>
         </section>
         <section
           id="edytor"

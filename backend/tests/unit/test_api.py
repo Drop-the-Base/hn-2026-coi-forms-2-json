@@ -334,3 +334,25 @@ def test_convert_rejects_a_bad_file(api: Api) -> None:
     response = api.client.post("/api/v1/forms:convert", files={"file": ("wniosek.exe", PDF)})
     assert response.status_code == 415
     assert api.queue.jobs == []
+
+
+def test_events_end_when_a_lost_job_expires(api: Api, monkeypatch: pytest.MonkeyPatch) -> None:
+    job_id = uuid.uuid4()
+    clock = [0.0]
+    api.results = InMemoryResultStore(ttl_seconds=60, clock=lambda: clock[0])
+    api.app.state.get_job_result = GetJobResult(api.results)
+    api.results.add_pending(job_id)
+
+    async def wait_for(awaitable: Any, timeout: float) -> Any:
+        awaitable.close()
+        clock[0] = 61  # no event came and the pending entry ran out: the worker lost the job
+        raise TimeoutError
+
+    monkeypatch.setattr("forms2json.adapters.inbound.http.app.asyncio.wait_for", wait_for)
+
+    events = sse_events(api, job_id)
+
+    assert [(e["step"], e["status"], e["message"]) for e in events] == [
+        ("job", "progress", ""),
+        ("job", "failed", "UnknownJob"),
+    ]
