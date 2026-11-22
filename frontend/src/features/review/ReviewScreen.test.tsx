@@ -107,6 +107,22 @@ test("błąd schematu blokuje pobranie z powodem", async () => {
   expect(screen.getByText("Popraw 1 błąd schematu, aby pobrać.")).toBeDefined();
 });
 
+test("JSON bez stron zgodny ze schematem nie wywraca ekranu, pobranie działa", async () => {
+  renderReview();
+  const text = editor().state.doc.toString();
+  typeInEditor({ from: 0, to: text.length, insert: '{"title": "Wniosek"}' });
+  expect(
+    (await screen.findAllByText(/Tego widoku nie da się pokazać/)).length,
+  ).toBeGreaterThan(0);
+  expect(
+    screen.getByRole("heading", { level: 1, name: "Wniosek" }),
+  ).toBeDefined();
+  expect(
+    (screen.getByRole("button", { name: "Pobierz JSON" }) as HTMLButtonElement)
+      .disabled,
+  ).toBe(false);
+});
+
 test("Pobierz JSON daje zmieniony JSON z nazwą z tytułu", async () => {
   let blob: Blob | undefined;
   URL.createObjectURL = vi.fn((b: Blob) => {

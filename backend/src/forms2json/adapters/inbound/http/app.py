@@ -29,6 +29,8 @@ from forms2json.domain.upload import (
     UnsupportedFileType,
 )
 
+EVENTS_RECHECK_SECONDS = 60.0
+
 
 class JobAccepted(BaseModel):
     job_id: UUID
@@ -180,7 +182,9 @@ async def _listen(job_id: UUID, request: Request) -> AsyncIterator[_Listener]:
 
 @router.get("/jobs/{job_id}/events", response_class=EventSourceResponse)
 async def job_events(
-    job_id: UUID, listener: Annotated[_Listener, Depends(_listen)]
+    job_id: UUID,
+    listener: Annotated[_Listener, Depends(_listen)],
+    get_result: Annotated[GetJobResult, Depends(_get_job_result)],
 ) -> AsyncIterable[ServerSentEvent]:
     """Live progress (FR-T5, ADR-0014); FastAPI adds a keep-alive ping every 15 s."""
     result, events = listener
@@ -189,7 +193,18 @@ async def job_events(
         return
     yield ServerSentEvent(event="progress", data=ProgressEvent(job_id, "job", "progress"))
     while True:
-        event = await events.get()
+        try:
+            event = await asyncio.wait_for(events.get(), EVENTS_RECHECK_SECONDS)
+        except TimeoutError:
+            # A job whose final event got lost (worker or broker died) would ping forever; its
+            # pending entry expires after the result TTL, and then the stream ends as failed.
+            try:
+                result = get_result.execute(job_id)
+            except UnknownJob:
+                result = JobResult(job_id, error=UnknownJob.__name__)
+            if result is None:
+                continue
+            event = job_finished(result)
         yield ServerSentEvent(event="progress", data=event)
         if event.step == "job":
             return

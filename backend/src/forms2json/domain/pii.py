@@ -93,7 +93,9 @@ _DETECTORS: list[tuple[str, re.Pattern[str], Validator]] = [
     ),
     ("REGON", re.compile(_NUMBER.format(r"\d{9}")), is_regon),
     ("NR DOWODU", re.compile(r"(?<![A-Za-z])[A-Z]{3} ?\d{6}(?!\d)"), is_id_card),
-    ("E-MAIL", re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+"), _any),
+    # RFC 5321 lengths (64 local, 63 per label) bound the backtracking: unbounded runs made a
+    # long word without "@" quadratic, a crafted file could hold the worker for hours.
+    ("E-MAIL", re.compile(r"[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63})+"), _any),
     ("TELEFON", re.compile(_NUMBER.format(_PHONE)), is_phone),
 ]
 

@@ -5,7 +5,7 @@ interface Props {
   children: ReactNode;
 }
 
-// A schema-valid JSON can still lack fields the preview needs (e.g. `flow`); the editor must survive that.
+// A schema-valid JSON can still lack parts the tree, inspector or preview need (e.g. `tabs`); the editor must survive that.
 export class PreviewBoundary extends Component<
   Props,
   { form: unknown; failed: boolean }
@@ -27,8 +27,9 @@ export class PreviewBoundary extends Component<
       <div className="alert alert--warning review-alert" role="status">
         <span className="i i-alert" aria-hidden="true"></span>
         <p>
-          Podglądu nie da się pokazać: w JSON-ie brakuje części, których
-          potrzebuje formularz (np. <code>flow</code> albo <code>field</code>).
+          Tego widoku nie da się pokazać: w JSON-ie brakuje części, których
+          potrzebuje formularz (np. <code>tabs</code>, <code>flow</code> albo{" "}
+          <code>field</code>).
         </p>
       </div>
     ) : (

@@ -1,3 +1,4 @@
+import time
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -77,6 +78,13 @@ def test_mask_replaces_each_kind_and_counts_it() -> None:
     assert found == Counter(
         {"PESEL": 1, "NR DOWODU": 1, "NIP": 1, "REGON": 1, "IBAN": 1, "E-MAIL": 1, "TELEFON": 2}
     )
+
+
+def test_mask_stays_linear_on_a_long_word_without_at_sign() -> None:
+    # Was quadratic: 200k characters took minutes and held the worker.
+    started = time.perf_counter()
+    assert mask_pii("a" * 200_000, Counter()) == "a" * 200_000
+    assert time.perf_counter() - started < 2
 
 
 FILLED = NormalizedDocument(
