@@ -85,7 +85,7 @@ Gwarancje NFR-06 (pliki tylko tymczasowo):
 
 ```mermaid
 flowchart LR
-    A[1. Ingest<br/>plik → NormalizedDocument] --> B[2. Understand<br/>LLM → FormDraft]
+    A[1. Ingest<br/>plik → NormalizedDocument] --> P[1a. PiiGuard<br/>maskowanie danych osobowych] --> B[2. Understand<br/>LLM → FormDraft]
     B --> C[3. Compose<br/>FormDraft → FormDefinition]
     C --> D[4. Validate<br/>reguły R + S]
     D --> E[Wynik + confidence + issues]
@@ -94,6 +94,7 @@ flowchart LR
 | Krok | Wejście → wyjście | AI? | Opis |
 |---|---|---|---|
 | 1. Ingest | bajty pliku → `NormalizedDocument` (bloki tekstu, tabele, strony, pola wyboru) | tylko OCR dla obrazów | Adapter per format. DOC → konwersja przez LibreOffice headless. Obrazy cięte na strony A4. |
+| 1a. PiiGuard | `NormalizedDocument` → `NormalizedDocument` | nie | Wypełniony wniosek zamiast blankietu (NFR-06): gdy plik ma PESEL albo nr dowodu (z sumą kontrolną), PESEL, NIP, REGON, nr dowodu, IBAN, e-mail i telefon są maskowane (`[PESEL]`) przed LLM-em. Raport dostaje ostrzeżenie `PII-MASKED`, metryka `forms2json.pii.masked` liczbę wykryć. Sam e-mail, telefon czy konto nie wystarczą: blankiety podają dane kontaktowe urzędu. |
 | 2. Understand | `NormalizedDocument` → `FormDraft` | **tak** | LLM wyciąga: tytuł, adresata, kto może złożyć wniosek (osoba / inna osoba / podmiot / pełnomocnik), pola przedmiotu wniosku z typem, warunki, załączniki, opłaty, zgody. Wyjście strukturalne (JSON Schema), z confidence per element. |
 | 3. Compose | `FormDraft` → `FormDefinition` | nie | Deterministycznie: bloki predefiniowane ze Standardów, strony tematyczne, layout `x/y/rows/cols`, UUID, `techName`, JSONata, słowniki, dane inicjalne, `flow`. |
 | 4. Validate | `FormDefinition` → lista `Issue` | nie | Reguły techniczne (FR-08) + Standardy (FR-09) + schemat (FR-06). Naruszenia obniżają confidence. |

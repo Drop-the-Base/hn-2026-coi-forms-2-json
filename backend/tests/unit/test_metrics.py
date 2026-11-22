@@ -87,6 +87,14 @@ def test_done_job_records_outcome_cost_from_result_and_confidence() -> None:
     assert collected["forms2json.job.confidence"] == [({}, 0.9, 1)]
 
 
+def test_done_job_counts_masked_personal_data_by_kind() -> None:
+    result = {"usage": {"cost": 0.0}, "confidence": {"overall": 0.9}, "pii": {"PESEL": 2}}
+
+    JobMetrics("m").job_finished(JobResult(uuid.uuid4(), result), 7.0)
+
+    assert _collect()["forms2json.pii.masked"] == [({"kind": "PESEL"}, 2, 1)]
+
+
 def test_failed_job_records_outcome_and_error_type_only() -> None:
     JobMetrics("m").job_finished(JobResult(uuid.uuid4(), error="LlmCallFailed"), 3.0)
 
