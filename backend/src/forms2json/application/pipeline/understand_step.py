@@ -49,8 +49,9 @@ class UnderstandStep(PipelineStep[NormalizedDocument, FormDraft]):
 
     name = "understand"
 
-    def __init__(self, llm: LlmClient, max_input_chars: int) -> None:
+    def __init__(self, llm: LlmClient, max_input_chars: int, fill: bool = True) -> None:
         self._llm = llm
+        self._fill_enabled = fill
         self._max_input_chars = max_input_chars
         self.usage: LlmUsage | None = None
         self.source_text = ""
@@ -68,7 +69,7 @@ class UnderstandStep(PipelineStep[NormalizedDocument, FormDraft]):
         except InvalidFormDraft as error:
             retry = f"{text}\n\nPoprzednia odpowiedź była niepoprawna, popraw ją:\n{error}"
             draft = self._ask(retry)
-        return self._fill(text, draft)
+        return self._fill(text, draft) if self._fill_enabled else draft
 
     def _ask(self, user: str) -> FormDraft:
         result = self._call(SYSTEM_PROMPT, user, FORM_DRAFT_SCHEMA)
