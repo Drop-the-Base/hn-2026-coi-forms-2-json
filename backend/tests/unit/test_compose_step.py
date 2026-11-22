@@ -66,7 +66,14 @@ DRAFT_5 = _draft(
         {"target": "nazwa", "source": "co", "value": ZALICZ, "confidence": 1.0},
         {"target": "rachunek", "source": "co", "value": ZWROT, "confidence": 0.6},
     ],
-    attachments=[{"name": "Plik deklaracji podatkowej", "required": True, "confidence": 0.7}],
+    attachments=[
+        {
+            "key": "deklaracja",
+            "name": "Plik deklaracji podatkowej",
+            "required": True,
+            "confidence": 0.7,
+        }
+    ],
 )
 BUILDING = "Lokalizacja budynku"
 DRAFT_1 = _draft(
@@ -215,4 +222,27 @@ def test_person_and_address_expand_into_standard_blocks_with_suffix() -> None:
         assert [s.type for s in shown.states or []] == ["SHOW"]
     paths = {f.tech_name: path for path, f in _paths(form)}
     assert step.confidence[paths["ulica_malzonek"]] == 0.7
+    assert [i for i in check_rules(form) if i.severity is Severity.ERROR] == []
+
+
+def test_condition_can_show_an_attachment() -> None:
+    choice = _field("rodzaj", "Wybierz rodzaj prac", "Prace", "RADIO", options=["Remont", "Budowa"])
+    plan: JsonValue = {"key": "plan", "name": "Plan prac", "required": True, "confidence": 0.9}
+    condition: JsonObject = {
+        "target": "plan",
+        "source": "rodzaj",
+        "value": "Budowa",
+        "confidence": 0.6,
+    }
+    step = ComposeStep()
+    form = step.run(
+        _draft("Wniosek", "Urząd", [choice], attachments=[plan], conditions=[condition])
+    )
+
+    upload = next(f for f in _fields(form) if f.title == "Plan prac")
+    assert upload.type == "FILE_UPLOADER"
+    assert [s.type for s in upload.states or []] == ["SHOW"]
+    assert "'wybierz_rodzaj_prac' in" in (upload.states or [])[0].query
+    paths = {f.tech_name: path for path, f in _paths(form)}
+    assert step.confidence[paths[upload.tech_name]] == 0.6
     assert [i for i in check_rules(form) if i.severity is Severity.ERROR] == []

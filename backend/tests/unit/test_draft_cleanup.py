@@ -1,6 +1,12 @@
 import pytest
 
-from forms2json.domain.draft_cleanup import SUBJECT_FALLBACK, clean_draft, sentence_case
+from forms2json.domain.draft_cleanup import (
+    INFERRED_CONFIDENCE,
+    SUBJECT_FALLBACK,
+    clean_draft,
+    sentence_case,
+)
+from forms2json.domain.form_definition import JsonObject, JsonValue
 from forms2json.domain.form_draft import ApplicantKind
 from tests.unit.test_compose_step import _draft, _field
 
@@ -69,3 +75,45 @@ def test_keeps_subject_fields_that_only_resemble_noise() -> None:
     ]
     clean = clean_draft(_draft("Wniosek o coś", "Wójt Gminy Leśna", fields))
     assert [f.key for f in clean.fields] == ["data_ur", "miejsce", "adres_n", "gmina", "imie"]
+
+
+CHOICE = "Wybierz rodzaj prac"
+WORKS = [
+    _field("rodzaj", CHOICE, "Prace", "RADIO", options=["Remont", "Budowa"]),
+    _field("opis", "Opis prac", "Prace", "TEXTAREA"),
+    _field("opis", "Opis prac dodatkowych", "Prace", "TEXTAREA"),
+]
+PLAN: JsonObject = {"key": "plan", "name": "Plan prac", "required": True, "confidence": 0.9}
+
+
+def _when(target: str, source: str = "rodzaj") -> JsonValue:
+    return {"target": target, "source": source, "value": "Budowa", "confidence": 0.9}
+
+
+def test_dangling_condition_is_dropped_and_its_target_flagged() -> None:
+    conditions = [_when("opis", source="brak"), _when("nie_ma"), _when("plan")]
+    clean = clean_draft(
+        _draft("Wniosek", "Urząd", WORKS, conditions=conditions, attachments=[PLAN])
+    )
+
+    assert [c.target for c in clean.conditions] == ["plan"]  # an attachment is a valid target
+    assert [(f.key, f.confidence) for f in clean.fields] == [
+        ("rodzaj", 0.9),
+        ("opis", INFERRED_CONFIDENCE),  # always shown now: review it
+        ("opis_2", 0.9),
+    ]
+
+
+def test_repeated_keys_get_a_suffix_across_fields_and_attachments() -> None:
+    attachments: JsonValue = [PLAN, PLAN | {"key": "opis"}]
+    clean = clean_draft(_draft("Wniosek", "Urząd", WORKS, attachments=attachments))
+
+    assert [f.key for f in clean.fields] == ["rodzaj", "opis", "opis_2"]
+    assert [a.key for a in clean.attachments] == ["plan", "opis_3"]
+
+
+def test_address_or_person_is_no_condition_source() -> None:
+    fields = [*WORKS, _field("inwestor", "Imię i nazwisko inwestora", "Prace", "PERSON")]
+    clean = clean_draft(_draft("W", "U", fields, conditions=[_when("opis", source="inwestor")]))
+
+    assert clean.conditions == []
