@@ -89,6 +89,53 @@
         ]
       }
     },
+    "/api/v1/jobs/batch": {
+      "post": {
+        "summary": "Submit Batch",
+        "description": "Batch mode (FR-E6): one job per file; a rejected file does not stop the others.",
+        "operationId": "submit_batch_api_v1_jobs_batch_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_submit_batch_api_v1_jobs_batch_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Za dużo plików w jednej paczce"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/jobs/{job_id}": {
       "get": {
         "summary": "Get Job",
@@ -355,13 +402,76 @@
           "max_upload_bytes": {
             "type": "integer",
             "title": "Max Upload Bytes"
+          },
+          "max_batch_files": {
+            "type": "integer",
+            "title": "Max Batch Files"
           }
         },
         "type": "object",
         "required": [
-          "max_upload_bytes"
+          "max_upload_bytes",
+          "max_batch_files"
         ],
         "title": "ApiConfig"
+      },
+      "BatchAccepted": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Batch Id"
+          },
+          "jobs": {
+            "items": {
+              "$ref": "#/components/schemas/BatchItem"
+            },
+            "type": "array",
+            "title": "Jobs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_id",
+          "jobs"
+        ],
+        "title": "BatchAccepted"
+      },
+      "BatchItem": {
+        "properties": {
+          "file_name": {
+            "type": "string",
+            "title": "File Name"
+          },
+          "job_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Job Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file_name"
+        ],
+        "title": "BatchItem"
       },
       "Body_convert_form_api_v1_forms_convert_post": {
         "properties": {
@@ -390,6 +500,23 @@
           "file"
         ],
         "title": "Body_render_preview_api_v1_preview_post"
+      },
+      "Body_submit_batch_api_v1_jobs_batch_post": {
+        "properties": {
+          "files": {
+            "items": {
+              "type": "string",
+              "contentMediaType": "application/octet-stream"
+            },
+            "type": "array",
+            "title": "Files"
+          }
+        },
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "title": "Body_submit_batch_api_v1_jobs_batch_post"
       },
       "Body_submit_job_api_v1_jobs_post": {
         "properties": {

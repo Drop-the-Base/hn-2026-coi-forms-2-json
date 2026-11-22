@@ -66,7 +66,14 @@ DRAFT_5 = _draft(
         {"target": "nazwa", "source": "co", "value": ZALICZ, "confidence": 1.0},
         {"target": "rachunek", "source": "co", "value": ZWROT, "confidence": 0.6},
     ],
-    attachments=[{"name": "Plik deklaracji podatkowej", "required": True, "confidence": 0.7}],
+    attachments=[
+        {
+            "key": "deklaracja",
+            "name": "Plik deklaracji podatkowej",
+            "required": True,
+            "confidence": 0.7,
+        }
+    ],
 )
 BUILDING = "Lokalizacja budynku"
 DRAFT_1 = _draft(
@@ -171,3 +178,102 @@ def test_draft_without_subject_fields_skips_the_subject_page() -> None:
     form = ComposeStep().run(_draft("Wniosek", "Urząd", []))
 
     assert [t.title for t in form.tabs] == ["Dane", "Kontakt i zgody", "Strona końcowa"]
+
+
+JOINT = "Wspólność majątkowa"
+SPOUSE = "Dane współmałżonka"
+# Generic draft: someone else's name and address, both shown only for one answer.
+DRAFT_SPOUSE = _draft(
+    "Deklaracja",
+    "Urząd",
+    [
+        _field("rodzaj", "Wybierz rodzaj własności", SPOUSE, "RADIO", options=[JOINT, "Inna"]),
+        _field("wspolmalzonek", "Imię i nazwisko współmałżonka", SPOUSE, "PERSON"),
+        _field(
+            "malzonek_adres", "Adres zamieszkania współmałżonka", SPOUSE, "ADDRESS", confidence=0.7
+        ),
+    ],
+    conditions=[
+        {"target": key, "source": "rodzaj", "value": JOINT, "confidence": 0.8}
+        for key in ("wspolmalzonek", "malzonek_adres")
+    ],
+)
+
+
+def test_person_and_address_expand_into_standard_blocks_with_suffix() -> None:
+    step = ComposeStep()
+    form = step.run(DRAFT_SPOUSE)
+
+    sections = sorted(form.tabs[1].questions, key=lambda q: q.y)
+    assert [s.field.title for s in sections] == [SPOUSE, "Adres zamieszkania współmałżonka"]
+    person = [c.field for c in sections[0].field.repeating_section_grid][1:]
+    assert [(f.tech_name, f.title) for f in person] == [
+        ("imie_wspolmalzonek", "Imię"),
+        ("nazwisko_wspolmalzonek", "Nazwisko"),
+    ]
+    address = {c.field.tech_name: c.field for c in sections[1].field.repeating_section_grid}
+    assert address["kraj_malzonek"].dictionary_name == "Kraje"
+    assert address["wojewodztwo_malzonek"].dictionary_name == "TERYT_4G_DOWODOWY"
+    assert all(f.default_value_type is None for f in address.values())  # no registry data
+    # Country conditions follow the new names and page.
+    query = (address["ulica_malzonek"].states or [])[0].query
+    assert "'Dane współmałżonka' in title" in query and "'kraj_malzonek' in" in query
+    for shown in (*person, sections[1].field):
+        assert [s.type for s in shown.states or []] == ["SHOW"]
+    paths = {f.tech_name: path for path, f in _paths(form)}
+    assert step.confidence[paths["ulica_malzonek"]] == 0.7
+    assert [i for i in check_rules(form) if i.severity is Severity.ERROR] == []
+
+
+def test_page_splits_subject_tabs_and_condition_value_names_the_option() -> None:
+    options: list[JsonValue] = ["1. właściciel", "2. współwłaściciel (wspólność majątkowa)"]
+    draft = _draft(
+        "Deklaracja",
+        "Prezydent Miasta",
+        [
+            _field("typ", "Wybierz typ", "Składający", "RADIO", options=options, page="Strona A"),
+            _field("malzonek", "Dane współmałżonka", "Współmałżonek", "PERSON", page="Strona A"),
+            _field("kwota", "Kwota", "Opłata", "NUMBER", page="Strona B"),
+        ],
+        conditions=[{"target": "malzonek", "source": "typ", "value": "2", "confidence": 0.9}],
+    )
+    form = ComposeStep().run(draft)
+
+    assert [t.title for t in form.tabs[1:-2]] == ["Strona A", "Strona B"]
+    imie = next(f for f in _fields(form) if f.tech_name == "imie_malzonek")
+    assert imie.states and imie.states[0].query.startswith(
+        "(\"2. współwłaściciel (wspólność majątkowa)\" in tabs['Strona A' in title]"
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("2", "2. b (x)"), ("b", "2. b (x)"), ("2. b (x)", "2. b (x)"), ("9", "9"), ("Tak", "Tak")],
+)
+def test_option_for(value: str, expected: str) -> None:
+    from forms2json.domain.compose import option_for
+
+    assert option_for(value, ["1. a", "2. b (x)"]) == expected
+
+
+def test_condition_can_show_an_attachment() -> None:
+    choice = _field("rodzaj", "Wybierz rodzaj prac", "Prace", "RADIO", options=["Remont", "Budowa"])
+    plan: JsonValue = {"key": "plan", "name": "Plan prac", "required": True, "confidence": 0.9}
+    condition: JsonObject = {
+        "target": "plan",
+        "source": "rodzaj",
+        "value": "Budowa",
+        "confidence": 0.6,
+    }
+    step = ComposeStep()
+    form = step.run(
+        _draft("Wniosek", "Urząd", [choice], attachments=[plan], conditions=[condition])
+    )
+
+    upload = next(f for f in _fields(form) if f.title == "Plan prac")
+    assert upload.type == "FILE_UPLOADER"
+    assert [s.type for s in upload.states or []] == ["SHOW"]
+    assert "'wybierz_rodzaj_prac' in" in (upload.states or [])[0].query
+    paths = {f.tech_name: path for path, f in _paths(form)}
+    assert step.confidence[paths[upload.tech_name]] == 0.6
+    assert [i for i in check_rules(form) if i.severity is Severity.ERROR] == []

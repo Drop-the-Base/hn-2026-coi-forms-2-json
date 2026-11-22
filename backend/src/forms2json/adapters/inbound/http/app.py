@@ -4,7 +4,7 @@ import asyncio
 import hmac
 from collections.abc import AsyncIterable, AsyncIterator
 from typing import Annotated, Any, Literal, cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, UploadFile, status
 from fastapi.responses import JSONResponse, Response
@@ -22,11 +22,27 @@ from forms2json.application.use_cases.render_preview import RenderPreview
 from forms2json.application.use_cases.submit_job import SubmitJob
 from forms2json.config import Settings, get_settings
 from forms2json.domain.standards import read_schema
-from forms2json.domain.upload import FileTooLarge, InvalidFileName, UnsupportedFileType
+from forms2json.domain.upload import (
+    FileTooLarge,
+    InvalidFileName,
+    InvalidUpload,
+    UnsupportedFileType,
+)
 
 
 class JobAccepted(BaseModel):
     job_id: UUID
+
+
+class BatchItem(BaseModel):
+    file_name: str
+    job_id: UUID | None = None
+    error: str | None = None  # the Polish reason the file was rejected
+
+
+class BatchAccepted(BaseModel):
+    batch_id: UUID
+    jobs: list[BatchItem]
 
 
 class JobStatus(BaseModel):
@@ -37,6 +53,7 @@ class JobStatus(BaseModel):
 
 class ApiConfig(BaseModel):
     max_upload_bytes: int
+    max_batch_files: int
 
 
 _HTTP_STATUS: dict[type[Exception], int] = {
@@ -108,6 +125,36 @@ async def submit_job(
     return JobAccepted(job_id=await submit.execute(file.filename or "", content))
 
 
+@router.post(
+    "/jobs/batch",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model_exclude_none=True,
+    responses={400: {"description": "Za dużo plików w jednej paczce"}},
+)
+async def submit_batch(
+    files: list[UploadFile],
+    submit: Annotated[SubmitJob, Depends(_submit_job)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> BatchAccepted:
+    """Batch mode (FR-E6): one job per file; a rejected file does not stop the others."""
+    if len(files) > settings.max_batch_files:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"Za dużo plików: {len(files)}, limit to {settings.max_batch_files} naraz.",
+        )
+    # shortcut: the batch id is not stored, it only groups the jobs for the client; store it
+    # when someone needs GET /jobs/batch/{id}.
+    jobs = []
+    for file in files:
+        name = file.filename or ""
+        content = await file.read(settings.max_upload_bytes + 1)
+        try:
+            jobs.append(BatchItem(file_name=name, job_id=await submit.execute(name, content)))
+        except InvalidUpload as error:
+            jobs.append(BatchItem(file_name=name, error=str(error)))
+    return BatchAccepted(batch_id=uuid4(), jobs=jobs)
+
+
 @router.get("/jobs/{job_id}", response_model_exclude_none=True)
 async def get_job(
     job_id: UUID, get_result: Annotated[GetJobResult, Depends(_get_job_result)]
@@ -151,7 +198,9 @@ async def job_events(
 @router.get("/config")
 async def get_config(settings: Annotated[Settings, Depends(get_settings)]) -> ApiConfig:
     """Limits the frontend checks before uploading (FR-05)."""
-    return ApiConfig(max_upload_bytes=settings.max_upload_bytes)
+    return ApiConfig(
+        max_upload_bytes=settings.max_upload_bytes, max_batch_files=settings.max_batch_files
+    )
 
 
 @router.get("/form-schema")

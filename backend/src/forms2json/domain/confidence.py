@@ -10,8 +10,9 @@ from dataclasses import dataclass
 from forms2json.domain.rules import Issue, Severity
 
 # Penalty per issue, subtracted from the source confidence and floored at 0.
-# An ERROR breaks the output, a WARNING is a Standards deviation the official forms also make.
-PENALTIES = {Severity.ERROR: 0.3, Severity.WARNING: 0.1}
+# An ERROR breaks the output, a WARNING is a Standards deviation the official forms also make,
+# an INFO is a readability hint that says nothing about the extraction.
+PENALTIES = {Severity.ERROR: 0.3, Severity.WARNING: 0.1, Severity.INFO: 0.0}
 
 
 @dataclass(frozen=True)
