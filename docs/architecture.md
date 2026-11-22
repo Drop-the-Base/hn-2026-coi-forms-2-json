@@ -29,7 +29,7 @@ flowchart LR
 | Usługa | Odpowiedzialność | Technologia | ADR |
 |---|---|---|---|
 | `frontend` | Upload, lista zadań, edytor JSON, podgląd formularza, confidence score | React + Vite + TypeScript, serwowany przez nginx bez roota | [0011](adr/0011-frontend-react-vite.md) |
-| `api` | JWT, walidacja pliku (FR-02..05), zapis do tmpfs, publikacja zadania, zwrot wyniku (tryb sync i async) | FastAPI | [0002](adr/0002-python-fastapi.md), [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
+| `api` | JWT (logowanie hasłem z `APP_PASSWORD`, [ADR-0032](adr/0032-logowanie-haslem-jwt-bez-wygasania.md)), walidacja pliku (FR-02..05), zapis do tmpfs, publikacja zadania, zwrot wyniku (tryb sync i async) | FastAPI | [0002](adr/0002-python-fastapi.md), [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
 | `rabbitmq` | Kolejka `jobs` i `results`, wiadomości nietrwałe | RabbitMQ | [0004](adr/0004-przetwarzanie-asynchroniczne-rabbitmq.md) |
 | `worker` | Pipeline: ekstrakcja → rozumienie → kompozycja → walidacja | czysty Python | [0006](adr/0006-pipeline-czysty-python.md) |
 | `llm-runtime` | Lokalne małe modele z API zgodnym z OpenAI | Ollama | [0007](adr/0007-lokalny-runtime-llm.md) |
@@ -72,6 +72,8 @@ sequenceDiagram
 Postęp na żywo (FR-T5, [ADR-0014](adr/0014-sse-postep-pipeline.md)): worker publikuje zdarzenia kroków do exchange `progress`, a frontend słucha `GET /api/v1/jobs/{id}/events` (SSE przez `fetch`, z nagłówkiem JWT). Polling `GET /api/v1/jobs/{id}` zostaje jako zapas.
 
 Tryb synchroniczny (`POST /api/v1/forms:convert`) robi to samo, ale czeka na wynik do `SYNC_TIMEOUT_SECONDS` i zwraca JSON w odpowiedzi (FR-01, FR-06). Po przekroczeniu limitu zwraca `202` z `job_id`.
+
+Podgląd oryginału na ekranie przeglądu (FR-E4, [ADR-0031](adr/0031-podglad-oryginalu-pdf-w-api.md)): frontend wysyła plik DOC, DOCX, XLSX albo ODS z pamięci karty na `POST /api/v1/preview`, a API zwraca go jako PDF z LibreOffice headless. Bez kolejki i bez zapisu poza katalogiem tymczasowym.
 
 Gwarancje NFR-06 (pliki tylko tymczasowo):
 - plik leży na wolumenie `tmpfs` (RAM), nigdy na dysku;

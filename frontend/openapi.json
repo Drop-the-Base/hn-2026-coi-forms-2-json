@@ -5,6 +5,47 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/v1/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "login_api_v1_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginToken"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nieprawidłowe hasło"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/jobs": {
       "post": {
         "summary": "Submit Job",
@@ -178,6 +219,65 @@
         ]
       }
     },
+    "/api/v1/form-schema": {
+      "get": {
+        "summary": "Get Form Schema",
+        "description": "The official eUsługi FormDefinition JSON Schema, as published (K-09 typo included).",
+        "operationId": "get_form_schema_api_v1_form_schema_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Form Schema Api V1 Form Schema Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/preview": {
+      "post": {
+        "summary": "Render Preview",
+        "description": "The uploaded DOC, DOCX, XLSX or ODS as PDF, for the review screen's original (FR-E4).",
+        "operationId": "render_preview_api_v1_preview_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_render_preview_api_v1_preview_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Plik jako PDF",
+            "content": {
+              "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Konwersja do PDF nie powiodła się"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/forms:convert": {
       "post": {
         "summary": "Convert Form",
@@ -277,6 +377,20 @@
         ],
         "title": "Body_convert_form_api_v1_forms_convert_post"
       },
+      "Body_render_preview_api_v1_preview_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_render_preview_api_v1_preview_post"
+      },
       "Body_submit_job_api_v1_jobs_post": {
         "properties": {
           "file": {
@@ -349,6 +463,32 @@
           "status"
         ],
         "title": "JobStatus"
+      },
+      "LoginRequest": {
+        "properties": {
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "LoginToken": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "LoginToken"
       },
       "ValidationError": {
         "properties": {

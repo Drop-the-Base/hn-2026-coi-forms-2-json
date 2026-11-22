@@ -6,13 +6,16 @@ import {
   checkJson,
   describePath,
   downloadName,
+  fixSchemaTypo,
   locate,
   plural,
   type ReviewResult,
 } from "./review";
 import wynik from "./fixtures/wynik-wzorzec-1.json";
+import { FORM_SCHEMA } from "../../test/server";
 
 const result = wynik as ReviewResult;
+const schema = fixSchemaTypo(FORM_SCHEMA);
 
 test("locate znajduje wartość po ścieżce w tekście JSON-a", () => {
   const text = JSON.stringify(
@@ -37,9 +40,9 @@ test("locate znajduje wartość po ścieżce w tekście JSON-a", () => {
 
 test("checkJson: błąd składni z linią, błąd schematu z linią, poprawny JSON", () => {
   expect(
-    checkJson('{\n  "title": "A",\n  "tabs": [\n}').syntaxError?.line,
+    checkJson('{\n  "title": "A",\n  "tabs": [\n}', schema).syntaxError?.line,
   ).toBe(4);
-  const wrongType = checkJson('{\n  "title": "A",\n  "tabs": {}\n}');
+  const wrongType = checkJson('{\n  "title": "A",\n  "tabs": {}\n}', schema);
   expect(wrongType.schemaErrors).toEqual([
     {
       path: "tabs",
@@ -48,7 +51,9 @@ test("checkJson: błąd składni z linią, błąd schematu z linią, poprawny JS
       line: 3,
     },
   ]);
-  expect(checkJson(JSON.stringify(result.form)).schemaErrors).toEqual([]);
+  expect(checkJson(JSON.stringify(result.form), schema).schemaErrors).toEqual(
+    [],
+  );
 });
 
 test("literówka schematu K-09: repeatingSectionGrid sprawdzamy pod poprawną nazwą", () => {
@@ -56,7 +61,7 @@ test("literówka schematu K-09: repeatingSectionGrid sprawdzamy pod poprawną na
     tabs: { questions: { field: Record<string, unknown> }[] }[];
   };
   form.tabs[0].questions[0].field.repeatingSectionGrid = "zła wartość";
-  expect(checkJson(JSON.stringify(form)).schemaErrors[0].path).toBe(
+  expect(checkJson(JSON.stringify(form), schema).schemaErrors[0].path).toBe(
     "tabs[0].questions[0].field.repeatingSectionGrid",
   );
 });

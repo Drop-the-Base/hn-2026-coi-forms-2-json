@@ -73,6 +73,27 @@ export function allFields(questions: Question[]): FormField[] {
 export const elementPath = (path: string) =>
   path.match(/^.*\.field(?=\.|$)/)?.[0] ?? path;
 
+/** Title of the field on `path` (or of a section around it) that a condition hides now; null when it is shown. */
+export function hiddenBy(
+  form: FormJson,
+  path: string,
+  statuses: Record<string, FieldStatus> | null,
+): string | null {
+  const segments = path.match(/[^.[\]]+/g) ?? [];
+  let node: unknown = form;
+  for (const segment of segments) {
+    node = (node as Record<string, unknown> | null | undefined)?.[segment];
+    if (segment !== "field" || !node) continue;
+    const field = node as FormField;
+    const status = statuses?.[field.id];
+    const shown = status
+      ? status.show
+      : !field.states?.some((s) => s.type === "SHOW");
+    if (!shown) return field.title || "bez tytułu";
+  }
+  return null;
+}
+
 export function isRequired(field: FormField): boolean {
   return (
     Array.isArray(field.validation) && field.validation.includes("REQUIRED")

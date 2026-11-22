@@ -42,7 +42,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0016](0016-router-react-router.md) | Routing we frontendzie: React Router | Zaakceptowana |
 | [0017](0017-odczyt-arkuszy-openpyxl.md) | Odczyt arkuszy: openpyxl dla XLSX, biblioteka standardowa dla ODS | Proponowana |
 | [0018](0018-klient-llm-openai-sdk.md) | Klient LLM: SDK `openai` z własną pętlą ponowień | Zaakceptowana |
-| [0019](0019-uwierzytelnianie-jwt-pyjwt.md) | Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu | Proponowana |
+| [0019](0019-uwierzytelnianie-jwt-pyjwt.md) | Uwierzytelnianie JWT: PyJWT, HMAC, token demo ze skryptu | Proponowana, częściowo zastąpiona przez ADR-0032 |
 | [0020](0020-pydantic-w-domenie.md) | Pydantic w domenie: tylko dla modeli-kontraktów z LLM (`FormDraft`) | Zaakceptowana |
 | [0021](0021-kolejka-aio-pika.md) | Kolejka zadań: `aio-pika` za portem `JobQueue` | Proponowana |
 | [0022](0022-serwer-uvicorn-python-multipart.md) | Serwer ASGI `uvicorn` i `python-multipart` dla uploadu | Proponowana |
@@ -54,6 +54,8 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0028](0028-model-wymienny-open-source-w-chmurze.md) | Model wymienny: open source u organizatorów, development na modelu open-weights w chmurze | Proponowana |
 | [0029](0029-ocr-tesseract.md) | OCR obrazów i skanów PDF: Tesseract + pytesseract | Proponowana |
 | [0030](0030-dashboard-kosztow-perses.md) | Dashboard kosztów w Perses, stawki za tokeny wejścia i wyjścia | Zaakceptowana |
+| [0031](0031-podglad-oryginalu-pdf-w-api.md) | Podgląd oryginału: DOC, DOCX, XLSX i ODS jako PDF z LibreOffice w API | Proponowana |
+| [0032](0032-logowanie-haslem-jwt-bez-wygasania.md) | Logowanie hasłem z konfiguracji, JWT bez wygasania | Proponowana |
 
 ## Szablon
 

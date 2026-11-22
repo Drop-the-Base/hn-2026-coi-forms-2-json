@@ -33,8 +33,9 @@ Ollama w kontenerze zamiast na hoście: patrz [Profile](#profile-compose).
 
 ```sh
 cp .env.example .env
-# uzupełnij dwa sekrety w .env:
-sed -i.bak "s/^JWT_SECRET=$/JWT_SECRET=$(openssl rand -hex 32)/; s/^RABBITMQ_PASSWORD=$/RABBITMQ_PASSWORD=$(openssl rand -hex 16)/" .env && rm .env.bak
+# uzupełnij sekrety w .env (APP_PASSWORD to hasło urzędnika do logowania; zapisz je):
+sed -i.bak "s/^JWT_SECRET=$/JWT_SECRET=$(openssl rand -hex 32)/; s/^RABBITMQ_PASSWORD=$/RABBITMQ_PASSWORD=$(openssl rand -hex 16)/; s/^APP_PASSWORD=$/APP_PASSWORD=$(openssl rand -hex 12)/" .env && rm .env.bak
+grep ^APP_PASSWORD= .env
 
 # LLM: ustaw LLM_BASE_URL, LLM_MODEL i LLM_API_KEY (patrz "LLM w chmurze albo u organizatorów")
 
@@ -44,12 +45,13 @@ docker compose up -d --build
 docker compose ps          # api i rabbitmq: (healthy), reszta: Up
 curl http://localhost:8080/health   # {"status":"ok"}
 
-# token JWT (ważny JWT_TTL_SECONDS, domyślnie 1 h)
-TOKEN=$(docker compose exec -T api python -m forms2json.adapters.inbound.http.issue_token demo)
+# token JWT dla curla: hasło z APP_PASSWORD wymienione na JWT (bez wygasania przy JWT_TTL_SECONDS=0)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/v1/login -H 'Content-Type: application/json' \
+  -d "{\"password\":\"$(grep ^APP_PASSWORD= .env | cut -d= -f2-)\"}" | python3 -c 'import json,sys; print(json.load(sys.stdin)["token"])')
 ```
 
 Potem:
-- **przeglądarka**: http://localhost:8080, wklej `$TOKEN` w pole „Token dostępu”, wgraj plik z `data/`;
+- **przeglądarka**: http://localhost:8080, wpisz hasło z `APP_PASSWORD`, wgraj plik z `data/`;
 - **terminal**: [REST API](#rest-api).
 
 Koniec: `docker compose down` (pliki i wyniki w tmpfs znikają, obrazy zostają).
@@ -66,7 +68,8 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `JWT_ALGORITHM` | `HS256` | `HS256` | `HS256`, `HS384` albo `HS512` |
 | `JWT_ISSUER` | `forms2json` | `forms2json` | `iss` tokenu |
 | `JWT_AUDIENCE` | `forms2json-api` | `forms2json-api` | `aud` tokenu |
-| `JWT_TTL_SECONDS` | `3600` | `3600` | ważność tokenu z `issue_token` |
+| `JWT_TTL_SECONDS` | `0` | `0` | ważność tokenu w sekundach; `0` = bez wygasania ([ADR-0032](docs/adr/0032-logowanie-haslem-jwt-bez-wygasania.md)) |
+| `APP_PASSWORD` | – | **wymagana** | hasło urzędnika, które `POST /api/v1/login` wymienia na JWT; min. 8 znaków |
 | `RABBITMQ_USER` | `forms2json` | – | użytkownik brokera (compose składa z niego `RABBITMQ_URL`) |
 | `RABBITMQ_PASSWORD` | – | **wymagana** | hasło brokera |
 | `MAX_UPLOAD_BYTES` | `20971520` | `20971520` | maks. rozmiar pliku (20 MB) |
@@ -79,7 +82,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_RESPONSE_FORMAT` | `json_schema` | `json_schema` | `json_schema` (strict) albo `json_object` (schemat w prompcie) dla dostawców bez strict structured output |
 | `LLM_TIMEOUT_SECONDS` | `120` | `120` | timeout jednego wywołania LLM |
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
-| `LLM_MAX_OUTPUT_TOKENS` | `4096` | `4096` | maks. długość odpowiedzi modelu; ucięta odpowiedź = błąd bez ponawiania (#103) |
+| `LLM_MAX_OUTPUT_TOKENS` | `32768` | `32768` | maks. długość odpowiedzi modelu, u modeli rozumujących razem z tokenami myślenia; ucięta odpowiedź = błąd bez ponawiania (#103). Lokalna Ollama z oknem 16384: ustaw `4096` |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
 | `OCR_LANG` | `pol` | `pol` | język Tesseracta dla obrazów i skanów PDF ([ADR-0029](docs/adr/0029-ocr-tesseract.md)) |
 | `COST_PER_1M_INPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wejścia ([Koszt](#koszt)) |
@@ -110,14 +113,19 @@ Ustawiane przez `compose.yaml` (nie w `.env`): `RABBITMQ_URL`, `FILE_STORE_DIR=/
 | `observability` | `jaeger` (http://127.0.0.1:16686), `prometheus` (http://127.0.0.1:9090), `perses` (http://127.0.0.1:8081) | `docker compose --profile observability up -d` |
 | `llm` | `llm-runtime` (Ollama w kontenerze) | w `.env`: `LLM_BASE_URL=http://llm-runtime:11434/v1`, potem `docker compose --profile llm up -d` i `docker compose exec llm-runtime ollama pull qwen2.5:7b-instruct` |
 
-Na zewnątrz wystawiony jest tylko port 8080 (nginx: SPA + proxy `/api/` i `/health` do api). UI obserwowalności tylko na 127.0.0.1.
+Na zewnątrz wystawiony jest tylko port 8080 (nginx: SPA + proxy `/api/` i `/health` do api). UI obserwowalności domyślnie tylko na 127.0.0.1; na serwerze `OBSERVABILITY_BIND=0.0.0.0` w `.env` wystawia je na zewnątrz (16686, 9090, 8081, bez logowania), a `COMPOSE_PROFILES=observability` sprawia, że `deploy.sh` je uruchamia.
+
+### Wdrożenie na VPS
+
+W `.env` ustaw `VPS_HOSTNAME`, `VPS_PASSWORD` i `VPS_PATH` (katalog z klonem repo na serwerze; opcjonalnie `VPS_USER`, domyślnie `root`), potem `./deploy.sh`. Skrypt loguje się przez SSH, w `VPS_PATH` robi `git pull --ff-only` i `docker compose up -d --build --remove-orphans`, potem `docker compose ps` i `curl localhost:8080/health`. Na serwerze musi być klon repo z własnym `.env` (konfiguracja aplikacji, LLM), Docker z Compose v2 i `curl`; lokalnie wystarczy OpenSSH ≥ 8.4 (hasło przez `SSH_ASKPASS`, bez `sshpass`). Wdrażany jest to, co jest wypchnięte na gałąź sprawdzoną na serwerze.
 
 ## REST API
 
-Wszystko pod `/api/v1` wymaga nagłówka `Authorization: Bearer <JWT>`. Upload: `multipart/form-data`, pole `file`.
+Wszystko pod `/api/v1` poza `/login` wymaga nagłówka `Authorization: Bearer <JWT>`. Upload: `multipart/form-data`, pole `file`.
 
 | Metoda i ścieżka | Opis | Odpowiedź |
 | --- | --- | --- |
+| `POST /api/v1/login` | bez JWT; JSON `{"password":"…"}` z hasłem `APP_PASSWORD` | `200 {"token":"<JWT>"}`; `401`, gdy hasło złe |
 | `POST /api/v1/forms:convert` | tryb synchroniczny: czeka na wynik do `SYNC_TIMEOUT_SECONDS` | `200` JSON formularza eUsług; `202 {"job_id"}` + `Location`, gdy trwa dłużej; `422 {"detail","error"}`, gdy konwersja padła |
 | `POST /api/v1/jobs` | tryb asynchroniczny: przyjmuje plik | `202 {"job_id"}` |
 | `GET /api/v1/jobs/{id}` | stan zadania | `{"status":"pending"}`, `{"status":"done","result":{…}}`, `{"status":"failed","error":"<typ>"}` |
@@ -252,6 +260,7 @@ docker run -d --rm --name rabbit --user rabbitmq \
 # 2. API (terminal 1), Swagger: http://localhost:8000/docs
 cd backend
 export JWT_SECRET=local-dev-secret-local-dev-secret-123   # min. 32 znaki
+export APP_PASSWORD=haslo-dev-123                         # hasło do logowania, min. 8 znaków
 export RABBITMQ_URL=amqp://guest:guest@localhost:5672/
 export FILE_STORE_DIR=$(mktemp -d)
 uv run uvicorn forms2json.bootstrap:create_api --factory --port 8000
@@ -260,7 +269,7 @@ uv run uvicorn forms2json.bootstrap:create_api --factory --port 8000
 LLM_BASE_URL=http://localhost:11434/v1 LLM_MODEL=qwen2.5:7b-instruct \
   uv run python -m forms2json.adapters.inbound.worker
 
-# 4. token (ten sam JWT_SECRET)
+# 4. logowanie w przeglądarce hasłem z APP_PASSWORD; token dla skryptów bez hasła (ten sam JWT_SECRET):
 uv run python -m forms2json.adapters.inbound.http.issue_token demo
 
 # 5. frontend (terminal 3): http://localhost:5173, /api idzie przez proxy Vite na :8000

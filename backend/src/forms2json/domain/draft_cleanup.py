@@ -71,6 +71,9 @@ def clean_draft(draft: FormDraft) -> FormDraft:
     """Drop paper, addressee and applicant-data fields; fix all-caps text and page-number sections.
 
     Applicant data name the applicant kinds instead: a name of a company means LEGAL_ENTITY.
+    A repeated key gets a number suffix. A condition whose source is not a field or whose target
+    is neither a field nor an attachment is dropped, and its target, now always shown, gets at
+    most INFERRED_CONFIDENCE so the review screen flags it (FR-T1).
     """
     addressee = f" {_norm(draft.addressee.value)} " if draft.addressee.value.strip() else ""
     applicant_data = [f for f in draft.fields if _is_applicant_data(f)]
@@ -85,7 +88,9 @@ def clean_draft(draft: FormDraft) -> FormDraft:
     listed = [f for f in draft.fields if _is_listed_attachment(f)]
     for f in listed:  # attachments given as fields belong to the attachment list
         if not PROXY.search(f.label) and not any(_same(f.label, a.name) for a in attachments):
-            attachments.append(Attachment(name=f.label, required=False, confidence=f.confidence))
+            attachments.append(
+                Attachment(key=f.key, name=f.label, required=False, confidence=f.confidence)
+            )
     fields = [
         f.model_copy(
             update={
@@ -102,9 +107,14 @@ def clean_draft(draft: FormDraft) -> FormDraft:
         and not _is_noise(f.label, addressee)
     ]
     fields, conditions = _collapse_addresses(fields, list(draft.conditions))
-    keys = {f.key for f in fields}
-    conditions = [c for c in conditions if {c.source, c.target} <= keys]
-    fields, conditions = _correspondence_gates(fields, conditions)
+    seen: set[str] = set()
+    fields, attachments = _unique_keys(fields, seen), _unique_keys(attachments, seen)
+    # An address or a person is no answer to compare.
+    sources = {f.key for f in fields if f.type not in (FieldType.ADDRESS, FieldType.PERSON)}
+    kept = [c for c in conditions if c.source in sources and c.target in seen]
+    unsure = {c.target for c in conditions if c not in kept}
+    fields, attachments = _lower(fields, unsure), _lower(attachments, unsure)
+    fields, conditions = _correspondence_gates(fields, kept)
     title = Text(value=sentence_case(draft.title.value), confidence=draft.title.confidence)
     fees = [fee for fee in draft.fees if not PROXY.search(fee.description)]
     update = {
@@ -116,6 +126,28 @@ def clean_draft(draft: FormDraft) -> FormDraft:
         "fees": fees,
     }
     return draft.model_copy(update=update)
+
+
+def _unique_keys[T: (DraftField, Attachment)](items: list[T], seen: set[str]) -> list[T]:
+    """`key`, `key_2`, `key_3`… so a repeated key never makes two targets of one condition."""
+    unique = []
+    for item in items:
+        key, n = item.key, 1
+        while key in seen:
+            n += 1
+            key = f"{item.key}_{n}"
+        seen.add(key)
+        unique.append(item if key == item.key else item.model_copy(update={"key": key}))
+    return unique
+
+
+def _lower[T: (DraftField, Attachment)](items: list[T], keys: set[str]) -> list[T]:
+    return [
+        i.model_copy(update={"confidence": min(i.confidence, INFERRED_CONFIDENCE)})
+        if i.key in keys
+        else i
+        for i in items
+    ]
 
 
 def sentence_case(text: str) -> str:

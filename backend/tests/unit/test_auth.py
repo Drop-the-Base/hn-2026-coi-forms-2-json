@@ -85,9 +85,22 @@ def test_wrong_issuer_is_401(client: TestClient, settings: Settings) -> None:
     assert _status(client, jwt.encode(_claims(settings, iss="someone-else"), SECRET)) == 401
 
 
-def test_token_without_exp_is_401(client: TestClient, settings: Settings) -> None:
+def test_default_ttl_issues_token_without_exp(client: TestClient, settings: Settings) -> None:
+    token = issue_token(settings, "urzednik")  # JWT_TTL_SECONDS=0 by default (ADR-0032)
+    assert "exp" not in jwt.decode(token, options={"verify_signature": False})
+    assert _status(client, token) == 200
+
+
+def test_positive_ttl_issues_token_with_exp(client: TestClient, settings: Settings) -> None:
+    token = issue_token(settings.model_copy(update={"jwt_ttl_seconds": 600}), "urzednik")
+    claims = jwt.decode(token, options={"verify_signature": False})
+    assert claims["exp"] - claims["iat"] == 600
+    assert _status(client, token) == 200  # once past exp, test_expired_token_is_401 applies
+
+
+def test_token_without_iat_is_401(client: TestClient, settings: Settings) -> None:
     claims = _claims(settings)
-    del claims["exp"]
+    del claims["iat"]
     assert _status(client, jwt.encode(claims, SECRET)) == 401
 
 

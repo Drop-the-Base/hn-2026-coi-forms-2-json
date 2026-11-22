@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/v1/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login_api_v1_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/jobs": {
         parameters: {
             query?: never;
@@ -78,6 +95,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/form-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Form Schema
+         * @description The official eUsługi FormDefinition JSON Schema, as published (K-09 typo included).
+         */
+        get: operations["get_form_schema_api_v1_form_schema_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Render Preview
+         * @description The uploaded DOC, DOCX, XLSX or ODS as PDF, for the review screen's original (FR-E4).
+         */
+        post: operations["render_preview_api_v1_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/forms:convert": {
         parameters: {
             query?: never;
@@ -129,6 +186,11 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_render_preview_api_v1_preview_post */
+        Body_render_preview_api_v1_preview_post: {
+            /** File */
+            file: string;
+        };
         /** Body_submit_job_api_v1_jobs_post */
         Body_submit_job_api_v1_jobs_post: {
             /** File */
@@ -159,6 +221,16 @@ export interface components {
             /** Error */
             error?: string | null;
         };
+        /** LoginRequest */
+        LoginRequest: {
+            /** Password */
+            password: string;
+        };
+        /** LoginToken */
+        LoginToken: {
+            /** Token */
+            token: string;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -181,6 +253,46 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    login_api_v1_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoginToken"];
+                };
+            };
+            /** @description Nieprawidłowe hasło */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submit_job_api_v1_jobs_post: {
         parameters: {
             query?: never;
@@ -293,6 +405,59 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiConfig"];
                 };
+            };
+        };
+    };
+    get_form_schema_api_v1_form_schema_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    render_preview_api_v1_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_render_preview_api_v1_preview_post"];
+            };
+        };
+        responses: {
+            /** @description Plik jako PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description Konwersja do PDF nie powiodła się */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

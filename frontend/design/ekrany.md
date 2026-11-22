@@ -13,12 +13,13 @@ Powłoka wspólna dla wszystkich ekranów po zalogowaniu: granatowy pasek z nazw
 | domyślny | [logowanie.png](zrzuty/logowanie.png) |
 | token wygasł | [logowanie-blad.png](zrzuty/logowanie-blad.png) |
 
-- Jedno pole „Token dostępu” (JWT od administratora, FR-10), maskowane, z przełącznikiem „Pokaż” (`aria-pressed`). Pole przyjmuje wklejenie; spacje i znaki nowej linii na końcach obcinamy.
-- „Zaloguj” jest aktywne zawsze; walidacja po wysłaniu. Przed wysłaniem sprawdzamy lokalnie tylko format (trzy części rozdzielone kropką) i datę `exp`; podpis sprawdza API przy pierwszym żądaniu.
-- Błędy (komunikat nad formularzem + ramka pola + linia pod polem, fokus wraca do pola):
-  - wygasły token: „Token wygasł 21.11.2026 o 9:12. Poproś administratora o nowy token…”;
-  - zły format: „To nie wygląda na token. Token ma trzy części rozdzielone kropkami i zaczyna się od „eyJ”.”;
-  - API odrzuca (401): „Serwer nie przyjął tokenu. Sprawdź, czy wkleiłeś go w całości.”
+- Zmiana po [ADR-0032](../../docs/adr/0032-logowanie-haslem-jwt-bez-wygasania.md): zamiast wklejania tokenu jedno pole „Hasło” (`type=password`, `autocomplete=current-password`) z przełącznikiem „Pokaż” (`aria-pressed`). Frontend wysyła je do `POST /api/v1/login` i zapisuje zwrócony JWT (FR-10). Zrzuty poniżej pokazują jeszcze wersję z tokenem.
+- „Zaloguj” jest aktywne zawsze (wyłączone tylko na czas żądania).
+- Błędy (komunikat nad formularzem + ramka pola, `aria-describedby`, fokus wraca do pola):
+  - złe hasło (401): „Nieprawidłowe hasło.”;
+  - brak odpowiedzi serwera: „Brak połączenia z serwerem. Spróbuj ponownie.”;
+  - 401 w trakcie pracy (np. po zmianie `JWT_SECRET`): „Sesja wygasła. Zaloguj się ponownie.”
+- Token bez `exp` (`JWT_TTL_SECONDS=0`): powłoka nie pokazuje czasu sesji.
 - Token trzymamy w `sessionStorage` (znika po zamknięciu karty), nigdy w adresie URL. Wygaśnięcie w trakcie pracy: przy 401 wracamy tu z tym samym komunikatem, a otwarty edytor z niepobranymi poprawkami najpierw pokazuje dialog z ekranu przeglądu (żeby nie stracić pracy).
 - Pod formularzem jedno zdanie o tymczasowym przetwarzaniu plików (NFR-06), bo to pierwsze pytanie urzędnika.
 

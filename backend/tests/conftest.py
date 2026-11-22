@@ -5,3 +5,4 @@ import pytest
 def _jwt_secret(monkeypatch: pytest.MonkeyPatch) -> None:
     # Settings requires JWT_SECRET (no default in code), so every test gets a throwaway one.
     monkeypatch.setenv("JWT_SECRET", "test-secret-test-secret-test-secret")
+    monkeypatch.setenv("APP_PASSWORD", "test-password")

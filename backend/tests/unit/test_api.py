@@ -51,7 +51,29 @@ def test_endpoints_without_token_are_401(api: Api) -> None:
     assert api.client.post("/api/v1/jobs", files={"file": ("a.pdf", PDF)}).status_code == 401
     assert api.client.get(f"/api/v1/jobs/{uuid.uuid4()}").status_code == 401
     assert api.client.get("/api/v1/config").status_code == 401
+    assert api.client.get("/api/v1/form-schema").status_code == 401
     assert api.queue.jobs == []
+
+
+def test_login_with_the_password_returns_a_working_token(api: Api) -> None:
+    del api.client.headers["Authorization"]
+    response = api.client.post("/api/v1/login", json={"password": "test-password"})
+
+    assert response.status_code == 200
+    token = response.json()["token"]
+    config = api.client.get("/api/v1/config", headers={"Authorization": f"Bearer {token}"})
+    assert config.status_code == 200
+
+
+def test_login_with_a_wrong_password_is_401(api: Api) -> None:
+    response = api.client.post("/api/v1/login", json={"password": "test-passwor"})
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Nieprawidłowe hasło."}
+
+
+def test_login_without_a_password_is_422(api: Api) -> None:
+    assert api.client.post("/api/v1/login").status_code == 422
+    assert api.client.post("/api/v1/login", json={}).status_code == 422
 
 
 def test_health_needs_no_token(api: Api) -> None:
@@ -112,6 +134,12 @@ def test_unknown_job_is_404(api: Api) -> None:
 
 def test_config_exposes_upload_limit(api: Api) -> None:
     assert api.client.get("/api/v1/config").json() == {"max_upload_bytes": MAX_BYTES}
+
+
+def test_form_schema_is_the_official_schema_as_published(api: Api) -> None:
+    schema = api.client.get("/api/v1/form-schema").json()
+    assert schema["title"] == "FormDefinition"
+    assert "repetingSectionGrid" in json.dumps(schema)
 
 
 def sse_events(api: Api, job_id: uuid.UUID) -> list[dict[str, Any]]:

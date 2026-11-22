@@ -13,7 +13,7 @@ from forms2json.domain.form_draft import (
 )
 
 PROMPTS = Path(__file__).parent / "prompts"
-SYSTEM_PROMPT = (PROMPTS / "understand_v3.md").read_text(encoding="utf-8")
+SYSTEM_PROMPT = (PROMPTS / "understand_v4.md").read_text(encoding="utf-8")
 FILL_PROMPT = f"{SYSTEM_PROMPT}\n\n{(PROMPTS / 'understand_fill.md').read_text(encoding='utf-8')}"
 
 

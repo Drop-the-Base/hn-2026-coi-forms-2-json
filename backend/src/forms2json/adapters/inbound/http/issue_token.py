@@ -1,4 +1,6 @@
-"""Prints a demo JWT signed with the configured secret.
+"""Prints a JWT signed with the configured secret, for scripts and curl.
+
+The UI logs in with the password instead: POST /api/v1/login (ADR-0032).
 
 Usage: uv run python -m forms2json.adapters.inbound.http.issue_token [subject]
 """

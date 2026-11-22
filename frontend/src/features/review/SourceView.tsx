@@ -1,8 +1,9 @@
 import { useCallback, useState } from "react";
 import { sourceFiles } from "../../shared/sourceFiles";
+import { usePreviewPdf } from "./api";
 
 /** Points the element at a blob URL of the file and revokes it when the element goes away. */
-function useBlobSrc(file: File) {
+function useBlobSrc(file: Blob) {
   return useCallback(
     (el: HTMLIFrameElement | HTMLImageElement | null) => {
       if (!el) return;
@@ -14,12 +15,12 @@ function useBlobSrc(file: File) {
   );
 }
 
-function PdfView({ file }: { file: File }) {
+function PdfView({ pdf, name }: { pdf: Blob; name: string }) {
   return (
     <iframe
-      ref={useBlobSrc(file)}
+      ref={useBlobSrc(pdf)}
       className="source__pdf"
-      title={`Oryginał: ${file.name}`}
+      title={`Oryginał: ${name}`}
     />
   );
 }
@@ -55,26 +56,21 @@ function pages(text: string) {
     .filter((page) => page.heading || page.body.trim());
 }
 
-/** The uploaded document: PDF and images from tab memory, anything else as the text the model read. */
-export function SourceView({
-  jobId,
+/** The text the model read, under a notice why the original itself is not shown. */
+function TextView({
+  notice,
   sourceText,
 }: {
-  jobId: string;
+  notice: string;
   sourceText?: string;
 }) {
-  const file = sourceFiles.get(jobId);
-  if (file?.type === "application/pdf") return <PdfView file={file} />;
-  if (file?.type.startsWith("image/")) return <ImageView file={file} />;
-
   return (
     <div className="source__text">
       <div className="alert alert--info review-alert" role="status">
         <span className="i i-info" aria-hidden="true"></span>
         <p>
-          {file
-            ? "Ten format nie ma podglądu w przeglądarce. Poniżej tekst odczytany z dokumentu."
-            : "Pliku nie ma już w tej karcie (na przykład po odświeżeniu strony). Poniżej tekst odczytany z dokumentu."}
+          {notice}
+          {sourceText && " Poniżej tekst odczytany z dokumentu."}
         </p>
       </div>
       {sourceText ? (
@@ -92,4 +88,54 @@ export function SourceView({
       )}
     </div>
   );
+}
+
+/** DOC, DOCX, XLSX or ODS: the API renders it as PDF (ADR-0031), the text is the fallback. */
+function ConvertedView({
+  jobId,
+  file,
+  sourceText,
+}: {
+  jobId: string;
+  file: File;
+  sourceText?: string;
+}) {
+  const preview = usePreviewPdf(jobId, file);
+  if (preview.data) return <PdfView pdf={preview.data} name={file.name} />;
+  if (preview.isError) {
+    return (
+      <TextView
+        notice="Nie udało się przygotować podglądu oryginału."
+        sourceText={sourceText}
+      />
+    );
+  }
+  return (
+    <p className="muted source__page" role="status">
+      Przygotowuję podgląd oryginału…
+    </p>
+  );
+}
+
+/** The uploaded document from tab memory: PDF and images as they are, other formats via the API. */
+export function SourceView({
+  jobId,
+  sourceText,
+}: {
+  jobId: string;
+  sourceText?: string;
+}) {
+  const file = sourceFiles.get(jobId);
+  if (!file) {
+    return (
+      <TextView
+        notice="Pliku nie ma już w tej karcie (na przykład po odświeżeniu strony)."
+        sourceText={sourceText}
+      />
+    );
+  }
+  if (file.type === "application/pdf")
+    return <PdfView pdf={file} name={file.name} />;
+  if (file.type.startsWith("image/")) return <ImageView file={file} />;
+  return <ConvertedView jobId={jobId} file={file} sourceText={sourceText} />;
 }

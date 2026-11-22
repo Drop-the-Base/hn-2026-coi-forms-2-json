@@ -1,2 +1,8 @@
 export { FormPreview } from "./FormPreview";
-export { elementPath, type FormJson } from "./form";
+export {
+  elementPath,
+  htmlToText,
+  type FormField,
+  type FormJson,
+  type Question,
+} from "./form";

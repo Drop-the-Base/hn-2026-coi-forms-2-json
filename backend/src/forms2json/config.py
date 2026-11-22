@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     llm_api_key: SecretStr = SecretStr("local")
     # Not every OpenAI-compatible provider supports strict json_schema; json_object is the fallback.
     llm_response_format: Literal["json_schema", "json_object"] = "json_schema"
-    # soffice can hang on a broken .doc; the worker kills it after this (#24).
+    # soffice can hang on a broken file; the worker (.doc) and the api (preview) kill it after this.
     doc_conversion_timeout_seconds: float = Field(default=60.0, gt=0)
     ocr_lang: str = "pol"  # Tesseract language pack installed in the worker image (ADR-0029)
     rabbitmq_url: str = "amqp://guest:guest@rabbitmq:5672/"  # compose service (ADR-0004)
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     llm_max_input_chars: int = Field(default=30_000, gt=0)
     # A looping model stops here instead of running until the timeout. Input + prompt + this
     # must fit the runtime context (Ollama: OLLAMA_CONTEXT_LENGTH, default 4096 is too small).
-    llm_max_output_tokens: int = Field(default=4096, gt=0)
+    llm_max_output_tokens: int = Field(default=32768, gt=0)
     # FR-T1: below this an element is not "high" in frontend/DESIGN.md and needs a human look.
     confidence_review_threshold: float = Field(default=0.85, ge=0, le=1)
     # NFR-13: provider prices per 1M tokens (or GPU time for a local model); 0 = not counted.
@@ -46,7 +46,10 @@ class Settings(BaseSettings):
     jwt_algorithm: Literal["HS256", "HS384", "HS512"] = "HS256"
     jwt_issuer: str = "forms2json"
     jwt_audience: str = "forms2json-api"
-    jwt_ttl_seconds: int = Field(default=3600, gt=0)
+    # 0 = tokens without `exp`: the clerk's session does not run out mid-review (ADR-0032).
+    jwt_ttl_seconds: int = Field(default=0, ge=0)
+    # The one shared clerk password that POST /api/v1/login trades for a JWT (ADR-0032).
+    app_password: SecretStr = Field(min_length=8)
 
 
 @cache

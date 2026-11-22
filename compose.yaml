@@ -47,7 +47,9 @@ services:
       OTEL_SEMCONV_STABILITY_OPT_IN: http
     tmpfs:
       # Starlette zapisuje upload > 1 MB w /tmp: ma zostać w RAM (ADR-0022, NFR-06).
-      - /tmp:size=64m
+      # Podgląd oryginału (ADR-0031) trzyma tam jeszcze kopię pliku, PDF i profil soffice.
+      - /tmp:size=160m
+      - /home/app  # profil LibreOffice (soffice) przy podglądzie oryginału
     healthcheck:  # test z obrazu (backend/Dockerfile), tu tylko szybszy start
       interval: 10s
       timeout: 3s
@@ -93,8 +95,9 @@ services:
     <<: *hardening
     image: otel/opentelemetry-collector-contrib:0.165.0  # contrib: receiver docker_stats
     command: ["--config=/etc/otelcol/config.yaml"]
-    # Socket Docker Desktop jest root:root 0660; grupa 0 zamiast user: "0" (ADR-0030).
-    group_add: ["0"]
+    # Dostęp do docker.sock przez grupę jego właściciela zamiast user: "0" (ADR-0030). Docker Desktop: root:root,
+    # więc 0; Linux: grupa docker, deploy.sh ustawia DOCKER_GID z socketu. Bez dostępu cały Collector nie wstaje.
+    group_add: ["${DOCKER_GID:-0}"]
     volumes:
       - ./deploy/otel-collector.yaml:/etc/otelcol/config.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -107,7 +110,8 @@ services:
     volumes:
       - ./deploy/jaeger.yaml:/etc/jaeger/config.yaml:ro
     ports:
-      - "127.0.0.1:16686:16686"  # UI bez logowania, więc tylko z localhosta
+      # UI bez logowania: domyślnie tylko z localhosta, na serwerze OBSERVABILITY_BIND=0.0.0.0 wystawia je na zewnątrz.
+      - "${OBSERVABILITY_BIND:-127.0.0.1}:16686:16686"
 
   prometheus:
     <<: *hardening
@@ -119,7 +123,7 @@ services:
     tmpfs:
       - /prometheus:uid=65534,gid=65534
     ports:
-      - "127.0.0.1:9090:9090"
+      - "${OBSERVABILITY_BIND:-127.0.0.1}:9090:9090"
 
   perses:
     <<: *hardening
@@ -133,7 +137,7 @@ services:
       # Baza plików i rozpakowane pluginy: stan odtwarzany z repo przy każdym starcie.
       - /perses:uid=65532,gid=65532
     ports:
-      - "127.0.0.1:8081:8080"  # UI bez logowania, więc tylko z localhosta
+      - "${OBSERVABILITY_BIND:-127.0.0.1}:8081:8080"
     depends_on:
       - prometheus
 
