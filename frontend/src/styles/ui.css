@@ -100,6 +100,12 @@ code,
 .skip:focus {
   top: var(--space-2);
 }
+@media print {
+  .shell,
+  .skip {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

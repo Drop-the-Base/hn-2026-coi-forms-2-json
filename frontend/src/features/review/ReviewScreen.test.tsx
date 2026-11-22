@@ -140,6 +140,18 @@ test("Pobierz JSON daje zmieniony JSON z nazwą z tytułu", async () => {
   expect(downloaded.confidence).toBeUndefined();
 });
 
+test("Drukuj / zapisz PDF otwiera druk z podglądem wszystkich stron", () => {
+  const print = vi.spyOn(window, "print").mockImplementation(() => {});
+  renderReview();
+  fireEvent.click(screen.getByRole("button", { name: "Drukuj / zapisz PDF" }));
+  expect(print).toHaveBeenCalledOnce();
+  // Print CSS shows the hidden pages; all of them must be in the DOM.
+  expect(document.querySelectorAll("#podglad .eu-page")).toHaveLength(4);
+  expect(document.querySelectorAll("#podglad .eu-page[hidden]")).toHaveLength(
+    3,
+  );
+});
+
 test("wynik w nieoczekiwanym formacie daje komunikat zamiast ekranu", () => {
   renderReview({ title: "Wniosek" });
   expect(screen.getByRole("alert").textContent).toContain(

@@ -99,23 +99,28 @@ export function FormPreview({
           dopiero po spełnieniu warunku. Edytujesz je w widoku „Pole”.
         </p>
       )}
-      {tab && (
-        <>
-          <h3 className="eu-page-title" ref={titleRef} tabIndex={-1}>
-            {tab.title}
+      {/* Every page is rendered, the other ones hidden, so the print mock-up shows them all (FR-E6). */}
+      {tabs.map((t) => (
+        <div key={t.id} className="eu-page" hidden={t !== tab}>
+          <h3
+            className="eu-page-title"
+            ref={t === tab ? titleRef : undefined}
+            tabIndex={-1}
+          >
+            {t.title}
           </h3>
           <PreviewQuestions
-            path={`tabs[${form.tabs.indexOf(tab)}].questions`}
+            path={`tabs[${form.tabs.indexOf(t)}].questions`}
             confidence={confidence}
             current={selection ? elementPath(selection.path) : undefined}
-            questions={tab.questions}
+            questions={t.questions}
             answers={answers}
             statuses={statuses}
             onAnswer={answer}
             onSelect={onSelect}
           />
-        </>
-      )}
+        </div>
+      ))}
       <div className="eu-foot">
         {page > 0 && (
           <button

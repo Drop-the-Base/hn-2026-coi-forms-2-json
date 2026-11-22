@@ -479,9 +479,19 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
                   </span>
                 )}
                 {view === "podglad" && (
-                  <span className="muted note">
-                    tak zobaczy go wnioskodawca
-                  </span>
+                  <>
+                    <span className="muted note">
+                      tak zobaczy go wnioskodawca
+                    </span>
+                    {/* Print styles leave only the preview, all pages expanded (FR-E6). */}
+                    <button
+                      className="btn btn--ghost btn--sm"
+                      type="button"
+                      onClick={() => window.print()}
+                    >
+                      Drukuj / zapisz PDF
+                    </button>
+                  </>
                 )}
               </div>
             </div>

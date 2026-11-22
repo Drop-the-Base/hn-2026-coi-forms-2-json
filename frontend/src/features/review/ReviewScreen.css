@@ -653,3 +653,21 @@
     height: 70vh;
   }
 }
+
+/* druk: zostaje sam podgląd formularza, rozwinięty na całą wysokość (FR-E6, makieta w FormPreview.css) */
+@media print {
+  .rhead,
+  .band,
+  .ws > :not(#podglad),
+  #podglad > .alert {
+    display: none !important;
+  }
+  .review,
+  .ws,
+  #podglad {
+    display: block !important;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}
