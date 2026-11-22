@@ -1,6 +1,6 @@
 import { useState, type DragEvent } from "react";
 import { sourceFiles } from "../../shared/sourceFiles";
-import { useConfig, useSubmitJob } from "./api";
+import { useConfig, useSubmitBatch } from "./api";
 import { EXTENSIONS, formatBytes, validateFile } from "./validateFile";
 import "./UploadPanel.css";
 
@@ -18,14 +18,31 @@ function filesWord(count: number) {
     : "plików";
 }
 
-/** Drag & drop or pick files, checked in the browser, each valid one sent as its own job (FR-E4, FR-T3). */
+// Each request stays within one file's size limit, so a batch fits the API's /tmp like a single upload.
+function packBatches(rows: Picked[], maxFiles: number, maxBytes: number) {
+  const batches: Picked[][] = [];
+  let bytes = 0;
+  for (const row of rows) {
+    const last = batches.at(-1);
+    if (last && last.length < maxFiles && bytes + row.file.size <= maxBytes) {
+      last.push(row);
+      bytes += row.file.size;
+    } else {
+      batches.push([row]);
+      bytes = row.file.size;
+    }
+  }
+  return batches;
+}
+
+/** Drag & drop or pick files, checked in the browser, sent as a batch with one job per file (FR-E4, FR-E6). */
 export function UploadPanel({
   onUploaded,
 }: {
-  onUploaded: (jobId: string, fileName: string) => void;
+  onUploaded: (jobId: string, fileName: string, batchId: string) => void;
 }) {
   const config = useConfig();
-  const submit = useSubmitJob();
+  const submit = useSubmitBatch();
   const [picked, setPicked] = useState<Picked[]>([]);
   const [dragging, setDragging] = useState(false);
   const [sending, setSending] = useState<{ current: number; total: number }>();
@@ -63,21 +80,41 @@ export function UploadPanel({
     add(event.dataTransfer.files);
   }
 
+  const reject = (key: string, reason: string) =>
+    setPicked((current) =>
+      current.map((item) =>
+        item.key === key
+          ? { ...item, serverError: `Serwer odrzucił plik: ${reason}` }
+          : item,
+      ),
+    );
+
   async function send() {
-    for (const [index, row] of ready.entries()) {
-      setSending({ current: index + 1, total: ready.length });
+    if (!config.data) return;
+    const batches = packBatches(
+      ready,
+      config.data.max_batch_files,
+      config.data.max_upload_bytes,
+    );
+    for (const [index, batch] of batches.entries()) {
+      setSending({ current: index + 1, total: batches.length });
       try {
-        const { job_id } = await submit.mutateAsync(row.file);
-        sourceFiles.set(job_id, row.file);
-        onUploaded(job_id, row.file.name);
-        remove(row.key);
-      } catch (error) {
-        const message = `Serwer odrzucił plik: ${(error as Error).message}`;
-        setPicked((current) =>
-          current.map((item) =>
-            item.key === row.key ? { ...item, serverError: message } : item,
-          ),
+        const { batch_id, jobs } = await submit.mutateAsync(
+          batch.map((row) => row.file),
         );
+        // The API answers in the order the files were sent.
+        jobs.forEach(({ job_id, error }, i) => {
+          const row = batch[i];
+          if (job_id) {
+            sourceFiles.set(job_id, row.file);
+            onUploaded(job_id, row.file.name, batch_id);
+            remove(row.key);
+          } else {
+            reject(row.key, error ?? "");
+          }
+        });
+      } catch (error) {
+        for (const row of batch) reject(row.key, (error as Error).message);
       }
     }
     setSending(undefined);
@@ -224,7 +261,7 @@ export function UploadPanel({
                   aria-hidden="true"
                 ></span>
                 {sending
-                  ? `Wysyłanie ${sending.current} z ${sending.total}`
+                  ? `Wysyłanie paczki ${sending.current} z ${sending.total}`
                   : `Wyślij ${ready.length} ${filesWord(ready.length)}`}
               </button>
               <span className="btn-note" id="pomijane" aria-live="polite">

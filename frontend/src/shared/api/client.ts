@@ -3,7 +3,7 @@ import { getToken } from "./token";
 
 type Schemas = components["schemas"];
 export type ApiConfig = Schemas["ApiConfig"];
-export type JobAccepted = Schemas["JobAccepted"];
+export type BatchAccepted = Schemas["BatchAccepted"];
 export type JobStatus = Schemas["JobStatus"];
 export type LoginToken = Schemas["LoginToken"];
 
@@ -79,10 +79,11 @@ export const getJob = (jobId: string) =>
 export const getJobEvents = (jobId: string, signal: AbortSignal) =>
   authFetch(`/jobs/${encodeURIComponent(jobId)}/events`, { signal });
 
-export function submitJob(file: File) {
+/** One job per file under a shared batch id (FR-E6); rejected files come back with `error`. */
+export function submitBatch(files: File[]) {
   const body = new FormData();
-  body.append("file", file);
-  return apiFetch<JobAccepted>("/jobs", { method: "POST", body });
+  for (const file of files) body.append("files", file);
+  return apiFetch<BatchAccepted>("/jobs/batch", { method: "POST", body });
 }
 
 /** The office file rendered as PDF by the API, for the review screen's "Oryginał" (ADR-0031). */
