@@ -10,7 +10,7 @@ export interface ReviewIssue {
   code: string;
   message: string;
   path: string;
-  severity: "ERROR" | "WARNING";
+  severity: "ERROR" | "WARNING" | "INFO";
 }
 
 export interface ReviewResult {
