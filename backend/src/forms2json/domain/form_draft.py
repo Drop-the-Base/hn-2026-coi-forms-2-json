@@ -67,12 +67,26 @@ class Applicant(_Strict):
     confidence: Confidence
 
 
+def _all_required(schema: JsonObject) -> None:
+    # Strict structured output wants every property required and no defaults.
+    props = schema["properties"]
+    assert isinstance(props, dict)
+    for prop in props.values():
+        if isinstance(prop, dict):
+            prop.pop("default", None)
+    schema["required"] = list(props)
+
+
 class DraftField(_Strict):
     """A field of the subject-matter part of the form, in document order (K-14)."""
+
+    # The default only keeps old drafts and fixtures valid: one page, as before.
+    model_config = ConfigDict(json_schema_extra=_all_required)
 
     key: str
     label: str
     section: str
+    page: str = ""  # title of the e-service page the field goes on; "" = the single subject page
     type: Annotated[FieldType, Field(strict=False)]
     required: bool
     options: list[str]
@@ -132,4 +146,37 @@ class FormDraft(_Strict):
             raise InvalidFormDraft(details) from error
 
 
+class DraftAddition(_Strict):
+    """Fields the first answer missed, from the fill-in call, with conditions on them."""
+
+    fields: list[DraftField]
+    conditions: list[Condition]
+
+    @classmethod
+    def from_dict(cls, data: JsonObject) -> DraftAddition:
+        try:
+            return cls.model_validate(data)
+        except ValidationError as error:
+            raise InvalidFormDraft(str(error)) from error
+
+    def added_to(self, draft: FormDraft) -> FormDraft:
+        """Each new field goes after the last field of its section (document order), a field of a
+        new section at the end; a known key or the same label in the same section, and conditions
+        on unknown fields are dropped."""
+        fields = list(draft.fields)
+        keys = {f.key for f in fields}
+        labels = {(f.section, f.label.casefold()) for f in fields}
+        for field in self.fields:
+            label = (field.section, field.label.casefold())
+            if field.key in keys or label in labels:
+                continue
+            keys.add(field.key)
+            labels.add(label)
+            same = [i for i, f in enumerate(fields) if f.section == field.section]
+            fields.insert(same[-1] + 1 if same else len(fields), field)
+        conditions = draft.conditions + [c for c in self.conditions if {c.source, c.target} <= keys]
+        return draft.model_copy(update={"fields": fields, "conditions": conditions})
+
+
 FORM_DRAFT_SCHEMA: JsonObject = FormDraft.model_json_schema()
+DRAFT_ADDITION_SCHEMA: JsonObject = DraftAddition.model_json_schema()
