@@ -15,6 +15,8 @@ EXPECTED_VALIDATORS = [
     (re.compile(r"\bnip\b|(^|_)nip(_|$)", re.IGNORECASE), "NIP"),
     (re.compile(r"regon", re.IGNORECASE), "REGON"),
     (re.compile(r"kod pocztowy|kod_pocztowy", re.IGNORECASE), "ZIP_CODE"),
+    # "dowodu osobistego" only: "dowód wpłaty" or the dog's "rodowód" are no ID card.
+    (re.compile(r"\bdow[oó]d\w*[ _]osobist", re.IGNORECASE), "SERIAL_NUMBER_ID_CARD"),
 ]
 assert {v for _, v in EXPECTED_VALIDATORS} <= VALIDATORS
 # Standards: a postal code outside Poland has no validation.

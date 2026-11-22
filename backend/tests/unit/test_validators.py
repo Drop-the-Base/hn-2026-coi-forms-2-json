@@ -17,6 +17,14 @@ from forms2json.domain.validators import validation_for
         ("REGON", "regon", True, ["REQUIRED", "REGON"]),
         ("Numer telefonu", "numer_telefonu", True, ["REQUIRED"]),
         ("Uwagi", "uwagi", False, []),
+        (
+            "Seria i numer dowodu osobistego",
+            "seria_i_numer_dowodu_osobistego",
+            True,
+            ["REQUIRED", "SERIAL_NUMBER_ID_CARD"],
+        ),
+        ("Dowód wpłaty", "dowod_wplaty", True, ["REQUIRED"]),
+        ("Numer rodowodu", "numer_rodowodu", True, ["REQUIRED"]),
     ],
 )
 def test_validation_for(title: str, tech_name: str, required: bool, expected: list[str]) -> None:
