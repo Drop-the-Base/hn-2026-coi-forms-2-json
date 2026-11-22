@@ -29,6 +29,12 @@ _job_confidence = _meter.create_histogram(
     explicit_bucket_boundaries_advisory=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95],
 )
 
+_pii_masked = _meter.create_counter(
+    "forms2json.pii.masked",
+    unit="{item}",
+    description="Personal data masked before the LLM, by kind (NFR-06)",
+)
+
 
 class MetricsObserver(PipelineObserver):
     """Step latency; a failed step carries `error.type` (NFR-14)."""
@@ -47,7 +53,8 @@ class MetricsObserver(PipelineObserver):
 
 
 class JobMetrics(JobObserver):
-    """Job latency and outcome; for done jobs also cost and overall confidence (NFR-13)."""
+    """Job latency and outcome; for done jobs also cost, overall confidence (NFR-13) and masked
+    personal data (NFR-06)."""
 
     def __init__(self, model: str) -> None:
         self._model = model
@@ -60,3 +67,5 @@ class JobMetrics(JobObserver):
         # Shape set by ReportStep.
         _job_cost.record(result.result["usage"]["cost"], {"gen_ai.request.model": self._model})
         _job_confidence.record(result.result["confidence"]["overall"])
+        for kind, count in result.result.get("pii", {}).items():
+            _pii_masked.add(count, {"kind": kind})
