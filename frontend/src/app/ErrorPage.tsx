@@ -2,7 +2,7 @@
 export function ErrorPage() {
   return (
     <main className="page page--narrow">
-      <title>Błąd – forms2json</title>
+      <title>Błąd – JSON-jusz</title>
       <div className="alert alert--error" role="alert">
         <span className="i i-x-circle" aria-hidden="true"></span>
         <p className="alert__title">Coś poszło nie tak</p>

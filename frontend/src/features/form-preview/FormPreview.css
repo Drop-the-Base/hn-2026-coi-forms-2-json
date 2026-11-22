@@ -244,6 +244,10 @@ select.eu-input:disabled {
   color: var(--color-sheet);
   border: 0;
 }
+.eu-next:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .eu :is(button):focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
@@ -273,11 +277,20 @@ select.eu-input:disabled {
   bottom: 0;
   left: calc(-1 * var(--space-4));
 }
+/* The ring sits 8px outside the cell (under the 12px grid gap), so it never hugs the text and
+   never reaches the page title or neighbouring cards. */
 .eu-cell.is-current {
-  outline: 2px solid var(--color-accent);
-  /* 4px ring in total: less than the smallest grid gap (12px), so it stays off neighbouring cards */
-  outline-offset: 2px;
+  isolation: isolate;
+}
+.eu-cell.is-current::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--space-2));
+  z-index: -1;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-control);
   background: var(--color-accent-subtle);
+  pointer-events: none;
 }
 .eu .badge {
   vertical-align: middle;
@@ -309,8 +322,32 @@ select.eu-input:disabled {
   .eu-cell {
     break-inside: avoid;
   }
-  .eu-cell.is-current {
-    outline: 0;
-    background: none;
+  .eu-cell.is-current::before {
+    display: none;
   }
+}
+
+/* answers listed on the final page (AnswerSummary) */
+.eu .eu-summary {
+  margin-top: var(--space-4);
+}
+.eu-summary h5 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+.eu-summary dl {
+  margin: 0;
+}
+.eu-summary dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  border-top: 1px solid var(--color-rule);
+}
+.eu-summary dt,
+.eu-summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
 }

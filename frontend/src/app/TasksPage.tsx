@@ -5,7 +5,7 @@ export function TasksPage() {
   const { jobs, addJob } = useSessionJobs();
   return (
     <>
-      <title>Zadania – forms2json</title>
+      <title>Zadania – JSON-jusz</title>
       <a className="skip" href="#lista">
         Przejdź do listy zadań
       </a>

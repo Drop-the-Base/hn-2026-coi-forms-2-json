@@ -39,6 +39,14 @@ test("przechodzi między stronami przyciskami i krokami", () => {
     screen.getByRole("button", { name: "Strona 4, Strona końcowa" }),
   );
   expect(screen.queryByRole("button", { name: "Dalej" })).toBeNull();
+  expect(
+    (
+      screen.getByRole("button", {
+        name: "Przejdź do podpisu",
+      }) as HTMLButtonElement
+    ).disabled,
+  ).toBe(true);
+  expect(screen.getByRole("region", { name: "Wpisane dane" })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Wróć" }));
   expect(screen.getByRole("heading", { level: 3 }).textContent).toBe(
     "Kontakt i zgody",
