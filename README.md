@@ -84,7 +84,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `LLM_TIMEOUT_SECONDS` | `120` | `120` | timeout jednego wywołania LLM |
 | `LLM_MAX_INPUT_CHARS` | `30000` | `30000` | maks. długość tekstu dokumentu dla modelu |
 | `LLM_MAX_OUTPUT_TOKENS` | `32768` | `32768` | maks. długość odpowiedzi modelu, u modeli rozumujących razem z tokenami myślenia; ucięta odpowiedź = błąd bez ponawiania (#103). Lokalna Ollama z oknem 16384: ustaw `4096` |
-| `UNDERSTAND_FILL` | `false` | `false` | drugie wywołanie LLM dopełnia pola pominięte w pierwszej odpowiedzi (#173); wyłączone, bo na formularzach 1–9 pola F1 0,74 bez niego vs 0,71 z nim, przy połowie tokenów (#190) |
+| `UNDERSTAND_FILL_MIN_CHARS` | `4500` | `4500` | drugie wywołanie LLM dopełnia pola pominięte w pierwszej odpowiedzi tylko dla dokumentów co najmniej tej długości (znaki tekstu); na długich formularzach podnosi recall pól, na krótkich nic nie daje przy dwukrotnym koszcie (#193); `0` = zawsze |
 | `CONFIDENCE_REVIEW_THRESHOLD` | `0.85` | `0.85` | element poniżej progu trafia do `to_review` |
 | `OCR_LANG` | `pol` | `pol` | język Tesseracta dla obrazów i skanów PDF ([ADR-0029](docs/adr/0029-ocr-tesseract.md)) |
 | `COST_PER_1M_INPUT_TOKENS` | `0` | `0` | stawka za 1M tokenów wejścia ([Koszt](#koszt)) |

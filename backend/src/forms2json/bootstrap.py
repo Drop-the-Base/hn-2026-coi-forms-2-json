@@ -152,7 +152,9 @@ def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineOb
 
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
         pii = PiiGuardStep()
-        understand = UnderstandStep(llm, settings.llm_max_input_chars, settings.understand_fill)
+        understand = UnderstandStep(
+            llm, settings.llm_max_input_chars, settings.understand_fill_min_chars
+        )
         compose = ComposeStep()
         report = ReportStep(
             pii, understand, compose, settings.confidence_review_threshold, cost_rates(settings)
