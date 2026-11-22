@@ -193,6 +193,8 @@ nginx nie przekazuje `/docs` do api (http://localhost:8080/docs to strona SPA). 
 
 http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wgraj pliki (przeciągnij albo „Wybierz pliki”) → lista zadań ze statusem → „Zobacz wynik”. Token żyje w karcie przeglądarki (`sessionStorage`); po wygaśnięciu UI wraca do logowania.
 
+Ekran przeglądu wyniku przy każdym otwarciu strony proponuje krótki samouczek (7 kroków, do pominięcia); przycisk „Samouczek” w nagłówku uruchamia go ponownie.
+
 ## Deklaracja dostępności
 
 Panel urzędnika ma spełniać **WCAG 2.1 na poziomie AA** (ustawa o dostępności cyfrowej podmiotów publicznych).
