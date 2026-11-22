@@ -37,11 +37,11 @@ export function LoginPage() {
 
   return (
     <div className="login">
-      <title>Logowanie – forms2json</title>
+      <title>Logowanie – JSON-jusz</title>
       <header className="shell">
         <div className="shell__in">
           <span className="wordmark">
-            forms2json <span>blankiet do eUsługi</span>
+            JSON-jusz <span>blankiet do eUsługi</span>
           </span>
         </div>
       </header>

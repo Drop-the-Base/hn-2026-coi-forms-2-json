@@ -24,7 +24,7 @@ export function Layout() {
       <header className="shell">
         <div className="shell__in">
           <span className="wordmark">
-            forms2json <span>blankiet do eUsługi</span>
+            JSON-jusz <span>blankiet do eUsługi</span>
           </span>
           <nav aria-label="Główna">
             <NavLink to="/" end>

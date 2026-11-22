@@ -58,7 +58,7 @@ export function JobResultPage() {
   // Progress until the job is done; then the review screen replaces this page (FR-T5).
   return (
     <main className="page page--narrow">
-      <title>{`Postęp: ${fileName ?? "zadanie"} – forms2json`}</title>
+      <title>{`Postęp: ${fileName ?? "zadanie"} – JSON-jusz`}</title>
       <div className="page-head">
         <div>
           <Link className="back" to="/">

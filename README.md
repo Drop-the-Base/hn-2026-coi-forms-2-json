@@ -1,6 +1,10 @@
-# forms2json: formularze COI do JSON
+# JSON-jusz: formularze COI do JSON
 
-Zamienia papierowy formularz urzędowy (DOCX, PDF, XLSX, ODS) na JSON formularza eUsług. Pipeline łączy szablony ze Standardów z małym lokalnym modelem językowym (Ollama), liczy pewność (confidence) każdego elementu i listę problemów do przejrzenia. Urzędnik wgrywa plik w przeglądarce albo przez REST API, a dane nie opuszczają serwera: pliki leżą tylko w RAM (tmpfs) i znikają po zadaniu.
+**JSON-jusz** (w kodzie pakiet `forms2json`) zamienia papierowy formularz urzędowy (DOCX, PDF, XLSX, ODS) na JSON formularza eUsług. Pipeline łączy szablony ze Standardów z małym lokalnym modelem językowym (Ollama), liczy pewność (confidence) każdego elementu i listę problemów do przejrzenia. Urzędnik wgrywa plik w przeglądarce albo przez REST API, a dane nie opuszczają serwera: pliki leżą tylko w RAM (tmpfs) i znikają po zadaniu.
+
+![JSON-jusz w 30 sekund: wgranie blankietu, postęp, samouczek, lista problemów, inspektor pola, JSON, oryginał i podgląd eUsługi](docs/media/demo.gif)
+
+Wersja wideo: [docs/media/demo.mp4](docs/media/demo.mp4) (30 s, formularz 7 na gpt-oss-120b; czekanie na model przyspieszone).
 
 ```mermaid
 flowchart LR

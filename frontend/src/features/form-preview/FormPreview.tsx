@@ -9,6 +9,7 @@ import {
   type FieldStatus,
   type FormJson,
 } from "./form";
+import { AnswerSummary } from "./AnswerSummary";
 import { PreviewQuestions } from "./PreviewQuestions";
 import "./FormPreview.css";
 
@@ -119,6 +120,12 @@ export function FormPreview({
             onAnswer={answer}
             onSelect={onSelect}
           />
+          {t.type === "FINISH" && (
+            <AnswerSummary
+              tabs={tabs.filter((other) => other.type !== "FINISH")}
+              answers={answers}
+            />
+          )}
         </div>
       ))}
       <div className="eu-foot">
@@ -131,13 +138,23 @@ export function FormPreview({
             Wróć
           </button>
         )}
-        {page < tabs.length - 1 && (
+        {page < tabs.length - 1 ? (
           <button
             type="button"
             className="eu-next"
             onClick={() => goTo(page + 1)}
           >
             Dalej
+          </button>
+        ) : (
+          // The e-service goes on to signing here; the preview stops, but the page should not look cut off.
+          <button
+            type="button"
+            className="eu-next"
+            disabled
+            title="W podglądzie nieaktywne"
+          >
+            Przejdź do podpisu
           </button>
         )}
       </div>

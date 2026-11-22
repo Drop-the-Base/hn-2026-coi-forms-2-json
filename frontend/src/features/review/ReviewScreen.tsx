@@ -236,7 +236,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
 
   return (
     <main className="review">
-      <title>{`Przegląd: ${form.title || "Formularz bez tytułu"} – forms2json`}</title>
+      <title>{`Przegląd: ${form.title || "Formularz bez tytułu"} – JSON-jusz`}</title>
       <a className="skip" href="#kolumna-a">
         Przejdź do edycji
       </a>
