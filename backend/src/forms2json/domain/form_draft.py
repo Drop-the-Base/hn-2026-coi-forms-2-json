@@ -150,4 +150,37 @@ class FormDraft(_Strict):
             raise InvalidFormDraft(str(error)) from error
 
 
+class DraftAddition(_Strict):
+    """Fields the first answer missed, from the fill-in call, with conditions on them."""
+
+    fields: list[DraftField]
+    conditions: list[Condition]
+
+    @classmethod
+    def from_dict(cls, data: JsonObject) -> DraftAddition:
+        try:
+            return cls.model_validate(data)
+        except ValidationError as error:
+            raise InvalidFormDraft(str(error)) from error
+
+    def added_to(self, draft: FormDraft) -> FormDraft:
+        """Each new field goes after the last field of its section (document order), a field of a
+        new section at the end; a known key or the same label in the same section, and conditions
+        on unknown fields are dropped."""
+        fields = list(draft.fields)
+        keys = {f.key for f in fields}
+        labels = {(f.section, f.label.casefold()) for f in fields}
+        for field in self.fields:
+            label = (field.section, field.label.casefold())
+            if field.key in keys or label in labels:
+                continue
+            keys.add(field.key)
+            labels.add(label)
+            same = [i for i, f in enumerate(fields) if f.section == field.section]
+            fields.insert(same[-1] + 1 if same else len(fields), field)
+        conditions = draft.conditions + [c for c in self.conditions if {c.source, c.target} <= keys]
+        return draft.model_copy(update={"fields": fields, "conditions": conditions})
+
+
 FORM_DRAFT_SCHEMA: JsonObject = FormDraft.model_json_schema()
+DRAFT_ADDITION_SCHEMA: JsonObject = DraftAddition.model_json_schema()
