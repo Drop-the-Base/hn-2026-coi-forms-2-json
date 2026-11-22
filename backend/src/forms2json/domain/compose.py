@@ -6,6 +6,7 @@ in order of first appearance. The flow is linear (K-13).
 """
 
 import html
+import re
 from collections.abc import Iterator, Sequence
 from itertools import pairwise
 
@@ -56,49 +57,55 @@ def compose(draft: FormDraft) -> tuple[FormDefinition, Confidence]:
 
 
 def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confidence]:
-    grouped: dict[str, list[DraftField]] = {}
+    """Subject pages in order of first appearance of `page`, sections grouped inside each."""
+    pages: dict[str, dict[str, list[DraftField]]] = {}
+    first_section = next((f.section for f in draft.fields), SUBJECT_FALLBACK)
     for draft_field in draft.fields:
-        grouped.setdefault(draft_field.section, []).append(draft_field)
-    title = next(iter(grouped), SUBJECT_FALLBACK)
+        page = draft_field.page.strip() or first_section
+        pages.setdefault(page, {}).setdefault(draft_field.section, []).append(draft_field)
 
     confidence: Confidence = {}
-    sources: dict[str, tuple[str, Field]] = {}  # draft key -> (section techName, answer field)
+    sources: dict[str, tuple[str, str, Field]] = {}  # draft key -> (page, section techName, answer)
     shown: dict[str, list[Field]] = {}  # draft key -> what its SHOW condition goes on
-    sections: list[Question] = []
-    for section_title, draft_fields in grouped.items():
-        plain = [f for f in draft_fields if f.type is not FieldType.ADDRESS]
-        if plain:
-            section_name = names.new(section_title)  # before its fields: sections win name clashes
-            children: list[Field] = []
-            for f in plain:
-                person = f.type is FieldType.PERSON
-                fields = _person(f, names) if person else [_draft_field(f, names)]
-                children += fields
-                shown[f.key] = fields
-                if not person:
-                    sources[f.key] = (section_name, fields[0])
-            sections.append(_section(section_title, section_name, children))
-        for f in draft_fields:
-            if f.type is FieldType.ADDRESS:
-                # The suffix is taken like a techName, so two addresses never share field names.
-                suffix = names.new(_address_suffix(f.key))
-                block = other_address(names.new(f.label), f.label, title, suffix)
-                for child in block.field.repeating_section_grid:
-                    child.field.tech_name = names.new(child.field.tech_name)
-                    confidence[child.field.tech_name] = f.confidence
-                shown[f.key] = [block.field]
-                sections.append(block)
-        for f in draft_fields:
-            for field in shown[f.key]:
-                confidence[field.tech_name] = f.confidence
+    tabs: list[tuple[str, list[Question]]] = []
+    for title, grouped in pages.items():
+        sections: list[Question] = []
+        for section_title, draft_fields in grouped.items():
+            plain = [f for f in draft_fields if f.type is not FieldType.ADDRESS]
+            if plain:
+                section_name = names.new(section_title)  # before its fields: sections win clashes
+                children: list[Field] = []
+                for f in plain:
+                    person = f.type is FieldType.PERSON
+                    fields = _person(f, names) if person else [_draft_field(f, names)]
+                    children += fields
+                    shown[f.key] = fields
+                    if not person:
+                        sources[f.key] = (title, section_name, fields[0])
+                sections.append(_section(section_title, section_name, children))
+            for f in draft_fields:
+                if f.type is FieldType.ADDRESS:
+                    # The suffix is taken like a techName, so two addresses never share field names.
+                    suffix = names.new(_address_suffix(f.key))
+                    block = other_address(names.new(f.label), f.label, title, suffix)
+                    for child in block.field.repeating_section_grid:
+                        child.field.tech_name = names.new(child.field.tech_name)
+                        confidence[child.field.tech_name] = f.confidence
+                    shown[f.key] = [block.field]
+                    sections.append(block)
+            for f in draft_fields:
+                for field in shown[f.key]:
+                    confidence[field.tech_name] = f.confidence
+        tabs.append((title, sections))
 
     targets: dict[str, list[str]] = {}
     for c in draft.conditions:
         if c.source not in sources:  # an address or a person is no answer to compare
             continue
-        section_name, source = sources[c.source]
+        page, section_name, source = sources[c.source]
+        value = option_for(c.value, [o.name for o in source.options or []])
         targets.setdefault(c.target, []).append(
-            answer_is(c.value, title, section_name, source.tech_name)
+            answer_is(value, page, section_name, source.tech_name)
         )
         for target in shown[c.target]:
             confidence[target.tech_name] = min(confidence[target.tech_name], c.confidence)
@@ -106,6 +113,7 @@ def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confid
         for target in shown[key]:
             target.states = [show(any_of(*queries))]
 
+    extra: list[Question] = []
     if draft.attachments:
         attachments_name = names.new(ATTACHMENTS_SECTION)
         uploads = []
@@ -113,7 +121,7 @@ def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confid
             upload = _field(FieldType.FILE_UPLOADER, a.name, a.required, names)
             uploads.append(upload)
             confidence[upload.tech_name] = a.confidence
-        sections.append(_section(ATTACHMENTS_SECTION, attachments_name, uploads))
+        extra.append(_section(ATTACHMENTS_SECTION, attachments_name, uploads))
     if draft.fees:
         fees_name = names.new(FEES_SECTION)
         infos = []
@@ -125,12 +133,37 @@ def _subject_page(draft: FormDraft, names: TechNames) -> tuple[list[Tab], Confid
             confidence[info.tech_name] = fee.confidence
         # References pair the fee info with an upload of the transfer confirmation.
         proof = _field(FieldType.FILE_UPLOADER, PAYMENT_PROOF, True, names)
-        sections.append(_section(FEES_SECTION, fees_name, [*infos, proof]))
+        extra.append(_section(FEES_SECTION, fees_name, [*infos, proof]))
+    if extra:  # attachments and fees close the last subject page
+        if not tabs:
+            tabs.append((SUBJECT_FALLBACK, []))
+        tabs[-1][1].extend(extra)
 
-    if not sections:
-        return [], confidence
-    layout_page(sections)
-    return [Tab(new_id(), title, "MAIN", sections)], confidence
+    result = []
+    for title, sections in tabs:
+        layout_page(sections)
+        result.append(Tab(new_id(), title, "MAIN", sections))
+    return result, confidence
+
+
+def option_for(value: str, options: Sequence[str]) -> str:
+    """The option a condition value means: "2" or "współwłaściciel" -> "2. współwłaściciel (…)".
+
+    The model often answers with the option number or a shortened label; the query must hold the
+    exact option value, or the field never shows.
+    """
+    if not options or value in options or not value.strip():
+        return value
+    v = value.strip().rstrip(".)").casefold()
+    for o in options:
+        c = o.casefold()
+        if (
+            c == v
+            or re.match(rf"{re.escape(v)}\W", c)
+            or re.sub(r"^\W*\w{1,3}[.)]\s*", "", c).startswith(v)
+        ):
+            return o
+    return value
 
 
 def _draft_field(f: DraftField, names: TechNames) -> Field:

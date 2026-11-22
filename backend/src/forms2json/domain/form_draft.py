@@ -67,12 +67,26 @@ class Applicant(_Strict):
     confidence: Confidence
 
 
+def _all_required(schema: JsonObject) -> None:
+    # Strict structured output wants every property required and no defaults.
+    props = schema["properties"]
+    assert isinstance(props, dict)
+    for prop in props.values():
+        if isinstance(prop, dict):
+            prop.pop("default", None)
+    schema["required"] = list(props)
+
+
 class DraftField(_Strict):
     """A field of the subject-matter part of the form, in document order (K-14)."""
+
+    # The default only keeps old drafts and fixtures valid: one page, as before.
+    model_config = ConfigDict(json_schema_extra=_all_required)
 
     key: str
     label: str
     section: str
+    page: str = ""  # title of the e-service page the field goes on; "" = the single subject page
     type: Annotated[FieldType, Field(strict=False)]
     required: bool
     options: list[str]

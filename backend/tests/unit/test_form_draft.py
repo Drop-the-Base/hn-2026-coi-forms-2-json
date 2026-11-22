@@ -19,6 +19,7 @@ DRAFT: JsonObject = {
             "key": "sposob_zwrotu",
             "label": "Sposób zwrotu",
             "section": "Zwrot",
+            "page": "",
             "type": "RADIO",
             "required": True,
             "options": ["gotówka", "przelew"],
@@ -28,6 +29,7 @@ DRAFT: JsonObject = {
             "key": "numer_rachunku",
             "label": "Numer rachunku",
             "section": "Zwrot",
+            "page": "",
             "type": "TEXT_FIELD",
             "required": True,
             "options": [],
@@ -103,3 +105,9 @@ def test_fee_without_amount_is_accepted() -> None:
     draft = FormDraft.from_dict(_broken(["fees", 0, "amount"], None))
 
     assert draft.fees[0].amount is None
+
+
+def test_schema_requires_page_for_strict_output() -> None:
+    field = cast(JsonObject, cast(JsonObject, FORM_DRAFT_SCHEMA["$defs"])["DraftField"])
+    assert "page" in cast(list[str], field["required"])
+    assert "default" not in cast(JsonObject, cast(JsonObject, field["properties"])["page"])
