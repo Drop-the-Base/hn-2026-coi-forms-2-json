@@ -73,6 +73,7 @@ Zmienne w `.env` ([.env.example](.env.example)), czytane przez [backend/src/form
 | `RABBITMQ_USER` | `forms2json` | – | użytkownik brokera (compose składa z niego `RABBITMQ_URL`) |
 | `RABBITMQ_PASSWORD` | – | **wymagana** | hasło brokera |
 | `MAX_UPLOAD_BYTES` | `20971520` | `20971520` | maks. rozmiar pliku (20 MB) |
+| `MAX_BATCH_FILES` | `10` | `10` | maks. liczba plików w jednej paczce `POST /api/v1/jobs/batch` |
 | `FILE_TTL_SECONDS` | `900` | `900` | po tym czasie sprzątacz usuwa plik, którego worker nie usunął |
 | `RESULT_TTL_SECONDS` | `1800` | `1800` | jak długo API trzyma wynik w pamięci |
 | `SYNC_TIMEOUT_SECONDS` | `120` | `120` | ile czeka `forms:convert`, zanim odda `202` |
@@ -128,16 +129,17 @@ Wszystko pod `/api/v1` poza `/login` wymaga nagłówka `Authorization: Bearer <J
 | `POST /api/v1/login` | bez JWT; JSON `{"password":"…"}` z hasłem `APP_PASSWORD` | `200 {"token":"<JWT>"}`; `401`, gdy hasło złe |
 | `POST /api/v1/forms:convert` | tryb synchroniczny: czeka na wynik do `SYNC_TIMEOUT_SECONDS` | `200` JSON formularza eUsług; `202 {"job_id"}` + `Location`, gdy trwa dłużej; `422 {"detail","error"}`, gdy konwersja padła |
 | `POST /api/v1/jobs` | tryb asynchroniczny: przyjmuje plik | `202 {"job_id"}` |
+| `POST /api/v1/jobs/batch` | paczka (FR-E6): pole `files` powtórzone dla każdego pliku, najwyżej `MAX_BATCH_FILES`; każdy plik to osobne zadanie, odrzucony plik nie blokuje pozostałych | `202 {"batch_id","jobs":[{"file_name","job_id"} \| {"file_name","error"}]}`; `400`, gdy plików za dużo |
 | `GET /api/v1/jobs/{id}` | stan zadania | `{"status":"pending"}`, `{"status":"done","result":{…}}`, `{"status":"failed","error":"<typ>"}` |
 | `GET /api/v1/jobs/{id}/events` | postęp na żywo (SSE, `event: progress`, krok i status) | `text/event-stream` |
-| `GET /api/v1/config` | limity dla frontendu | `{"max_upload_bytes":20971520}` |
+| `GET /api/v1/config` | limity dla frontendu | `{"max_upload_bytes":20971520,"max_batch_files":10}` |
 | `GET /health` | bez JWT | `{"status":"ok"}` |
 
 Błędy (`{"detail": "<komunikat po polsku>"}`):
 
 | Kod | Kiedy |
 | --- | --- |
-| `400` | zła nazwa pliku (> 250 znaków albo znaki `;:><\/\|'*%$`) |
+| `400` | zła nazwa pliku (> 250 znaków albo znaki `;:><\/\|'*%$`); za dużo plików w paczce |
 | `401` | brak, zły albo wygasły token |
 | `404` | nieznane zadanie albo wynik wygasł (`RESULT_TTL_SECONDS`) |
 | `413` | plik większy niż `MAX_UPLOAD_BYTES` |
@@ -155,6 +157,7 @@ curl -H "Authorization: Bearer $TOKEN" -F "file=@$F" http://localhost:8080/api/v
 curl -H "Authorization: Bearer $TOKEN" -F "file=@$F" http://localhost:8080/api/v1/jobs
 # {"job_id":"7c0e…"}
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/jobs/<job_id>
+curl -H "Authorization: Bearer $TOKEN" -F "files=@$F" -F "files=@inny.pdf" http://localhost:8080/api/v1/jobs/batch
 curl -N -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/v1/jobs/<job_id>/events
 ```
 
@@ -189,6 +192,23 @@ nginx nie przekazuje `/docs` do api (http://localhost:8080/docs to strona SPA). 
 ## Frontend
 
 http://localhost:8080 → ekran logowania → wklej token z `issue_token` → wgraj pliki (przeciągnij albo „Wybierz pliki”) → lista zadań ze statusem → „Zobacz wynik”. Token żyje w karcie przeglądarki (`sessionStorage`); po wygaśnięciu UI wraca do logowania.
+
+## Deklaracja dostępności
+
+Panel urzędnika ma spełniać **WCAG 2.1 na poziomie AA** (ustawa o dostępności cyfrowej podmiotów publicznych).
+
+Jak sprawdzamy:
+- **lint**: `eslint-plugin-jsx-a11y` (reguły `recommended`) w `npm run lint`;
+- **axe**: `axe-core` w Vitest (`frontend/src/app/a11y.test.tsx`) na ekranach logowania, wgrywania z listą zadań, postępu, przeglądu i podglądu formularza, bez błędów WCAG 2.1 A/AA ([ADR-0033](docs/adr/0033-narzedzia-dostepnosci-frontendu.md));
+- **kontrast**: `python3 frontend/design/kontrast.py` liczy kontrast par tokenów (tekst 4,5:1, elementy UI 3:1);
+- **klawiatura**: testy ekranów przechodzą główne ścieżki rolami i etykietami; link „Przejdź do treści”, widoczny fokus, postęp zadania ogłaszany przez `aria-live="polite"`.
+
+Znane ograniczenia:
+- kliknięcie pola w podglądzie wybiera je do edycji tylko myszą; z klawiatury ten sam wybór jest w liście „Struktura”;
+- oryginał dokumentu (PDF w ramce, obraz skanu) jest dostępny tak, jak sam plik; skan nie ma warstwy tekstowej;
+- testy axe w jsdom nie liczą kontrastu na żywo ani układu; brak jeszcze audytu z czytnikiem ekranu (NVDA, VoiceOver) i testu e2e klawiaturą w CI.
+
+Problemy z dostępnością zgłaszaj jako issue z etykietą `frontend`.
 
 ## Obserwowalność
 

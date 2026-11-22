@@ -1,39 +1,50 @@
 from typing import Any
 
 from forms2json.application.pipeline.compose_step import ComposeStep
+from forms2json.application.pipeline.pii_guard_step import PiiGuardStep
 from forms2json.application.pipeline.step import PipelineStep
 from forms2json.application.pipeline.understand_step import UnderstandStep
 from forms2json.application.pipeline.validate_step import ValidatedForm
 from forms2json.application.ports.llm_client import LlmUsage
 from forms2json.domain.confidence import score
 from forms2json.domain.cost import CostRates
+from forms2json.domain.pii import pii_summary
+from forms2json.domain.rules import Issue, Severity
 
 
 class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
-    """Job result: form, confidence (FR-T1), issues, LLM usage (NFR-13) and source text, as JSON.
+    """Job result: form, confidence (FR-T1), issues, LLM usage (NFR-13), masked personal data
+    (NFR-06) and source text, as JSON.
 
-    Reads the last-run state of the Understand and Compose steps, so all of them must belong
-    to one pipeline built for one job (bootstrap.new_pipeline).
+    Reads the last-run state of the PiiGuard, Understand and Compose steps, so all of them must
+    belong to one pipeline built for one job (bootstrap.new_pipeline).
     """
 
     name = "report"
 
     def __init__(
         self,
+        pii: PiiGuardStep,
         understand: UnderstandStep,
         compose: ComposeStep,
         review_threshold: float,
         cost_rates: CostRates,
     ) -> None:
+        self._pii = pii
         self._understand = understand
         self._compose = compose
         self._review_threshold = review_threshold
         self._cost_rates = cost_rates
 
     def run(self, data: ValidatedForm) -> dict[str, Any]:
+        issues, extra = data.issues, {}
+        if found := self._pii.found:
+            issues = [*issues, Issue("PII-MASKED", pii_summary(found), "", Severity.WARNING)]
+            # only with a hit, so a blank form's result keeps its shape
+            extra = {"pii": dict(found)}
         report = score(
             self._compose.confidence,
-            data.issues,
+            issues,
             self._review_threshold,
             self._understand.ocr_confidence,
         )
@@ -60,4 +71,5 @@ class ReportStep(PipelineStep[ValidatedForm, dict[str, Any]]):
             },
             # the server drops the file (NFR-06), so the review screen shows this text instead
             "source_text": self._understand.source_text,
+            **extra,
         }

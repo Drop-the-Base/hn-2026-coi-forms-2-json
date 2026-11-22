@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getConfig, submitJob } from "../../shared/api/client";
+import { getConfig, submitBatch } from "../../shared/api/client";
 
 export const useConfig = () =>
   useQuery({ queryKey: ["config"], queryFn: getConfig, staleTime: Infinity });
 
-export const useSubmitJob = () => useMutation({ mutationFn: submitJob });
+export const useSubmitBatch = () => useMutation({ mutationFn: submitBatch });

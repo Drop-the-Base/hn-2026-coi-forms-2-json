@@ -36,7 +36,10 @@ export const FORM_SCHEMA = {
 // Default API for tests; a test overrides single endpoints with server.use().
 export const server = setupServer(
   http.get("*/api/v1/config", () =>
-    HttpResponse.json({ max_upload_bytes: MAX_UPLOAD_BYTES }),
+    HttpResponse.json({
+      max_upload_bytes: MAX_UPLOAD_BYTES,
+      max_batch_files: 10,
+    }),
   ),
   http.get("*/api/v1/form-schema", () => HttpResponse.json(FORM_SCHEMA)),
   http.post("*/api/v1/login", async ({ request }) => {

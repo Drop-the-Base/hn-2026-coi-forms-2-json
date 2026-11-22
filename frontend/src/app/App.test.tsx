@@ -9,6 +9,7 @@ import wynik from "../features/review/fixtures/wynik-wzorzec-1.json";
 import { routes } from "./routes";
 
 const JOB_ID = "b6af199b-0000-4000-8000-000000000001";
+const BATCH_ID = "ba7c0000-0000-4000-8000-000000000001";
 
 function renderApp(path = "/") {
   const router = createMemoryRouter(routes, { initialEntries: [path] });
@@ -142,8 +143,14 @@ test("upload tworzy zadanie, lista pokazuje krok z SSE, potem gotowe", async () 
   const stream = sseStream();
   const finish = mockJob(stream);
   server.use(
-    http.post("*/api/v1/jobs", () =>
-      HttpResponse.json({ job_id: JOB_ID }, { status: 202 }),
+    http.post("*/api/v1/jobs/batch", () =>
+      HttpResponse.json(
+        {
+          batch_id: BATCH_ID,
+          jobs: [{ file_name: "Wniosek.pdf", job_id: JOB_ID }],
+        },
+        { status: 202 },
+      ),
     ),
   );
   renderApp();
@@ -173,6 +180,57 @@ test("upload tworzy zadanie, lista pokazuje krok z SSE, potem gotowe", async () 
   expect(screen.getByRole("button", { name: "Pobierz JSON" })).toBeDefined();
 });
 
+test("paczka: pliki idą po MAX_BATCH_FILES, lista oznacza paczkę, odrzucony zostaje", async () => {
+  setToken(fakeToken());
+  const BATCHES = [
+    ["a.pdf", "b.pdf"],
+    ["c.pdf", "d.pdf"],
+  ];
+  let requests = 0;
+  server.use(
+    http.get("*/api/v1/config", () =>
+      HttpResponse.json({ max_upload_bytes: 1024, max_batch_files: 2 }),
+    ),
+    http.get("*/api/v1/jobs/:id/events", () => HttpResponse.error()),
+    http.get("*/api/v1/jobs/:id", () =>
+      HttpResponse.json({ status: "pending" }),
+    ),
+    // The body is not read: a jsdom File cannot be streamed in Node, so the answer goes by request number.
+    http.post("*/api/v1/jobs/batch", () => {
+      const n = ++requests;
+      return HttpResponse.json(
+        {
+          batch_id: `ba7c000${n}-0000-4000-8000-000000000000`,
+          jobs: BATCHES[n - 1].map((name, i) =>
+            name === "d.pdf"
+              ? { file_name: name, error: "Plik jest pusty." }
+              : {
+                  file_name: name,
+                  job_id: `00000000-0000-4000-8000-00000000000${n}${i}`,
+                },
+          ),
+        },
+        { status: 202 },
+      );
+    }),
+  );
+  renderApp();
+  await screen.findByText(/Maksymalnie 1 kB/);
+
+  pickFiles(...BATCHES.flat().map((name) => new File(["%PDF-"], name)));
+  fireEvent.click(screen.getByRole("button", { name: "Wyślij 4 pliki" }));
+
+  expect(
+    await screen.findByText("Serwer odrzucił plik: Plik jest pusty."),
+  ).toBeDefined();
+  expect(requests).toBe(2);
+  const list = within(screen.getByRole("table", { name: "Twoje zadania" }));
+  expect(list.getAllByText(/paczka ba7c0001/)).toHaveLength(2);
+  expect(list.getByRole("link", { name: "c.pdf" })).toBeDefined();
+  expect(list.queryByText(/paczka ba7c0002/)).toBeNull();
+  expect(list.queryByRole("link", { name: "d.pdf" })).toBeNull();
+});
+
 test("nieznany typ błędu zadania pokazuje polski komunikat", async () => {
   setToken(fakeToken());
   server.use(
@@ -191,10 +249,18 @@ test("nieznany typ błędu zadania pokazuje polski komunikat", async () => {
 test("błąd serwera przy uploadzie pokazuje detail", async () => {
   setToken(fakeToken());
   server.use(
-    http.post("*/api/v1/jobs", () =>
+    http.post("*/api/v1/jobs/batch", () =>
       HttpResponse.json(
-        { detail: "Zawartość pliku nie odpowiada rozszerzeniu .pdf." },
-        { status: 415 },
+        {
+          batch_id: BATCH_ID,
+          jobs: [
+            {
+              file_name: "Wniosek.pdf",
+              error: "Zawartość pliku nie odpowiada rozszerzeniu .pdf.",
+            },
+          ],
+        },
+        { status: 202 },
       ),
     ),
   );

@@ -235,6 +235,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
 
   return (
     <main className="review">
+      <title>{`Przegląd: ${form.title || "Formularz bez tytułu"} – forms2json`}</title>
       <a className="skip" href="#kolumna-a">
         Przejdź do edycji
       </a>
@@ -359,6 +360,8 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
           data-a={a === "lista" || undefined}
         >
           <div className="pane__head pane__head--tabs">
+            {/* Roving tabindex: the selected tab takes focus, the list only handles arrows. */}
+            {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
             <div
               className="tabs"
               role="tablist"
@@ -431,6 +434,7 @@ function ReviewScreen({ result, schema, jobId, fileName }: Props) {
               id={`kolumna-${column}`}
               className={`colhead colhead--${column}`}
             >
+              {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
               <div
                 className="tabs"
                 role="tablist"

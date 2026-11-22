@@ -225,6 +225,37 @@ def test_person_and_address_expand_into_standard_blocks_with_suffix() -> None:
     assert [i for i in check_rules(form) if i.severity is Severity.ERROR] == []
 
 
+def test_page_splits_subject_tabs_and_condition_value_names_the_option() -> None:
+    options: list[JsonValue] = ["1. właściciel", "2. współwłaściciel (wspólność majątkowa)"]
+    draft = _draft(
+        "Deklaracja",
+        "Prezydent Miasta",
+        [
+            _field("typ", "Wybierz typ", "Składający", "RADIO", options=options, page="Strona A"),
+            _field("malzonek", "Dane współmałżonka", "Współmałżonek", "PERSON", page="Strona A"),
+            _field("kwota", "Kwota", "Opłata", "NUMBER", page="Strona B"),
+        ],
+        conditions=[{"target": "malzonek", "source": "typ", "value": "2", "confidence": 0.9}],
+    )
+    form = ComposeStep().run(draft)
+
+    assert [t.title for t in form.tabs[1:-2]] == ["Strona A", "Strona B"]
+    imie = next(f for f in _fields(form) if f.tech_name == "imie_malzonek")
+    assert imie.states and imie.states[0].query.startswith(
+        "(\"2. współwłaściciel (wspólność majątkowa)\" in tabs['Strona A' in title]"
+    )
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [("2", "2. b (x)"), ("b", "2. b (x)"), ("2. b (x)", "2. b (x)"), ("9", "9"), ("Tak", "Tak")],
+)
+def test_option_for(value: str, expected: str) -> None:
+    from forms2json.domain.compose import option_for
+
+    assert option_for(value, ["1. a", "2. b (x)"]) == expected
+
+
 def test_condition_can_show_an_attachment() -> None:
     choice = _field("rodzaj", "Wybierz rodzaj prac", "Prace", "RADIO", options=["Remont", "Budowa"])
     plan: JsonValue = {"key": "plan", "name": "Plan prac", "required": True, "confidence": 0.9}

@@ -56,6 +56,7 @@ Każda decyzja o frameworku, bibliotece, usłudze albo wzorcu architektonicznym 
 | [0030](0030-dashboard-kosztow-perses.md) | Dashboard kosztów w Perses, stawki za tokeny wejścia i wyjścia | Zaakceptowana |
 | [0031](0031-podglad-oryginalu-pdf-w-api.md) | Podgląd oryginału: DOC, DOCX, XLSX i ODS jako PDF z LibreOffice w API | Proponowana |
 | [0032](0032-logowanie-haslem-jwt-bez-wygasania.md) | Logowanie hasłem z konfiguracji, JWT bez wygasania | Proponowana |
+| [0033](0033-narzedzia-dostepnosci-frontendu.md) | Dostępność frontendu: `eslint-plugin-jsx-a11y` i `axe-core` w testach | Proponowana |
 
 ## Szablon
 

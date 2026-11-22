@@ -45,6 +45,7 @@ from forms2json.adapters.outbound.storage.tmpfs_file_store import TmpfsFileStore
 from forms2json.application.log_context import job_id_var
 from forms2json.application.pipeline.compose_step import ComposeStep
 from forms2json.application.pipeline.ingest_step import IngestStep
+from forms2json.application.pipeline.pii_guard_step import PiiGuardStep
 from forms2json.application.pipeline.pipeline import Pipeline
 from forms2json.application.pipeline.report_step import ReportStep
 from forms2json.application.pipeline.understand_step import UnderstandStep
@@ -136,7 +137,8 @@ async def _delete_expired_files_forever(files: FileStore) -> None:
 
 
 def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineObserver], Pipeline]:
-    """Adapters are created once; steps per job, because Understand and Compose keep run state."""
+    """Adapters are created once; steps per job, because PiiGuard, Understand and Compose keep run
+    state."""
     ocr = TesseractOcr(settings.ocr_lang)
     readers = [
         DocxReader(),
@@ -149,13 +151,14 @@ def pipeline_factory(settings: Settings, llm: LlmClient) -> Callable[[PipelineOb
     tracing, logs, step_metrics = TracingObserver(), LogObserver(), MetricsObserver()
 
     def new_pipeline(progress: PipelineObserver) -> Pipeline:
+        pii = PiiGuardStep()
         understand = UnderstandStep(llm, settings.llm_max_input_chars)
         compose = ComposeStep()
         report = ReportStep(
-            understand, compose, settings.confidence_review_threshold, cost_rates(settings)
+            pii, understand, compose, settings.confidence_review_threshold, cost_rates(settings)
         )
         return Pipeline(
-            [IngestStep(readers), understand, compose, ValidateStep(), report],
+            [IngestStep(readers), pii, understand, compose, ValidateStep(), report],
             tracing,
             logs,
             step_metrics,

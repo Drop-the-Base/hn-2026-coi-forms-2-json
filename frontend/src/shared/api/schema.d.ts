@@ -38,6 +38,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/jobs/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit Batch
+         * @description Batch mode (FR-E6): one job per file; a rejected file does not stop the others.
+         */
+        post: operations["submit_batch_api_v1_jobs_batch_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/jobs/{job_id}": {
         parameters: {
             query?: never;
@@ -180,6 +200,27 @@ export interface components {
         ApiConfig: {
             /** Max Upload Bytes */
             max_upload_bytes: number;
+            /** Max Batch Files */
+            max_batch_files: number;
+        };
+        /** BatchAccepted */
+        BatchAccepted: {
+            /**
+             * Batch Id
+             * Format: uuid
+             */
+            batch_id: string;
+            /** Jobs */
+            jobs: components["schemas"]["BatchItem"][];
+        };
+        /** BatchItem */
+        BatchItem: {
+            /** File Name */
+            file_name: string;
+            /** Job Id */
+            job_id?: string | null;
+            /** Error */
+            error?: string | null;
         };
         /** Body_convert_form_api_v1_forms_convert_post */
         Body_convert_form_api_v1_forms_convert_post: {
@@ -190,6 +231,11 @@ export interface components {
         Body_render_preview_api_v1_preview_post: {
             /** File */
             file: string;
+        };
+        /** Body_submit_batch_api_v1_jobs_batch_post */
+        Body_submit_batch_api_v1_jobs_batch_post: {
+            /** Files */
+            files: string[];
         };
         /** Body_submit_job_api_v1_jobs_post */
         Body_submit_job_api_v1_jobs_post: {
@@ -314,6 +360,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["JobAccepted"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_batch_api_v1_jobs_batch_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_submit_batch_api_v1_jobs_batch_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchAccepted"];
+                };
+            };
+            /** @description Za dużo plików w jednej paczce */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

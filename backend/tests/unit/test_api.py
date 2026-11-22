@@ -49,6 +49,8 @@ def api() -> Api:
 def test_endpoints_without_token_are_401(api: Api) -> None:
     del api.client.headers["Authorization"]
     assert api.client.post("/api/v1/jobs", files={"file": ("a.pdf", PDF)}).status_code == 401
+    batch = api.client.post("/api/v1/jobs/batch", files=[("files", ("a.pdf", PDF))])
+    assert batch.status_code == 401
     assert api.client.get(f"/api/v1/jobs/{uuid.uuid4()}").status_code == 401
     assert api.client.get("/api/v1/config").status_code == 401
     assert api.client.get("/api/v1/form-schema").status_code == 401
@@ -111,6 +113,37 @@ def test_invalid_upload_is_rejected_with_polish_message(
     assert api.queue.jobs == []
 
 
+def test_batch_queues_one_job_per_file_and_reports_rejected_ones(api: Api) -> None:
+    files = [("files", ("a.pdf", PDF)), ("files", ("b.exe", PDF)), ("files", ("c.pdf", PDF))]
+    response = api.client.post("/api/v1/jobs/batch", files=files)
+
+    assert response.status_code == 202
+    body = response.json()
+    uuid.UUID(body["batch_id"])
+    a, b, c = body["jobs"]
+    assert [a["file_name"], b["file_name"], c["file_name"]] == ["a.pdf", "b.exe", "c.pdf"]
+    assert b == {"file_name": "b.exe", "error": b["error"]}
+    assert b["error"].startswith("Nieobsługiwany")
+    queued = [uuid.UUID(a["job_id"]), uuid.UUID(c["job_id"])]
+    assert [job.job_id for job in api.queue.jobs] == queued
+    assert sorted(api.files.files) == sorted(map(str, queued))
+
+
+def test_batch_over_the_file_limit_is_400_and_queues_nothing(api: Api) -> None:
+    settings = Settings(max_upload_bytes=MAX_BYTES, max_batch_files=2)
+    api.app.dependency_overrides[get_settings] = lambda: settings
+    files = [("files", (f"{n}.pdf", PDF)) for n in range(3)]
+    response = api.client.post("/api/v1/jobs/batch", files=files)
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Za dużo plików: 3, limit to 2 naraz."}
+    assert api.queue.jobs == []
+
+
+def test_batch_without_files_is_422(api: Api) -> None:
+    assert api.client.post("/api/v1/jobs/batch").status_code == 422
+
+
 def test_done_and_failed_results(api: Api) -> None:
     done, failed = uuid.uuid4(), uuid.uuid4()
     api.results.complete(JobResult(done, result={"title": "Wniosek"}))
@@ -133,7 +166,10 @@ def test_unknown_job_is_404(api: Api) -> None:
 
 
 def test_config_exposes_upload_limit(api: Api) -> None:
-    assert api.client.get("/api/v1/config").json() == {"max_upload_bytes": MAX_BYTES}
+    assert api.client.get("/api/v1/config").json() == {
+        "max_upload_bytes": MAX_BYTES,
+        "max_batch_files": 10,
+    }
 
 
 def test_form_schema_is_the_official_schema_as_published(api: Api) -> None:
