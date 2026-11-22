@@ -27,6 +27,11 @@ export function FormTree({
         type="button"
         className="tree__node"
         aria-current={path === selected ? "true" : undefined}
+        data-tour={
+          value !== undefined && value < REVIEW_THRESHOLD
+            ? "pewnosc"
+            : undefined
+        }
         onClick={() => onSelect(path)}
       >
         {value !== undefined && value < REVIEW_THRESHOLD ? (

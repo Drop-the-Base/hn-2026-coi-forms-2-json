@@ -52,6 +52,7 @@ export function PreviewQuestions(props: Props) {
               path === props.current ? "eu-cell is-current" : "eu-cell"
             }
             style={{ gridColumn: `${q.x + 1} / span ${q.cols}` }}
+            data-tour={flagged ? "pewnosc" : undefined}
             onClick={(e) => {
               // The innermost cell wins, so a field inside a section selects the field.
               e.stopPropagation();
