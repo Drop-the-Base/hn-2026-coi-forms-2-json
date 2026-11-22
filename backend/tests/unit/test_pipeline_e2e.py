@@ -26,7 +26,7 @@ NOTHING_MISSING: dict[str, Any] = {"fields": [], "conditions": []}
 
 
 class FakeLlm(LlmClient):
-    """Answers in order, the fill-in finds nothing missing; each call costs 10 + 5 tokens, 1 s."""
+    """Answers in order (a fill-in, if on, finds nothing); each call costs 10 + 5 tokens, 1 s."""
 
     def __init__(self, *answers: dict[str, Any]) -> None:
         self._answers = list(answers)
@@ -56,9 +56,9 @@ def test_docx_becomes_form_with_confidence_issues_usage_and_source_text() -> Non
     # numer_rachunku: field 0.8, condition 0.6 -> below the 0.85 review threshold
     assert any(confidence["elements"][p] == 0.6 for p in confidence["to_review"])
     assert result["usage"] == {
-        "prompt_tokens": 20,  # the answer and the fill-in call
-        "completion_tokens": 10,
-        "seconds": 2.0,
+        "prompt_tokens": 10,  # one call: the fill-in is off by default (#190)
+        "completion_tokens": 5,
+        "seconds": 1.0,
         "cost": 0.0,  # rates default to 0
         "currency": "USD",
     }
@@ -74,9 +74,9 @@ def test_usage_cost_comes_from_configured_rates() -> None:
 
     result = pipeline.run(SourceFile(DOCX_5.read_bytes(), DOCX))
 
-    # 20 input tokens at 1 per token + 10 output tokens at 2 per token (answer + fill-in)
+    # 10 input tokens at 1 per token + 5 output tokens at 2 per token (one call)
     assert isinstance(result, dict)
-    assert (result["usage"]["cost"], result["usage"]["currency"]) == (40.0, "PLN")
+    assert (result["usage"]["cost"], result["usage"]["currency"]) == (20.0, "PLN")
 
 
 def test_unsupported_format_fails_with_readable_error() -> None:
@@ -85,7 +85,7 @@ def test_unsupported_format_fails_with_readable_error() -> None:
 
 
 def test_usage_does_not_leak_between_jobs() -> None:
-    # Job 1 needs a retry (3 calls with the fill-in), job 2 two; one LLM client like in the worker.
+    # Job 1 needs a retry (2 calls), job 2 one; one LLM client like in the worker.
     llm = FakeLlm({"title": "no"}, VALID, VALID)
     files, queue = FakeFileStore(), FakeJobQueue()
     use_case = ProcessJob(files, pipeline_factory(Settings(), llm), queue)
@@ -94,4 +94,4 @@ def test_usage_does_not_leak_between_jobs() -> None:
         files.save(str(job.job_id), DOCX_5.read_bytes())
         asyncio.run(use_case.execute(job))
 
-    assert [r.result["usage"]["prompt_tokens"] for r in queue.results] == [30, 20]
+    assert [r.result["usage"]["prompt_tokens"] for r in queue.results] == [20, 10]

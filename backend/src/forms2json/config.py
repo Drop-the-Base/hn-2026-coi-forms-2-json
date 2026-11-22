@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     # A looping model stops here instead of running until the timeout. Input + prompt + this
     # must fit the runtime context (Ollama: OLLAMA_CONTEXT_LENGTH, default 4096 is too small).
     llm_max_output_tokens: int = Field(default=32768, gt=0)
+    # Second LLM call adding missed fields (understand_step). Off: forms 1-9 field F1 0.74 vs 0.71
+    # with it, at half the tokens (#190).
+    understand_fill: bool = False
     # FR-T1: below this an element is not "high" in frontend/DESIGN.md and needs a human look.
     confidence_review_threshold: float = Field(default=0.85, ge=0, le=1)
     # NFR-13: provider prices per 1M tokens (or GPU time for a local model); 0 = not counted.

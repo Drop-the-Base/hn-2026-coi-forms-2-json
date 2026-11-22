@@ -142,6 +142,12 @@ def test_fill_in_adds_missing_fields_after_their_section() -> None:
     assert [(c.target, c.source) for c in draft.conditions] == [("a2", "a1")]
 
 
+def test_fill_in_off_makes_one_call() -> None:
+    llm = FakeLlm(VALID)
+    UnderstandStep(llm, max_input_chars=10_000, fill=False).run(DOCUMENT)
+    assert len(llm.calls) == 1
+
+
 @pytest.mark.parametrize("failure", [LlmCallFailed("timeout"), INVALID])
 def test_failed_fill_in_keeps_the_first_answer(failure: dict[str, Any] | Exception) -> None:
     draft = UnderstandStep(FakeLlm(VALID, failure), max_input_chars=10_000).run(DOCUMENT)
