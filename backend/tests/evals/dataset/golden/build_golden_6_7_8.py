@@ -76,22 +76,8 @@ def section(
 
 
 def address(tech_name: str, title: str, tab: str, suffix: str, when: str | None = None) -> Question:
-    """The Standardy address block (template adres_zamieszkania) under new techNames."""
-    block = pages._section("adres_zamieszkania", when)
-    block.field.tech_name, block.field.title = tech_name, title
-    for child in block.field.repeating_section_grid:
-        base = child.field.tech_name.removesuffix("_zagranica")
-        tail = "_zagranica" if base != child.field.tech_name else ""
-        child.field.tech_name = f"{base}_{suffix}{tail}"
-        # Registry data (MLPZ) belongs to the applicant, not to this other address (as in refs).
-        if child.field.default_value_type == "EXTERNAL_SYSTEM":
-            child.field.default_value = child.field.default_value_type = None
-        for state in child.field.states or []:
-            state.query = (
-                state.query.replace("'Dane' in title", f"'{tab}' in title")
-                .replace("'adres_zamieszkania' in", f"'{tech_name}' in")
-                .replace("'kraj' in", f"'kraj_{suffix}' in")
-            )
+    block = pages.other_address(tech_name, title, tab, suffix)
+    block.field.states = [show(when)] if when else []
     return block
 
 

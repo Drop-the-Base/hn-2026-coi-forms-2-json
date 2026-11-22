@@ -31,6 +31,7 @@ TAB_TITLE_REF = re.compile(r"'([^']+)'\s*in\s+title")
 class Severity(StrEnum):
     ERROR = "ERROR"
     WARNING = "WARNING"
+    INFO = "INFO"
 
 
 @dataclass(frozen=True)

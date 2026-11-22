@@ -8,11 +8,16 @@ import pytest
 from opentelemetry.sdk.trace import TracerProvider
 
 from forms2json.adapters.outbound.llm.openai_compatible_client import OpenAiCompatibleLlmClient
-from forms2json.adapters.outbound.observability.log_observer import JobContextFilter, JobLog
+from forms2json.adapters.outbound.observability.log_observer import (
+    JobContextFilter,
+    JobLog,
+    LogObserver,
+)
 from forms2json.application.ports.job_queue import Job
 from forms2json.application.use_cases.process_job import ProcessJob
 from forms2json.bootstrap import pipeline_factory
 from forms2json.config import Settings
+from forms2json.domain.form_draft import FormDraft, InvalidFormDraft
 from forms2json.domain.upload import DOCX
 from tests.unit.test_compose_step import DRAFT_5
 from tests.unit.test_openai_compatible_client import completion
@@ -48,3 +53,15 @@ def test_full_job_logs_job_and_trace_id_but_no_key_or_content(
     text = "\n".join(messages)
     assert API_KEY not in text
     assert DRAFT_5.title.value not in text  # from the document, also in the model's answer
+
+
+def test_failed_step_logs_why_the_llm_answer_was_invalid(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.WARNING)
+    draft = DRAFT_5.model_dump(mode="json") | {"title": "x"}
+
+    with pytest.raises(InvalidFormDraft), LogObserver().step("understand"):
+        FormDraft.from_dict(draft)
+
+    message = caplog.records[-1].getMessage()
+    assert "InvalidFormDraft: title: Input should be a valid dictionary" in message
+    assert DRAFT_5.fields[0].label not in message  # paths and pydantic messages only

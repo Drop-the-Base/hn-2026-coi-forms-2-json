@@ -19,6 +19,7 @@ DRAFT: JsonObject = {
             "key": "sposob_zwrotu",
             "label": "Sposób zwrotu",
             "section": "Zwrot",
+            "page": "",
             "type": "RADIO",
             "required": True,
             "options": ["gotówka", "przelew"],
@@ -28,6 +29,7 @@ DRAFT: JsonObject = {
             "key": "numer_rachunku",
             "label": "Numer rachunku",
             "section": "Zwrot",
+            "page": "",
             "type": "TEXT_FIELD",
             "required": True,
             "options": [],
@@ -42,7 +44,9 @@ DRAFT: JsonObject = {
             "confidence": 0.75,
         }
     ],
-    "attachments": [{"name": "Pełnomocnictwo", "required": False, "confidence": 0.7}],
+    "attachments": [
+        {"key": "pelnomocnictwo", "name": "Pełnomocnictwo", "required": False, "confidence": 0.7}
+    ],
     "fees": [{"description": "Opłata skarbowa", "amount": 17, "confidence": 0.9}],
     "consents": [{"text": "Oświadczam, że dane są prawdziwe.", "required": True, "confidence": 1}],
 }
@@ -90,8 +94,7 @@ def _broken(path: list[str | int], value: JsonValue) -> JsonObject:
         (["applicants", 0, "kind"], "ALIEN", "Input should be 'SELF'"),
         (["fields", 0, "options"], "gotówka", "valid list"),
         (["fees", 0, "amount"], "17", "valid number"),
-        (["fields", 1, "key"], "sposob_zwrotu", "unique"),
-        (["conditions", 0, "source"], "brak_pola", "unknown field"),
+        (["attachments", 0], {"name": "Pełnomocnictwo"}, "attachments.0.key: Field required"),
     ],
 )
 def test_invalid_draft_is_rejected(path: list[str | int], value: JsonValue, message: str) -> None:
@@ -103,3 +106,18 @@ def test_fee_without_amount_is_accepted() -> None:
     draft = FormDraft.from_dict(_broken(["fees", 0, "amount"], None))
 
     assert draft.fees[0].amount is None
+
+
+def test_schema_requires_page_for_strict_output() -> None:
+    field = cast(JsonObject, cast(JsonObject, FORM_DRAFT_SCHEMA["$defs"])["DraftField"])
+    assert "page" in cast(list[str], field["required"])
+    assert "default" not in cast(JsonObject, cast(JsonObject, field["properties"])["page"])
+
+
+def test_bad_references_are_left_to_clean_draft() -> None:
+    data = _broken(["conditions", 0, "target"], "pelnomocnictwo_brak")
+    cast(JsonObject, cast(list[JsonValue], data["fields"])[1])["key"] = "sposob_zwrotu"
+
+    draft = FormDraft.from_dict(data)
+
+    assert draft.conditions[0].target == "pelnomocnictwo_brak"
