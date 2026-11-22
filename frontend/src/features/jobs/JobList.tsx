@@ -8,14 +8,25 @@ import "./JobList.css";
 // shortcut: SSE only for the newest rows, because HTTP/1.1 allows ~6 connections per origin and the rest poll; lift when nginx serves HTTP/2.
 const LIVE_ROWS = 4;
 
-function JobRow({ job, live }: { job: SessionJob; live: boolean }) {
+function JobRow({
+  job,
+  live,
+  batch,
+}: {
+  job: SessionJob;
+  live: boolean;
+  batch?: string;
+}) {
   const { status, steps } = useJobEvents(job.id, live);
   return (
     <tr>
       <td>
         <span className="cell-file">
           <Link to={`/zadania/${job.id}`}>{job.fileName}</Link>
-          <span className="mono">{job.id.slice(0, 8)}</span>
+          <span className="mono">
+            {job.id.slice(0, 8)}
+            {batch && ` · paczka ${batch.slice(0, 8)}`}
+          </span>
         </span>
       </td>
       <td className="num" data-label="Wgrano">
@@ -42,6 +53,10 @@ function JobRow({ job, live }: { job: SessionJob; live: boolean }) {
 }
 
 export function JobList({ jobs }: { jobs: SessionJob[] }) {
+  const batchSizes = new Map<string, number>();
+  for (const { batchId } of jobs) {
+    if (batchId) batchSizes.set(batchId, (batchSizes.get(batchId) ?? 0) + 1);
+  }
   return (
     <section className="sheet" aria-labelledby="lista-h" id="lista">
       <div className="sheet__head">
@@ -73,7 +88,17 @@ export function JobList({ jobs }: { jobs: SessionJob[] }) {
             </thead>
             <tbody>
               {jobs.map((job, index) => (
-                <JobRow key={job.id} job={job} live={index < LIVE_ROWS} />
+                <JobRow
+                  key={job.id}
+                  job={job}
+                  live={index < LIVE_ROWS}
+                  // a one-file batch is a plain upload, so it gets no tag
+                  batch={
+                    (batchSizes.get(job.batchId ?? "") ?? 0) > 1
+                      ? job.batchId
+                      : undefined
+                  }
+                />
               ))}
             </tbody>
           </table>
