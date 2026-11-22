@@ -279,3 +279,36 @@ select.eu-input:disabled {
 .eu .badge {
   vertical-align: middle;
 }
+
+/* makieta do druku i PDF (FR-E6): wszystkie strony po kolei, ciemny tekst na białym, bez nawigacji i znaczników przeglądu */
+@media print {
+  .eu {
+    background: var(--color-sheet);
+    color: var(--color-ink);
+    padding: 0;
+  }
+  .eu-page[hidden] {
+    display: block !important;
+  }
+  .eu-page ~ .eu-page {
+    break-before: page;
+  }
+  .eu-steps,
+  .eu-foot,
+  .eu-alert,
+  .eu-mark,
+  .eu .badge {
+    display: none !important;
+  }
+  .eu-card {
+    border: 1px solid var(--color-eu-border);
+  }
+  .eu-cell {
+    break-inside: avoid;
+  }
+  .eu-cell.is-current {
+    outline: 0;
+    background: none;
+    box-shadow: none;
+  }
+}
